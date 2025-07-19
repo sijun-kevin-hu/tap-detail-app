@@ -1,0 +1,11 @@
+# Minimal-Code
+
+---
+description: Minimal-Code
+globs:
+alwaysApply: false
+---
+- Keep the code readable and reusable
+- Keep the code minimal and only put lines of code where necessary
+- Use proper documentation practices
+- Try to use minimal, modern solutions
