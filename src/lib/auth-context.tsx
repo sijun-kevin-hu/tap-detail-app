@@ -2,27 +2,12 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebase/client-app';
+import { auth } from './firebase/client-app';
+import { Detailer, AuthDetailer } from './models';
+import { getDetailer } from './firebase/firestore-detailers';
 
-interface User {
-    uid: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    businessName: string;
-    phone: string;
-    role: string;
-}
-
-interface AuthContextType {
-    user: User | null;
-    firebaseUser: FirebaseUser | null;
-    loading: boolean;
-}
-
-const AuthContext = createContext<AuthContextType>({
-    user: null,
+const AuthContext = createContext<AuthDetailer>({
+    detailer: null,
     firebaseUser: null,
     loading: true,
 });
@@ -40,7 +25,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [detailer, setDetailer] = useState<Detailer | null>(null);
     const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -50,16 +35,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             if (firebaseUser) {
                 try {
-                    const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-                    if (userDoc.exists()) {
-                        setUser(userDoc.data() as User);
-                    }
+                    const detailer = await getDetailer(firebaseUser.uid);
+                    setDetailer(detailer);
                 } catch (error) {
-                    console.error('Error fetching user data:', error);
-                    setUser(null);
+                    console.error('Error fetching detailer data:', error);
+                    setDetailer(null);
                 }
             } else {
-                setUser(null);
+                setDetailer(null);
             }
             
             setLoading(false);
@@ -69,7 +52,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, []);
 
     const value = {
-        user,
+        detailer,
         firebaseUser,
         loading,
     };

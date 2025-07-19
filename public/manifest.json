@@ -1,0 +1,16 @@
+{
+  "name": "Tap Detail - Mobile Car Detailing",
+  "short_name": "Tap Detail",
+  "description": "Professional mobile car detailing services",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+} 

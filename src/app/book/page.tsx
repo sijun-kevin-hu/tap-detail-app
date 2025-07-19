@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client-app';
+import { getActiveDetailers } from '@/lib/firebase';
+import Link from 'next/link';
 
 interface Detailer {
     uid: string;
@@ -11,7 +11,6 @@ interface Detailer {
     lastName: string;
     email: string;
     phone: string;
-    services?: string[];
     location?: string;
 }
 
@@ -27,12 +26,7 @@ export default function BookPage() {
 
     const fetchDetailers = async () => {
         try {
-            const q = query(collection(db, 'users'), where('role', '==', 'detailer'));
-            const querySnapshot = await getDocs(q);
-            const detailerList: Detailer[] = [];
-            querySnapshot.forEach((doc) => {
-                detailerList.push({ uid: doc.id, ...doc.data() } as Detailer);
-            });
+            const detailerList = await getActiveDetailers();
             setDetailers(detailerList);
         } catch (error) {
             console.error('Error fetching detailers:', error);
@@ -62,43 +56,68 @@ export default function BookPage() {
             <nav className="border-b bg-white">
                 <div className="max-w-3xl mx-auto px-4 flex justify-between items-center h-20">
                     <div className="font-extrabold text-2xl text-indigo-700 tracking-tight">Tap Detail</div>
-                    <a href="/" className="text-indigo-700 font-medium hover:text-indigo-900 text-base transition">Home</a>
+                    <div className="flex gap-6">
+                        <Link href="/" className="text-indigo-700 font-medium hover:text-indigo-900 transition">Home</Link>
+                        <Link href="/signup" className="text-indigo-700 font-medium hover:text-indigo-900 transition">Join as Detailer</Link>
+                        <Link href="/login" className="text-indigo-700 font-medium hover:text-indigo-900 transition">Login</Link>
+                    </div>
                 </div>
             </nav>
-            <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-12">
-                <h1 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Book a Detailer</h1>
-                <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                    <input
-                        type="text"
-                        placeholder="Search by business or location..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 text-base"
-                    />
-                    <select
-                        value={selectedService}
-                        onChange={(e) => setSelectedService(e.target.value)}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-400 text-base"
-                    >
-                        <option value="">All Services</option>
-                        {services.map((service) => (
-                            <option key={service} value={service}>{service}</option>
-                        ))}
-                    </select>
-                    <button
-                        onClick={() => {
-                            setSearchTerm('');
-                            setSelectedService('');
-                        }}
-                        className="px-4 py-3 border border-indigo-200 rounded-full bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                    >
-                        Clear
-                    </button>
+            <main className="flex-1 max-w-3xl mx-auto px-4 py-8">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-4">Find Local Detailers</h1>
+                    <p className="text-gray-600">Connect with trusted mobile detailers in your area</p>
                 </div>
+
+                {/* Search and Filter */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-md p-6 mb-8">
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">Search Detailers</label>
+                            <input
+                                type="text"
+                                id="search"
+                                placeholder="Search by business name or location..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-2">Filter by Service</label>
+                            <select
+                                id="service"
+                                value={selectedService}
+                                onChange={(e) => setSelectedService(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="">All Services</option>
+                                {services.map((service) => (
+                                    <option key={service} value={service}>{service}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Detailers List */}
                 {loading ? (
-                    <div className="text-indigo-500 text-center py-12 text-lg">Loading...</div>
+                    <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                        <p className="mt-2 text-gray-600">Loading detailers...</p>
+                    </div>
                 ) : filteredDetailers.length === 0 ? (
-                    <div className="text-gray-500 text-center py-12 text-lg">No detailers found.</div>
+                    <div className="text-center py-12">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No detailers found</h3>
+                        <p className="mt-1 text-gray-500">
+                            {searchTerm || selectedService 
+                                ? 'No detailers match your search criteria.' 
+                                : 'No detailers are currently available in your area.'}
+                        </p>
+                    </div>
                 ) : (
                     <ul className="space-y-6">
                         {filteredDetailers.map((detailer) => (
@@ -106,13 +125,6 @@ export default function BookPage() {
                                 <div className="font-bold text-lg text-gray-900 mb-1">{detailer.businessName}</div>
                                 <div className="text-sm text-gray-600 mb-1">{detailer.firstName} {detailer.lastName}</div>
                                 {detailer.location && <div className="text-xs text-gray-500 mb-1">{detailer.location}</div>}
-                                {detailer.services && detailer.services.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-1">
-                                        {detailer.services.slice(0, 3).map((service, idx) => (
-                                            <span key={idx} className="bg-indigo-50 text-indigo-700 text-xs px-3 py-1 rounded-full font-medium">{service}</span>
-                                        ))}
-                                    </div>
-                                )}
                                 <button className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-full text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">Book</button>
                             </li>
                         ))}

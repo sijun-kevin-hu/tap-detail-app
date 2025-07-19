@@ -10,18 +10,18 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-    const { user, loading } = useAuth();
+    const { detailer, loading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
         if (!loading) {
-            if (!user) {
+            if (!detailer) {
                 router.push('/login');
-            } else if (requiredRole && user.role !== requiredRole) {
+            } else if (requiredRole && detailer.role !== requiredRole) {
                 router.push('/login');
             }
         }
-    }, [user, loading, requiredRole, router]);
+    }, [detailer, loading, requiredRole, router]);
 
     if (loading) {
         return (
@@ -37,7 +37,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
         );
     }
 
-    if (!user || (requiredRole && user.role !== requiredRole)) {
+    if (!detailer || (requiredRole && detailer.role !== requiredRole)) {
         return null;
     }
 
