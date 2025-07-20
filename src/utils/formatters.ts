@@ -1,13 +1,19 @@
 export const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
+    year: 'numeric'
   });
 };
 
 export const formatTime = (timeString: string) => {
-  return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+  const [hour, minute] = timeString.split(':').map(Number);
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  return date.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true
@@ -15,13 +21,13 @@ export const formatTime = (timeString: string) => {
 };
 
 export const formatPhone = (phone: string) => {
-  const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 10) {
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-  } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
-    return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
-  }
-  return phone;
+  // Remove all non-digits and limit to 10 digits
+  const cleaned = phone.replace(/\D/g, '').slice(0, 10);
+  
+  if (cleaned.length === 0) return '';
+  if (cleaned.length <= 3) return cleaned;
+  if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+  return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
 };
 
 export const getStatusColor = (status: string) => {
@@ -50,4 +56,35 @@ export const getStatusIcon = (status: string) => {
     default:
       return 'clock';
   }
+};
+
+// Validation functions for appointments
+export const validateAppointmentDate = (date: string): boolean => {
+  const selectedDate = new Date(date);
+  const today = new Date();
+  const sixMonthsFromNow = new Date();
+  sixMonthsFromNow.setMonth(today.getMonth() + 6);
+  
+  // Set time to start of day for comparison
+  today.setHours(0, 0, 0, 0);
+  selectedDate.setHours(0, 0, 0, 0);
+  sixMonthsFromNow.setHours(0, 0, 0, 0);
+  
+  return selectedDate >= today && selectedDate <= sixMonthsFromNow;
+};
+
+export const validateAppointmentTime = (time: string): boolean => {
+  const [hour, minute] = time.split(':').map(Number);
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+};
+
+export const getMinDate = (): string => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+};
+
+export const getMaxDate = (): string => {
+  const sixMonthsFromNow = new Date();
+  sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+  return sixMonthsFromNow.toISOString().split('T')[0];
 }; 

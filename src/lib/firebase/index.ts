@@ -1,5 +1,5 @@
 // Firebase client exports
-export { app, db, auth } from './client-app';
+export { default as app, db, auth, storage } from './client-app';
 
 // Firestore settings exports
 export {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Client } from '@/lib/models/client';
-import { formatPhoneNumber } from '@/lib/models/client';
+import { formatPhone } from '@/utils/formatters';
 import { 
   PhoneIcon, 
   EnvelopeIcon, 
@@ -24,7 +24,7 @@ export default function ClientCard({ client, onClick, formatDate }: ClientCardPr
           <h3 className="font-semibold text-gray-900 mb-1">{client.fullName}</h3>
           <div className="flex items-center gap-2 mb-2">
             <PhoneIcon className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{formatPhoneNumber(client.phone)}</span>
+            <span className="text-sm text-gray-600">{formatPhone(client.phone)}</span>
           </div>
           {client.email && (
             <div className="flex items-center gap-2 mb-2">

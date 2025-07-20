@@ -84,7 +84,7 @@ export interface AppointmentFormData {
 
 export interface AppointmentFilters {
     searchTerm: string;
-    statusFilter: 'all' | 'pending' | 'confirmed' | 'in-progress' | 'completed';
+    statusFilter: 'all' | 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'archived';
     dateFilter?: string;
     detailerFilter?: string;
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from 'react';
-import { doc, addDoc, collection } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client-app';
-import { AppointmentFormData, APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
+import React, { useState } from 'react';
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
+import { formatPhone, validateAppointmentDate, validateAppointmentTime, getMinDate, getMaxDate } from '@/utils/formatters';
 
 interface AddAppointmentModalProps {
     isOpen: boolean;
@@ -13,7 +14,7 @@ interface AddAppointmentModalProps {
 }
 
 export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detailerId }: AddAppointmentModalProps) {
-    const [formData, setFormData] = useState<AppointmentFormData>({
+    const [formData, setFormData] = useState({
         clientName: '',
         clientEmail: '',
         clientPhone: '',
@@ -32,26 +33,12 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
     const [error, setError] = useState('');
     const [currentStep, setCurrentStep] = useState(1);
 
-    const formatPhoneNumber = (value: string) => {
-        // Remove all non-digits
-        const digits = value.replace(/\D/g, '');
-        
-        // Format as (XXX) XXX-XXXX
-        if (digits.length <= 3) {
-            return digits;
-        } else if (digits.length <= 6) {
-            return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-        } else {
-            return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-        }
-    };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         
         // Format phone number as user types
         if (name === 'clientPhone') {
-            const formattedValue = formatPhoneNumber(value);
+            const formattedValue = formatPhone(value);
             setFormData(prev => ({
                 ...prev,
                 [name]: formattedValue
@@ -105,6 +92,16 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                     setError('Please select service, date, and time');
                     return false;
                 }
+                // Validate appointment date (within 6 months)
+                if (!validateAppointmentDate(formData.date)) {
+                    setError('Appointment date must be within the next 6 months');
+                    return false;
+                }
+                // Validate appointment time
+                if (!validateAppointmentTime(formData.time)) {
+                    setError('Please enter a valid time');
+                    return false;
+                }
                 break;
             case 3:
                 if (!formData.address) {
@@ -145,6 +142,16 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
         }
         if (formData.price <= 0) {
             setError('Please select a valid service');
+            return false;
+        }
+        // Validate appointment date (within 6 months)
+        if (!validateAppointmentDate(formData.date)) {
+            setError('Appointment date must be within the next 6 months');
+            return false;
+        }
+        // Validate appointment time
+        if (!validateAppointmentTime(formData.time)) {
+            setError('Please enter a valid time');
             return false;
         }
         return true;
@@ -418,7 +425,8 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                                 name="date"
                                                 value={formData.date}
                                                 onChange={handleInputChange}
-                                                min={new Date().toISOString().split('T')[0]}
+                                                min={getMinDate()}
+                                                max={getMaxDate()}
                                                 className="input-modern"
                                             />
                                         </div>

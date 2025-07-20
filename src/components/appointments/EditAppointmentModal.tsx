@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppointmentFormData, APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
+import { formatPhone, validateAppointmentDate, validateAppointmentTime, getMinDate, getMaxDate } from '@/utils/formatters';
 
 interface EditAppointmentModalProps {
     isOpen: boolean;
@@ -18,14 +19,27 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
     useEffect(() => {
         setFormData(initialData);
         setError('');
-    }, [initialData, isOpen]);
+    }, [initialData]);
+
+    if (!isOpen) return null;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        
+        // Format phone number as user types
+        if (name === 'clientPhone') {
+            const formattedValue = formatPhone(value);
+            setFormData(prev => ({
+                ...prev,
+                [name]: formattedValue
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
+
         // Auto-update price when service changes
         if (name === 'service') {
             const selectedService = APPOINTMENT_SERVICES.find(s => s.name === value);
@@ -38,16 +52,32 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
     };
 
     const validateForm = () => {
-        if (!formData.clientName || !formData.clientEmail || !formData.carType || !formData.service || !formData.date || !formData.time || !formData.address) {
+        if (!formData.clientName || !formData.clientPhone || !formData.service || !formData.date || !formData.time || !formData.address) {
             setError('Please fill in all required fields');
             return false;
         }
-        if (!formData.clientEmail.includes('@')) {
+        // Validate phone number has at least 10 digits
+        const phoneDigits = formData.clientPhone.replace(/\D/g, '');
+        if (phoneDigits.length < 10) {
+            setError('Please enter a complete phone number');
+            return false;
+        }
+        if (formData.clientEmail && !formData.clientEmail.includes('@')) {
             setError('Please enter a valid email address');
             return false;
         }
         if (formData.price <= 0) {
             setError('Please select a valid service');
+            return false;
+        }
+        // Validate appointment date (within 6 months)
+        if (!validateAppointmentDate(formData.date)) {
+            setError('Appointment date must be within the next 6 months');
+            return false;
+        }
+        // Validate appointment time
+        if (!validateAppointmentTime(formData.time)) {
+            setError('Please enter a valid time');
             return false;
         }
         return true;
@@ -56,15 +86,17 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (!validateForm()) return;
+
+        if (!validateForm()) {
+            return;
+        }
+
         onSave(formData);
     };
 
-    if (!isOpen) return null;
-
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[95vh] overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[95vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
                     <div className="flex justify-between items-center">
@@ -79,43 +111,46 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
                         </button>
                     </div>
                 </div>
+
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {/* Client Information */}
                     <div className="space-y-4">
-                        <div>
-                            <label htmlFor="clientName" className="block text-sm font-medium text-gray-700 mb-2">
-                                Client Name *
-                            </label>
-                            <input
-                                id="clientName"
-                                name="clientName"
-                                type="text"
-                                value={formData.clientName}
-                                onChange={handleInputChange}
-                                className="input-modern"
-                                placeholder="Enter client name"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700 mb-2">
-                                Email *
-                            </label>
-                            <input
-                                id="clientEmail"
-                                name="clientEmail"
-                                type="email"
-                                value={formData.clientEmail}
-                                onChange={handleInputChange}
-                                className="input-modern"
-                                placeholder="Enter email address"
-                                required
-                            />
+                        <h3 className="text-lg font-medium text-gray-900">Client Information</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="clientName" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Client Name *
+                                </label>
+                                <input
+                                    id="clientName"
+                                    name="clientName"
+                                    type="text"
+                                    value={formData.clientName}
+                                    onChange={handleInputChange}
+                                    className="input-modern"
+                                    placeholder="Enter client name"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Email
+                                </label>
+                                <input
+                                    id="clientEmail"
+                                    name="clientEmail"
+                                    type="email"
+                                    value={formData.clientEmail}
+                                    onChange={handleInputChange}
+                                    className="input-modern"
+                                    placeholder="Enter email address"
+                                />
+                            </div>
                         </div>
                         <div>
                             <label htmlFor="clientPhone" className="block text-sm font-medium text-gray-700 mb-2">
-                                Phone Number
+                                Phone Number *
                             </label>
                             <input
                                 id="clientPhone"
@@ -245,7 +280,8 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
                                     name="date"
                                     value={formData.date}
                                     onChange={handleInputChange}
-                                    min={new Date().toISOString().split('T')[0]}
+                                    min={getMinDate()}
+                                    max={getMaxDate()}
                                     className="input-modern"
                                     required
                                 />

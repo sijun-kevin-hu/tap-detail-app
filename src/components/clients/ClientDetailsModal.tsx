@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import { Client, ClientFormData, validateClientForm } from '@/lib/models/client';
-import { 
-  PhoneIcon, 
-  EnvelopeIcon, 
-  CalendarIcon, 
-  CurrencyDollarIcon,
-  MapPinIcon
-} from '@heroicons/react/24/outline';
+import { Client, ClientFormData } from '@/lib/models/client';
+import { formatPhone } from '@/utils/formatters';
+import { PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 
 interface ClientDetailsModalProps {
   client: Client;
@@ -34,7 +29,7 @@ export default function ClientDetailsModal({
   getStatusColor
 }: ClientDetailsModalProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({
+  const [editData, setEditData] = useState<ClientFormData>({
     fullName: client.fullName,
     phone: client.phone,
     email: client.email || '',
@@ -45,10 +40,13 @@ export default function ClientDetailsModal({
   if (!isOpen) return null;
 
   const handleSave = () => {
-    // Validate form before saving
-    const validation = validateClientForm(editData);
-    if (!validation.isValid) {
-      setEditErrors(validation.errors);
+    // Simple validation
+    if (!editData.fullName.trim()) {
+      setEditErrors(['Full name is required']);
+      return;
+    }
+    if (!editData.phone.trim()) {
+      setEditErrors(['Phone number is required']);
       return;
     }
     
@@ -59,36 +57,9 @@ export default function ClientDetailsModal({
 
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
     setEditData({ ...editData, [field]: value });
-    // Clear errors when user starts typing
     if (editErrors.length > 0) {
       setEditErrors([]);
     }
-  };
-
-  const handlePhoneChange = (value: string) => {
-    // Auto-format phone number
-    const cleaned = value.replace(/\D/g, '');
-    let formatted = value;
-    
-    if (cleaned.length <= 3) {
-      formatted = cleaned;
-    } else if (cleaned.length <= 6) {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    } else {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-    }
-    
-    handleInputChange('phone', formatted);
-  };
-
-  const formatPhone = (phone: string) => {
-    const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length === 10) {
-      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-    } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
-      return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
-    }
-    return phone;
   };
 
   return (
@@ -148,9 +119,9 @@ export default function ClientDetailsModal({
                 <input
                   type="tel"
                   value={editData.phone}
-                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="(555) 123-4567"
+                  placeholder="Enter phone number"
                   required
                 />
               </div>
@@ -237,23 +208,15 @@ export default function ClientDetailsModal({
                     {client.currentAppointments.map((apt) => (
                       <div key={apt.id} className="bg-blue-50 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-blue-900">{apt.service}</span>
+                          <span className="font-medium text-gray-900">{apt.service}</span>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(apt.status)}`}>
                             {apt.status}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-blue-700">
-                          <CalendarIcon className="h-4 w-4" />
-                          <span>{formatDate(apt.date)} at {formatTime(apt.time)}</span>
+                        <div className="text-sm text-gray-600">
+                          {formatDate(apt.date)} at {formatTime(apt.time)}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-blue-700 mt-1">
-                          <MapPinIcon className="h-4 w-4" />
-                          <span>{apt.address}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-blue-700 mt-1">
-                          <CurrencyDollarIcon className="h-4 w-4" />
-                          <span>${apt.price}</span>
-                        </div>
+                        <div className="text-sm text-gray-600">${apt.price}</div>
                       </div>
                     ))}
                   </div>
@@ -264,7 +227,7 @@ export default function ClientDetailsModal({
               {client.pastAppointments && client.pastAppointments.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Past Appointments</h4>
-                  <div className="space-y-3 max-h-48 overflow-y-auto">
+                  <div className="space-y-3">
                     {client.pastAppointments.slice(0, 5).map((apt) => (
                       <div key={apt.id} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-2">
@@ -273,21 +236,12 @@ export default function ClientDetailsModal({
                             {apt.status}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <CalendarIcon className="h-4 w-4" />
-                          <span>{formatDate(apt.date)} at {formatTime(apt.time)}</span>
+                        <div className="text-sm text-gray-600">
+                          {formatDate(apt.date)} at {formatTime(apt.time)}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                          <CurrencyDollarIcon className="h-4 w-4" />
-                          <span>${apt.price}</span>
-                        </div>
+                        <div className="text-sm text-gray-600">${apt.price}</div>
                       </div>
                     ))}
-                    {client.pastAppointments.length > 5 && (
-                      <div className="text-center text-sm text-gray-500">
-                        +{client.pastAppointments.length - 5} more appointments
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -316,20 +270,17 @@ export default function ClientDetailsModal({
             ) : (
               <>
                 <button
-                  onClick={() => {
-                    setIsEditing(true);
-                    setEditErrors([]);
-                  }}
+                  onClick={() => setIsEditing(true)}
                   className="btn-secondary flex-1"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => onDelete(client.id)}
-                  className="btn-secondary flex-1 bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                  className="btn-danger flex-1"
                   disabled={submitting}
                 >
-                  {submitting ? 'Deleting...' : 'Delete'}
+                  {submitting ? 'Deleting...' : 'Delete Client'}
                 </button>
               </>
             )}

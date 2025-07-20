@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ClientFormData, validateClientForm } from '@/lib/models/client';
+import React from 'react';
+import { ClientFormData } from '@/lib/models/client';
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -26,26 +26,9 @@ export default function AddClientModal({
 
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
     setFormData({ ...formData, [field]: value });
-    // Clear errors when user starts typing
     if (formErrors.length > 0) {
       setFormErrors([]);
     }
-  };
-
-  const handlePhoneChange = (value: string) => {
-    // Auto-format phone number
-    const cleaned = value.replace(/\D/g, '');
-    let formatted = value;
-    
-    if (cleaned.length <= 3) {
-      formatted = cleaned;
-    } else if (cleaned.length <= 6) {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    } else {
-      formatted = `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-    }
-    
-    handleInputChange('phone', formatted);
   };
 
   return (
@@ -100,9 +83,9 @@ export default function AddClientModal({
             <input
               type="tel"
               value={formData.phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="(555) 123-4567"
+              placeholder="Enter phone number"
               required
             />
           </div>

@@ -1,98 +1,136 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { processReminders, ReminderConfig, ReminderResult } from '@/lib/services/reminderService';
+import { 
+  processReminders, 
+  sendManualReminder, 
+  getReminderHistory,
+  updateReminderSettings 
+} from '@/lib/services/reminderService';
+import { getReminderConfig } from '@/lib/firebase/firestore-reminders';
+import { ReminderConfig, ReminderLog } from '@/lib/models/reminder';
 import { Appointment } from '@/lib/models';
-import { updateAppointment } from '@/lib/firebase';
 
-export function useReminders(appointments: Appointment[]) {
+export function useReminders() {
   const { detailer } = useAuth();
-  const [reminderConfig, setReminderConfig] = useState<ReminderConfig>({
-    enabled: true,
-    hoursBeforeAppointment: 24,
-    messageTemplate: undefined
-  });
-  const [processingReminders, setProcessingReminders] = useState(false);
-  const [lastReminderResults, setLastReminderResults] = useState<ReminderResult[]>([]);
+  const [config, setConfig] = useState<ReminderConfig | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [history, setHistory] = useState<ReminderLog[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Process reminders when appointments change
+  // Load reminder configuration
   useEffect(() => {
-    if (!detailer || !reminderConfig.enabled || appointments.length === 0) {
-      return;
+    if (detailer?.uid) {
+      loadConfig();
+      loadHistory();
     }
+  }, [detailer?.uid]);
 
-    const processAppointmentReminders = async () => {
-      setProcessingReminders(true);
-      try {
-        const results = await processReminders(
-          appointments,
-          detailer.businessName,
-          reminderConfig
-        );
-
-        // Update appointment documents for successful reminders
-        for (const result of results) {
-          if (result.success) {
-            await updateAppointment(detailer.uid, result.appointmentId, {
-              reminderSent: true,
-              reminderSentAt: new Date().toISOString(),
-            });
-          }
-        }
-
-        setLastReminderResults(results);
-        
-        // Log results
-        const successful = results.filter(r => r.success).length;
-        const failed = results.filter(r => !r.success).length;
-        
-        if (successful > 0 || failed > 0) {
-          console.log(`Reminder processing complete: ${successful} sent, ${failed} failed`);
-        }
-      } catch (error) {
-        console.error('Error processing reminders:', error);
-      } finally {
-        setProcessingReminders(false);
-      }
-    };
-
-    processAppointmentReminders();
-  }, [appointments, detailer, reminderConfig]);
-
-  // Update reminder configuration
-  const updateReminderConfig = (config: Partial<ReminderConfig>) => {
-    setReminderConfig(prev => ({ ...prev, ...config }));
+  const loadConfig = async () => {
+    if (!detailer?.uid) return;
+    
+    try {
+      setLoading(true);
+      const reminderConfig = await getReminderConfig(detailer.uid);
+      setConfig(reminderConfig);
+    } catch (err) {
+      console.error('Error loading reminder config:', err);
+      setError('Failed to load reminder settings');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Manually send reminder for specific appointment
-  const sendManualReminder = async (appointment: Appointment): Promise<boolean> => {
-    if (!detailer) return false;
-
+  const loadHistory = async () => {
+    if (!detailer?.uid) return;
+    
     try {
-      const results = await processReminders(
-        [appointment],
-        detailer.businessName,
-        reminderConfig
-      );
-
-      if (results.length > 0 && results[0].success) {
-        await updateAppointment(detailer.uid, appointment.id, {
-          reminderSent: true,
-          reminderSentAt: new Date().toISOString(),
-        });
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error sending manual reminder:', error);
-      return false;
+      const logs = await getReminderHistory(detailer.uid);
+      setHistory(logs);
+    } catch (err) {
+      console.error('Error loading reminder history:', err);
     }
+  };
+
+  const updateConfig = async (updates: Partial<ReminderConfig>) => {
+    if (!detailer?.uid || !config) return;
+    
+    try {
+      setLoading(true);
+      const success = await updateReminderSettings(detailer.uid, updates);
+      
+      if (success) {
+        setConfig({ ...config, ...updates });
+        setError(null);
+      } else {
+        setError('Failed to update reminder settings');
+      }
+    } catch (err) {
+      console.error('Error updating reminder config:', err);
+      setError('Failed to update reminder settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const processAutomaticReminders = async (appointments: Appointment[]) => {
+    if (!detailer?.uid || !config?.enabled) return [];
+    
+    try {
+      setProcessing(true);
+      const results = await processReminders(detailer.uid, appointments);
+      
+      // Reload history after processing
+      await loadHistory();
+      
+      return results;
+    } catch (err) {
+      console.error('Error processing reminders:', err);
+      setError('Failed to process reminders');
+      return [];
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const sendManualReminderForAppointment = async (appointment: Appointment) => {
+    if (!detailer?.uid) return null;
+    
+    try {
+      setProcessing(true);
+      const result = await sendManualReminder(detailer.uid, appointment);
+      
+      // Reload history after sending
+      await loadHistory();
+      
+      return result;
+    } catch (err) {
+      console.error('Error sending manual reminder:', err);
+      setError('Failed to send reminder');
+      return null;
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const clearError = () => {
+    setError(null);
   };
 
   return {
-    reminderConfig,
-    processingReminders,
-    lastReminderResults,
-    updateReminderConfig,
-    sendManualReminder
+    // State
+    config,
+    loading,
+    processing,
+    history,
+    error,
+    
+    // Actions
+    updateConfig,
+    processAutomaticReminders,
+    sendManualReminderForAppointment,
+    loadConfig,
+    loadHistory,
+    clearError
   };
 } 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { AppointmentStatus, APPOINTMENT_STATUSES } from '@/lib/models';
+import { getStatusColor } from '@/utils/formatters';
 
 interface StatusDropdownProps {
   currentStatus: AppointmentStatus;
@@ -15,17 +16,6 @@ export default function StatusDropdown({
   disabled = false,
   className = ''
 }: StatusDropdownProps) {
-  const getStatusColor = (status: AppointmentStatus) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'in-progress': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
   const getStatusLabel = (status: AppointmentStatus) => {
     switch (status) {
       case 'pending': return 'Pending';

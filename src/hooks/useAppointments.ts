@@ -1,62 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { getAppointments, updateAppointment, deleteAppointment } from '@/lib/firebase';
-import { Appointment, AppointmentFilters, AppointmentFormData } from '@/lib/models';
+import { getAppointments, updateAppointment, deleteAppointment } from '@/lib/firebase/firestore-appointments';
+import { Appointment, AppointmentFilters } from '@/lib/models';
+import { formatDate, formatTime, getStatusColor } from '@/utils/formatters';
 
 export function useAppointments() {
-  const { detailer, loading: authLoading } = useAuth();
-  
-  // State
+  const { detailer } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<AppointmentFilters>({
     searchTerm: '',
-    statusFilter: 'all'
+    statusFilter: 'all',
   });
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<'archive' | 'delete' | null>(null);
-  const [editForm, setEditForm] = useState<AppointmentFormData | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Appointment> | null>(null);
   const [editLoading, setEditLoading] = useState(false);
-  const [dateRangeType, setDateRangeType] = useState<'all' | '7' | '30' | 'custom' | 'next7' | 'next30'>('all');
+  const [dateRangeType, setDateRangeType] = useState<'7' | '30' | 'next7' | 'next30' | 'custom'>('7');
   const [customRange, setCustomRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
 
-  // Load appointments
-  useEffect(() => {
-    if (authLoading) {
-      // Still loading auth, don't do anything yet
-      return;
-    }
-    
-    if (detailer?.uid) {
-      fetchAppointments();
-    } else if (detailer === null) {
-      // User is not authenticated, set loading to false
-      setLoading(false);
-    }
-  }, [detailer?.uid, authLoading]);
-
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     if (!detailer?.uid) return;
     
     try {
       setLoading(true);
       const appointmentsList = await getAppointments(detailer.uid);
-      setAppointments(appointmentsList);
+      setAppointments(appointmentsList || []);
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [detailer?.uid]);
+
+  useEffect(() => {
+    if (detailer?.uid) {
+      fetchAppointments();
+    }
+  }, [detailer?.uid, fetchAppointments]);
 
   // Filter appointments
   const filteredAppointments = appointments.filter(appointment => {
     const matchesSearch = appointment.clientName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
                         appointment.clientEmail.toLowerCase().includes(filters.searchTerm.toLowerCase());
     const matchesStatus = filters.statusFilter === 'all' || appointment.status === filters.statusFilter;
+    
     let matchesDate = true;
     const now = new Date();
     let startDate: Date | null = null;
@@ -82,13 +73,11 @@ export function useAppointments() {
       endDate = new Date(customRange.end + 'T23:59:59');
     }
     if (startDate) {
-      // Parse as local date
       const [year, month, day] = appointment.date.split('-').map(Number);
       const apptDate = new Date(year, month - 1, day);
       if (apptDate < startDate) matchesDate = false;
     }
     if (endDate) {
-      // Parse as local date
       const [year, month, day] = appointment.date.split('-').map(Number);
       const apptDate = new Date(year, month - 1, day);
       if (apptDate > endDate) matchesDate = false;
@@ -96,7 +85,7 @@ export function useAppointments() {
     return matchesSearch && matchesStatus && matchesDate;
   });
 
-  // Archive (soft-delete) appointment
+  // Archive appointment
   const handleArchive = async (id: string) => {
     if (!detailer?.uid) return;
     setActionLoading('archive');
@@ -105,24 +94,24 @@ export function useAppointments() {
         status: 'archived',
         deletedAt: new Date().toISOString(),
       });
-      fetchAppointments();
-    } catch (err) {
-      alert('Failed to archive appointment.');
+      await fetchAppointments();
+    } catch (error) {
+      console.error('Error archiving appointment:', error);
     } finally {
       setActionLoading(null);
       setConfirmingId(null);
     }
   };
 
-  // Permanently delete appointment
+  // Delete appointment
   const handlePermanentDelete = async (id: string) => {
     if (!detailer?.uid) return;
     setActionLoading('delete');
     try {
       await deleteAppointment(detailer.uid, id);
-      fetchAppointments();
-    } catch (err) {
-      alert('Failed to delete appointment.');
+      await fetchAppointments();
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
     } finally {
       setActionLoading(null);
       setConfirmingId(null);
@@ -132,22 +121,22 @@ export function useAppointments() {
   // Open edit modal
   const openEditModal = (appointment: Appointment) => {
     setEditingAppointment(appointment);
-          setEditForm({
-        clientName: appointment.clientName,
-        clientEmail: appointment.clientEmail,
-        clientPhone: appointment.clientPhone,
-        carType: appointment.carType || '',
-        carMake: appointment.carMake || '',
-        carModel: appointment.carModel || '',
-        carYear: appointment.carYear || '',
-        service: appointment.service,
-        date: appointment.date,
-        time: appointment.time,
-        address: appointment.address,
-        notes: appointment.notes || '',
-        price: appointment.price,
-        reminderSent: appointment.reminderSent || false,
-      });
+    setEditForm({
+      clientName: appointment.clientName,
+      clientEmail: appointment.clientEmail,
+      clientPhone: appointment.clientPhone,
+      carType: appointment.carType || '',
+      carMake: appointment.carMake || '',
+      carModel: appointment.carModel || '',
+      carYear: appointment.carYear || '',
+      service: appointment.service,
+      date: appointment.date,
+      time: appointment.time,
+      address: appointment.address,
+      notes: appointment.notes || '',
+      price: appointment.price,
+      reminderSent: appointment.reminderSent || false,
+    });
   };
 
   // Save edited appointment
@@ -161,43 +150,12 @@ export function useAppointments() {
       });
       setEditingAppointment(null);
       setEditForm(null);
-      fetchAppointments();
-    } catch (err) {
-      alert('Failed to update appointment.');
+      await fetchAppointments();
+    } catch (error) {
+      console.error('Error updating appointment:', error);
     } finally {
       setEditLoading(false);
     }
-  };
-
-  // Utility functions
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'scheduled': return 'bg-blue-100 text-blue-800';
-      case 'in-progress': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    // Parse as local date
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString(undefined, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  const formatTime = (timeString: string) => {
-    // timeString is 'HH:MM' (24h), convert to local time with AM/PM
-    const [hour, minute] = timeString.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hour, minute, 0, 0);
-    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
   };
 
   return {
