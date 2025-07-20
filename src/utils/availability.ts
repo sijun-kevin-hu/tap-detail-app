@@ -41,18 +41,40 @@ export function getAvailableTimeSlots({
   if (availability.blockedDates.includes(date)) return [];
 
   // 2. Check if day is a working day
-  const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+  // Parse date string manually to avoid timezone issues
+  const [year, month, day] = date.split('-').map(Number);
+  const localDate = new Date(year, month - 1, day); // month is 0-indexed
+  const dayOfWeek = localDate.toLocaleDateString('en-US', { weekday: 'long' });
+  
   if (!availability.workingDays.includes(dayOfWeek)) return [];
 
   // 3. Get business hours for the day
   const hours = availability.businessHours[dayOfWeek];
-  if (!hours) return [];
+  
+  // Auto-fix corrupted business hours
+  if (!hours || !hours.start || !hours.end) {
+    // Use default hours for this day
+    const defaultHours = { start: '09:00', end: '17:00' };
+    return getAvailableTimeSlots({
+      date,
+      serviceDuration,
+      availability: {
+        ...availability,
+        businessHours: {
+          ...availability.businessHours,
+          [dayOfWeek]: defaultHours,
+        },
+      },
+      appointments,
+      services,
+    });
+  }
 
   // 4. Build all possible slots within business hours
   const slots: TimeSlot[] = [];
   const detailerBuffer = availability.bufferMinutes || 0;
   const breaks = availability.breaks.filter(b => b.day === dayOfWeek);
-
+  
   // Helper to add minutes to a time string
   const addMinutes = (time: string, mins: number) => {
     if (!time || typeof time !== 'string') {
@@ -137,12 +159,12 @@ export function getAvailableTimeSlots({
       reason = 'Break time';
     } else if (overlapsAppt) {
       available = false;
-      reason = 'Booked';
+      reason = 'Appointment conflict';
     }
     
     slots.push({
-      start: `${date}T${slotStart}`,
-      end: `${date}T${slotEnd}`,
+      start: `${date}T${slotStart}:00`,
+      end: `${date}T${slotEnd}:00`,
       available,
       reason: available ? undefined : reason,
     });

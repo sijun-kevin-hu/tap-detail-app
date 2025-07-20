@@ -15,7 +15,14 @@ interface UnifiedDateTimePickerProps {
 }
 
 export default function UnifiedDateTimePicker({ detailerId, serviceName, services = [], value, onChange }: UnifiedDateTimePickerProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(value?.date ? new Date(value.date) : null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
+    if (value?.date) {
+      // Parse the date string and create a local date object
+      const [year, month, day] = value.date.split('-').map(Number);
+      return new Date(year, month - 1, day); // month is 0-indexed
+    }
+    return null;
+  });
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -32,7 +39,12 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
     if (!selectedDate) return;
     setLoading(true);
     setError('');
-    const dateStr = selectedDate.toISOString().split('T')[0];
+    
+    // Use the original date object to avoid timezone issues
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(selectedDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     
     (async () => {
       try {
@@ -108,7 +120,14 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
                   {slots.map(slot => {
                     const startDate = new Date(slot.start);
                     const start = startDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
-                    const isSelected = value && value.date === selectedDate.toISOString().split('T')[0] && value.time === slot.start.slice(11, 16);
+                    
+                    // Use local date string to avoid timezone issues
+                    const year = selectedDate.getFullYear();
+                    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(selectedDate.getDate()).padStart(2, '0');
+                    const localDateStr = `${year}-${month}-${day}`;
+                    
+                    const isSelected = value && value.date === localDateStr && value.time === slot.start.slice(11, 16);
 
                     if (slot.available) {
                       return (
@@ -117,7 +136,7 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
                           className={`rounded-lg px-4 py-3 text-base font-medium border transition-colors w-full
                             ${isSelected ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-900 border-gray-200 hover:bg-indigo-50'}
                           `}
-                          onClick={() => onChange({ date: selectedDate.toISOString().split('T')[0], time: slot.start.slice(11, 16) })}
+                          onClick={() => onChange({ date: localDateStr, time: slot.start.slice(11, 16) })}
                           type="button"
                           style={{ minHeight: 48 }}
                         >

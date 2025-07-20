@@ -1,6 +1,7 @@
 import type { AvailabilitySettings } from '@/lib/models/detailer';
 import React, { useState, useEffect } from 'react';
 import { getDetailerAvailability, updateDetailerAvailability } from '@/lib/firebase/firestore-detailers';
+import Toast from '@/components/Toast';
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DEFAULT_HOURS = { start: '09:00', end: '17:00' };
@@ -19,8 +20,13 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
   const [availability, setAvailability] = useState<AvailabilitySettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
+
+  const handleToastClose = () => {
+    setShowToast(false);
+    setToastMessage('');
+  };
 
   useEffect(() => {
     (async () => {
@@ -38,7 +44,8 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
           }
         );
       } catch (e) {
-        setError('Failed to load availability settings');
+        setToastMessage('Failed to load availability settings');
+        setShowToast(true);
       } finally {
         setLoading(false);
       }
@@ -114,13 +121,14 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
   const handleSave = async () => {
     if (!availability) return;
     setSaving(true);
-    setError('');
-    setSuccess('');
+    
     try {
       await updateDetailerAvailability(detailerId, availability);
-      setSuccess('Availability updated!');
+      setToastMessage('Settings saved successfully!');
+      setShowToast(true);
     } catch (e) {
-      setError('Failed to save availability');
+      setToastMessage('Failed to save settings');
+      setShowToast(true);
     } finally {
       setSaving(false);
     }
@@ -131,8 +139,7 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Availability</h3>
-      {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
-      {success && <div className="text-green-600 text-sm mb-2">{success}</div>}
+      <Toast message={toastMessage} show={showToast} onClose={handleToastClose} />
 
       {/* Working Days */}
       <div className="mb-6">

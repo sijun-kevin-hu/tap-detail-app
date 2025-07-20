@@ -444,7 +444,20 @@ export const getDetailerAvailability = async (detailerId: string): Promise<Avail
     const detailerDoc = await getDoc(detailerRef);
     if (detailerDoc.exists()) {
       const data = detailerDoc.data();
-      return data.availability || null;
+      const availability = data.availability || getDefaultAvailability();
+      
+      // Auto-fix corrupted business hours
+      const fixedAvailability = fixCorruptedBusinessHours(availability);
+      
+      // If data was corrupted, save the fixed version
+      if (JSON.stringify(availability) !== JSON.stringify(fixedAvailability)) {
+        await updateDoc(detailerRef, { 
+          availability: fixedAvailability, 
+          updatedAt: serverTimestamp() 
+        });
+      }
+      
+      return fixedAvailability;
     }
     return null;
   } catch (error) {
@@ -452,6 +465,29 @@ export const getDetailerAvailability = async (detailerId: string): Promise<Avail
     throw new Error('Failed to fetch detailer availability');
   }
 };
+
+/**
+ * Fix corrupted business hours data
+ * @param availability - The availability settings to fix
+ * @returns Fixed availability settings
+ */
+function fixCorruptedBusinessHours(availability: AvailabilitySettings): AvailabilitySettings {
+  const defaultHours = { start: '09:00', end: '17:00' };
+  const fixedBusinessHours = { ...availability.businessHours };
+  
+  // Check each day and fix corrupted hours
+  WEEKDAYS.forEach(day => {
+    const hours = fixedBusinessHours[day];
+    if (!hours || !hours.start || !hours.end) {
+      fixedBusinessHours[day] = { ...defaultHours };
+    }
+  });
+  
+  return {
+    ...availability,
+    businessHours: fixedBusinessHours,
+  };
+}
 
 export const updateDetailerAvailability = async (detailerId: string, availability: AvailabilitySettings): Promise<void> => {
   try {
