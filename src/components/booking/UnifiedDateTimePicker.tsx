@@ -52,7 +52,7 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
           serviceDuration,
           availability,
           appointments,
-          services,
+          services, // Pass the full services array for buffer calculation
         });
         
         setSlots(slots);

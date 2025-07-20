@@ -65,6 +65,7 @@ export interface NewAppointment {
   address: string;
   price: number;
   notes?: string;
+  estimatedDuration?: number; // Add estimated duration from service
 }
 
 // Firestore Structure:

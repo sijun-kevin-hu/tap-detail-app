@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { addDoc, collection } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { CAR_TYPES } from '@/lib/models';
 import { formatPhone, validateAppointmentDate, validateAppointmentTime } from '@/utils/formatters';
 import UnifiedDateTimePicker from '../booking/UnifiedDateTimePicker';
 import { getServices } from '@/lib/firebase/firestore-settings';
+import { createAppointment } from '@/lib/firebase/firestore-appointments';
 import { ServiceMenu } from '@/lib/models/settings';
 
 interface AddAppointmentModalProps {
@@ -191,7 +190,10 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
         }
 
         try {
-            await addDoc(collection(db, 'detailers', detailerId, 'appointments'), {
+            // Get the selected service to include duration
+            const selectedService = services.find(s => s.name === formData.service);
+            
+            await createAppointment(detailerId, {
                 clientName: formData.clientName,
                 clientEmail: formData.clientEmail,
                 clientPhone: formData.clientPhone,
@@ -205,8 +207,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                 address: formData.address,
                 notes: formData.notes,
                 price: formData.price,
-                status: 'pending',
-                createdAt: new Date().toISOString()
+                estimatedDuration: selectedService?.duration || 60
             });
 
             handleSuccess();

@@ -288,7 +288,8 @@ export default function BookingPage() {
         time: selectedDateTime.time,
         address: '', // Will be filled by detailer
         price: selectedService!.price,
-        notes: formData.notes.trim()
+        notes: formData.notes.trim(),
+        estimatedDuration: selectedService!.duration // Include service duration
       };
       
       await createAppointment(detailer!.uid, appointmentData);

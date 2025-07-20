@@ -9,6 +9,21 @@ export interface TimeSlot {
   reason?: string; // Why slot is unavailable
 }
 
+/**
+ * Calculate available time slots for a given date, considering:
+ * - Detailer's business hours and working days
+ * - Detailer's buffer time (bufferMinutes)
+ * - Service-specific buffer time (service.buffer)
+ * - Existing appointments with their duration + buffer time
+ * - Break times
+ * 
+ * @param date - The date to check (YYYY-MM-DD format)
+ * @param serviceDuration - Duration of the service in minutes
+ * @param availability - Detailer's availability settings
+ * @param appointments - Existing appointments for the date
+ * @param services - Array of services to get service-specific buffer times
+ * @returns Array of time slots with availability status
+ */
 export function getAvailableTimeSlots({
   date,
   serviceDuration,
@@ -35,7 +50,7 @@ export function getAvailableTimeSlots({
 
   // 4. Build all possible slots within business hours
   const slots: TimeSlot[] = [];
-  const buffer = availability.bufferMinutes || 0;
+  const detailerBuffer = availability.bufferMinutes || 0;
   const breaks = availability.breaks.filter(b => b.day === dayOfWeek);
 
   // Helper to add minutes to a time string
@@ -98,15 +113,18 @@ export function getAvailableTimeSlots({
       // Get service-specific buffer for this appointment
       const apptService = services.find(s => s.name === appt.service);
       const serviceBuffer = apptService?.buffer || 0;
-      const totalApptBuffer = buffer + serviceBuffer;
+      const totalApptBuffer = detailerBuffer + serviceBuffer;
       
-      // Calculate appointment end time in minutes
+      // Calculate appointment end time in minutes (including buffer)
       const apptEndMinutes = apptStartMinutes + apptDuration + totalApptBuffer;
       
       // Check if the new slot overlaps with this appointment
-      // Slot overlaps if: slot starts before appointment ends AND slot ends after appointment starts
+      // Only block slots that start during the appointment time
       const slotEndMinutes = slotStartMinutes + serviceDuration;
-      const overlaps = slotStartMinutes < apptEndMinutes && slotEndMinutes > apptStartMinutes;
+      
+      // Slot overlaps if it starts during the appointment window
+      // This means the slot start time is >= appointment start AND < appointment end
+      const overlaps = slotStartMinutes >= apptStartMinutes && slotStartMinutes < apptEndMinutes;
       
       return overlaps;
     });
