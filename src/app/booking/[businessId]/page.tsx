@@ -549,6 +549,7 @@ export default function BookingPage() {
           <UnifiedDateTimePicker
             detailerId={detailer?.uid || ''}
             serviceName={selectedService?.name || ''}
+            services={services}
             value={selectedDateTime}
             onChange={setSelectedDateTime}
           />

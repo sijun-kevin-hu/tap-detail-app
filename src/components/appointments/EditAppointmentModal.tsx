@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { AppointmentFormData, APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
-import { formatPhone, validateAppointmentDate, validateAppointmentTime, getMinDate, getMaxDate } from '@/utils/formatters';
-import UnifiedDateTimePicker from '../booking/UnifiedDateTimePicker';
+import { AppointmentFormData, CAR_TYPES } from '@/lib/models';
+import { formatPhone, validateAppointmentDate, validateAppointmentTime } from '@/utils/formatters';
+import { getServices } from '@/lib/firebase/firestore-settings';
+import { ServiceMenu } from '@/lib/models/settings';
 
 interface EditAppointmentModalProps {
     isOpen: boolean;
@@ -17,6 +18,26 @@ interface EditAppointmentModalProps {
 export default function EditAppointmentModal({ isOpen, onClose, onSave, initialData, loading, detailerId }: EditAppointmentModalProps) {
     const [formData, setFormData] = useState<AppointmentFormData>(initialData);
     const [error, setError] = useState('');
+    const [services, setServices] = useState<ServiceMenu[]>([]);
+    const [servicesLoading, setServicesLoading] = useState(true);
+
+    // Load detailer's services
+    useEffect(() => {
+        if (detailerId && isOpen) {
+            setServicesLoading(true);
+            getServices(detailerId)
+                .then(servicesList => {
+                    setServices(servicesList.filter(s => s.active));
+                })
+                .catch(err => {
+                    console.error('Error loading services:', err);
+                    setError('Failed to load services');
+                })
+                .finally(() => {
+                    setServicesLoading(false);
+                });
+        }
+    }, [detailerId, isOpen]);
 
     useEffect(() => {
         setFormData(initialData);
@@ -44,7 +65,7 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
 
         // Auto-update price when service changes
         if (name === 'service') {
-            const selectedService = APPOINTMENT_SERVICES.find(s => s.name === value);
+            const selectedService = services.find(s => s.name === value);
             setFormData(prev => ({
                 ...prev,
                 service: value,
@@ -255,21 +276,25 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
                             <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-2">
                                 Service *
                             </label>
-                            <select
-                                id="service"
-                                name="service"
-                                value={formData.service}
-                                onChange={handleInputChange}
-                                className="input-modern"
-                                required
-                            >
-                                <option value="">Select a service</option>
-                                {APPOINTMENT_SERVICES.map((service) => (
-                                    <option key={service.name} value={service.name}>
-                                        {service.name} - ${service.price}
-                                    </option>
-                                ))}
-                            </select>
+                            {servicesLoading ? (
+                                <div className="text-gray-500 text-sm">Loading services...</div>
+                            ) : (
+                                <select
+                                    id="service"
+                                    name="service"
+                                    value={formData.service}
+                                    onChange={handleInputChange}
+                                    className="input-modern"
+                                    required
+                                >
+                                    <option value="">Select a service</option>
+                                    {services.map((service) => (
+                                        <option key={service.name} value={service.name}>
+                                            {service.name} - ${service.price}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>

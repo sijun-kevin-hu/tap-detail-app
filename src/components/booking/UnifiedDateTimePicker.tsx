@@ -4,22 +4,23 @@ import 'react-calendar/dist/Calendar.css';
 import { getDetailerAvailability } from '@/lib/firebase/firestore-detailers';
 import { getAppointmentsForDate } from '@/lib/firebase/firestore-appointments';
 import { getAvailableTimeSlots, TimeSlot } from '@/utils/availability';
-import { APPOINTMENT_SERVICES } from '@/lib/models/appointment';
+import { ServiceMenu } from '@/lib/models/settings';
 
 interface UnifiedDateTimePickerProps {
   detailerId: string;
   serviceName: string;
+  services?: ServiceMenu[];
   value?: { date: string; time: string };
   onChange: (val: { date: string; time: string }) => void;
 }
 
-export default function UnifiedDateTimePicker({ detailerId, serviceName, value, onChange }: UnifiedDateTimePickerProps) {
+export default function UnifiedDateTimePicker({ detailerId, serviceName, services = [], value, onChange }: UnifiedDateTimePickerProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(value?.date ? new Date(value.date) : null);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const service = APPOINTMENT_SERVICES.find(s => s.name === serviceName);
+  const service = services.find(s => s.name === serviceName);
   const serviceDuration = service?.duration || 60;
 
   // Calculate max date (3 months from today)
@@ -51,17 +52,19 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, value, 
           serviceDuration,
           availability,
           appointments,
+          services,
         });
         
         setSlots(slots);
       } catch (err) {
+        console.error('Error loading time slots:', err);
         setSlots([]);
         setError('Failed to load slots');
       } finally {
         setLoading(false);
       }
     })();
-  }, [selectedDate, detailerId, serviceDuration]);
+  }, [selectedDate, detailerId, serviceDuration, services]);
 
   // Disable dates in the past
   const tileDisabled = ({ date }: { date: Date }) => {

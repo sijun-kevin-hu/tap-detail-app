@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
-import { formatPhone, validateAppointmentDate, validateAppointmentTime, getMinDate, getMaxDate } from '@/utils/formatters';
+import { CAR_TYPES } from '@/lib/models';
+import { formatPhone, validateAppointmentDate, validateAppointmentTime } from '@/utils/formatters';
 import UnifiedDateTimePicker from '../booking/UnifiedDateTimePicker';
+import { getServices } from '@/lib/firebase/firestore-settings';
+import { ServiceMenu } from '@/lib/models/settings';
 
 interface AddAppointmentModalProps {
     isOpen: boolean;
@@ -33,6 +35,26 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [currentStep, setCurrentStep] = useState(1);
+    const [services, setServices] = useState<ServiceMenu[]>([]);
+    const [servicesLoading, setServicesLoading] = useState(true);
+
+    // Load detailer's services
+    useEffect(() => {
+        if (detailerId && isOpen) {
+            setServicesLoading(true);
+            getServices(detailerId)
+                .then(servicesList => {
+                    setServices(servicesList.filter(s => s.active));
+                })
+                .catch(err => {
+                    console.error('Error loading services:', err);
+                    setError('Failed to load services');
+                })
+                .finally(() => {
+                    setServicesLoading(false);
+                });
+        }
+    }, [detailerId, isOpen]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -53,7 +75,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
 
         // Auto-update price when service changes
         if (name === 'service') {
-            const selectedService = APPOINTMENT_SERVICES.find(s => s.name === value);
+            const selectedService = services.find(s => s.name === value);
             setFormData(prev => ({
                 ...prev,
                 service: value,
@@ -188,7 +210,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
             });
 
             handleSuccess();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error creating appointment:', error);
             setError('Failed to create appointment. Please try again.');
         } finally {
@@ -408,36 +430,28 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                             className="input-modern"
                                         >
                                             <option value="">Select a service</option>
-                                            {APPOINTMENT_SERVICES.map((service) => (
+                                            {services.map((service) => (
                                                 <option key={service.name} value={service.name}>
                                                     {service.name} - ${service.price}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Date *
-                                            </label>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Date & Time *
+                                        </label>
+                                        {servicesLoading ? (
+                                            <div className="text-gray-500 text-sm">Loading services...</div>
+                                        ) : (
                                             <UnifiedDateTimePicker
                                                 detailerId={detailerId}
                                                 serviceName={formData.service}
+                                                services={services}
                                                 value={{ date: formData.date, time: formData.time }}
                                                 onChange={({ date, time }) => setFormData(f => ({ ...f, date, time }))}
                                             />
-                                        </div>
-                                        <div>
-                                            <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                                                Time *
-                                            </label>
-                                            <UnifiedDateTimePicker
-                                                detailerId={detailerId}
-                                                serviceName={formData.service}
-                                                value={{ date: formData.date, time: formData.time }}
-                                                onChange={({ date, time }) => setFormData(f => ({ ...f, date, time }))}
-                                            />
-                                        </div>
+                                        )}
                                     </div>
                                     
                                     {/* Price Display */}

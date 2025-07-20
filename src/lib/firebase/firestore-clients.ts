@@ -49,7 +49,7 @@ export const getClients = async (detailerId: string): Promise<Client[]> => {
       const currentAppointments = clientAppointments
         .filter(apt => {
           const aptDate = new Date(apt.date);
-          return aptDate >= now && apt.status !== 'cancelled' && apt.status !== 'archived';
+          return aptDate >= now && apt.status !== 'archived';
         })
         .map(apt => ({
           id: apt.id,
@@ -64,7 +64,7 @@ export const getClients = async (detailerId: string): Promise<Client[]> => {
       const pastAppointments = clientAppointments
         .filter(apt => {
           const aptDate = new Date(apt.date);
-          return aptDate < now || apt.status === 'cancelled' || apt.status === 'archived';
+          return aptDate < now || apt.status === 'archived';
         })
         .map(apt => ({
           id: apt.id,
@@ -139,7 +139,7 @@ export const getClient = async (detailerId: string, clientId: string): Promise<C
       const currentAppointments = clientAppointments
         .filter(apt => {
           const aptDate = new Date(apt.date);
-          return aptDate >= now && apt.status !== 'cancelled' && apt.status !== 'archived';
+          return aptDate >= now && apt.status !== 'archived';
         })
         .map(apt => ({
           id: apt.id,
@@ -154,7 +154,7 @@ export const getClient = async (detailerId: string, clientId: string): Promise<C
       const pastAppointments = clientAppointments
         .filter(apt => {
           const aptDate = new Date(apt.date);
-          return aptDate < now || apt.status === 'cancelled' || apt.status === 'archived';
+          return aptDate < now || apt.status === 'archived';
         })
         .map(apt => ({
           id: apt.id,
