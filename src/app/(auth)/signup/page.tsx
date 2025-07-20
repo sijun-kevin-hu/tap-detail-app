@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 import { DetailerFormData } from '@/lib/models';
 import { createDetailer, createBaseServices } from '@/lib/firebase/firestore-detailers';
@@ -16,11 +17,20 @@ export default function Signup() {
         password: '',
         confirmPassword: '',
         phone: '',
-        businessName: ''
+        businessName: '',
+        businessId: ''
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+    const { detailer, loading: authLoading } = useAuth();
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (!authLoading && detailer) {
+            router.push('/admin');
+        }
+    }, [detailer, authLoading, router]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -31,7 +41,7 @@ export default function Signup() {
     };
 
     const validateForm = () => {
-        if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone || !formData.businessName) {
+        if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone || !formData.businessName || !formData.businessId) {
             setError('Please fill in all fields');
             return false;
         }
@@ -73,6 +83,7 @@ export default function Signup() {
             // Create detailer document in Firestore using new function
             await createDetailer({
                 uid: userCredential.user.uid,
+                businessId: formData.businessId,
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
@@ -90,8 +101,7 @@ export default function Signup() {
             // Create base services for the new detailer
             await createBaseServices(userCredential.user.uid);
 
-            // Redirect to admin dashboard
-            router.push('/admin');
+            // Don't redirect here - let the useEffect handle it
         } catch (error: any) {
             console.error('Signup error:', error);
             if (error.code === 'auth/email-already-in-use') {
@@ -105,6 +115,18 @@ export default function Signup() {
             setLoading(false);
         }
     };
+
+    // Show loading if auth is still loading
+    if (authLoading) {
+        return (
+            <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
@@ -191,6 +213,25 @@ export default function Signup() {
                                     className="input-modern"
                                     placeholder="Enter business name"
                                 />
+                            </div>
+
+                            <div>
+                                <label htmlFor="businessId" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Business ID *
+                                </label>
+                                <input
+                                    id="businessId"
+                                    name="businessId"
+                                    type="text"
+                                    required
+                                    value={formData.businessId}
+                                    onChange={handleInputChange}
+                                    className="input-modern"
+                                    placeholder="Enter unique business ID (e.g., mybusiness)"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    This will be used in your booking URL: yourapp.com/booking/{formData.businessId}
+                                </p>
                             </div>
 
                             <div>

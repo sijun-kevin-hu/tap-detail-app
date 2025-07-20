@@ -13,7 +13,7 @@ import {
   QueryDocumentSnapshot
 } from 'firebase/firestore';
 import { db } from './client-app';
-import { Detailer } from '@/lib/models/user';
+import { Detailer } from '@/lib/models/detailer';
 import { ProfileSettings } from '@/lib/models/settings';
 import { addService } from './firestore-settings';
 
@@ -24,6 +24,7 @@ import { addService } from './firestore-settings';
 
 // Types for Firestore data
 export interface FirestoreDetailer extends Omit<Detailer, 'createdAt' | 'updatedAt'> {
+  businessId: string;
   createdAt: any;
   updatedAt: any;
 }
@@ -42,6 +43,7 @@ export const getDetailer = async (detailerId: string): Promise<Detailer | null> 
       const data = detailerDoc.data() as FirestoreDetailer;
       return {
         uid: data.uid,
+        businessId: data.businessId || '',
         email: data.email,
         firstName: data.firstName || '',
         lastName: data.lastName || '',
@@ -136,6 +138,47 @@ export const updateDetailer = async (
 };
 
 /**
+ * Get a detailer by business ID
+ * @param businessId - The detailer's business identifier
+ * @returns Promise<Detailer | null> - The detailer data or null if not found
+ */
+export const getDetailerByBusinessId = async (businessId: string): Promise<Detailer | null> => {
+  try {
+    const detailersRef = collection(db, 'detailers');
+    const q = query(detailersRef, where('businessId', '==', businessId));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const data = doc.data() as FirestoreDetailer;
+      return {
+        uid: data.uid,
+        businessId: data.businessId,
+        email: data.email,
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        businessName: data.businessName || '',
+        phone: data.phone || '',
+        role: data.role || 'detailer',
+        isActive: data.isActive !== undefined ? data.isActive : true,
+        bio: data.bio || '',
+        profileImage: data.profileImage || null,
+        galleryImages: data.galleryImages || [],
+        location: data.location || '',
+        services: data.services || [],
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching detailer by business ID:', error);
+    throw new Error('Failed to fetch detailer');
+  }
+};
+
+/**
  * Get all detailers
  * @returns Promise<Detailer[]> - Array of all detailers
  */
@@ -150,6 +193,7 @@ export const getAllDetailers = async (): Promise<Detailer[]> => {
       const data = doc.data() as FirestoreDetailer;
       detailers.push({
         uid: data.uid,
+        businessId: data.businessId || '',
         email: data.email,
         firstName: data.firstName || '',
         lastName: data.lastName || '',
@@ -189,6 +233,7 @@ export const getActiveDetailers = async (): Promise<Detailer[]> => {
       const data = doc.data() as FirestoreDetailer;
       detailers.push({
         uid: data.uid,
+        businessId: data.businessId || '',
         email: data.email,
         firstName: data.firstName || '',
         lastName: data.lastName || '',

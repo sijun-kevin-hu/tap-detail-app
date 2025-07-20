@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import AddAppointmentModal from '../../../components/AddAppointmentModal';
+import AddAppointmentModal from '../../../components/appointments/AddAppointmentModal';
 import { getAppointments, updateAppointment, deleteAppointment } from '@/lib/firebase';
-import EditAppointmentModal from '../../../components/EditAppointmentModal';
+import EditAppointmentModal from '../../../components/appointments/EditAppointmentModal';
 import { Appointment, AppointmentFilters, APPOINTMENT_STATUSES, AppointmentFormData } from '@/lib/models';
 import Link from 'next/link';
 

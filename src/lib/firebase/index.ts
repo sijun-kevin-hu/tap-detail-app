@@ -19,6 +19,7 @@ export {
 // Firestore detailer exports
 export {
   getDetailer,
+  getDetailerByBusinessId,
   createDetailer,
   updateDetailer,
   updateDetailerProfile,
@@ -31,6 +32,17 @@ export {
   createBaseServices,
   type FirestoreDetailer
 } from './firestore-detailers';
+
+// Firestore client exports
+export {
+  getClients,
+  getClient,
+  addClient,
+  updateClient,
+  deleteClient,
+  findClientByPhone,
+  autoCreateClientFromAppointment
+} from './firestore-clients';
 
 // Firestore appointment exports
 export {

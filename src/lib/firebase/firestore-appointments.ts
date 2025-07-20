@@ -14,6 +14,7 @@ import {
   QueryDocumentSnapshot
 } from 'firebase/firestore';
 import { db } from './client-app';
+import { autoCreateClientFromAppointment } from './firestore-clients';
 
 // Types for appointment data
 export interface Appointment {
@@ -177,6 +178,13 @@ export const createAppointment = async (detailerId: string, appointmentData: New
     
     const docRef = doc(appointmentsRef);
     await setDoc(docRef, newAppointment);
+    
+    // Auto-create client if they don't exist
+    await autoCreateClientFromAppointment(detailerId, {
+      clientName: appointmentData.clientName,
+      clientPhone: appointmentData.clientPhone,
+      clientEmail: appointmentData.clientEmail,
+    });
     
     return docRef.id;
   } catch (error) {

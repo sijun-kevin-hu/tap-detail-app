@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 
 export default function Login() {
@@ -12,6 +13,14 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+    const { detailer, loading: authLoading } = useAuth();
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (!authLoading && detailer) {
+            router.push('/admin');
+        }
+    }, [detailer, authLoading, router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,7 +29,7 @@ export default function Login() {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            router.push('/admin');
+            // Don't redirect here - let the useEffect handle it
         } catch (error: any) {
             console.error('Login error:', error);
             setError(error.message || 'Failed to login. Please try again.');
@@ -28,6 +37,18 @@ export default function Login() {
             setLoading(false);
         }
     };
+
+    // Show loading if auth is still loading
+    if (authLoading) {
+        return (
+            <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen gradient-bg flex items-center justify-center p-4">

@@ -1,5 +1,5 @@
 // Detailer models (formerly user models)
-export * from './user';
+export * from './detailer';
 
 // Appointment models
 export * from './appointment';

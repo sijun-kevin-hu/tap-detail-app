@@ -6,6 +6,7 @@ export interface Detailer {
     email: string;
     
     // Custom Firestore properties
+    businessId: string; // Unique business identifier for public URLs
     firstName: string;
     lastName: string;
     businessName: string;
@@ -39,9 +40,11 @@ export interface DetailerFormData {
     confirmPassword: string;
     phone: string;
     businessName: string;
+    businessId: string;
 }
 
-// Legacy interface for backward compatibility during transition
-export interface User extends Detailer {}
-export interface AuthUser extends AuthDetailer {}
-export interface UserFormData extends DetailerFormData {} 
+// Legacy interfaces for backward compatibility during transition
+// These are kept for any remaining imports that might still reference the old names
+export type User = Detailer;
+export type AuthUser = AuthDetailer;
+export type UserFormData = DetailerFormData; 
