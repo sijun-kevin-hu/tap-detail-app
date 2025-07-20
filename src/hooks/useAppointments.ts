@@ -102,7 +102,7 @@ export function useAppointments() {
     setActionLoading('archive');
     try {
       await updateAppointment(detailer.uid, id, {
-        status: 'cancelled',
+        status: 'archived',
         deletedAt: new Date().toISOString(),
       });
       fetchAppointments();
