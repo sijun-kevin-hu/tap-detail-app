@@ -9,7 +9,8 @@ export const formatDate = (dateString: string) => {
   });
 };
 
-export const formatTime = (timeString: string) => {
+export const formatTime = (timeString: string | undefined | null) => {
+  if (!timeString) return 'N/A';
   const [hour, minute] = timeString.split(':').map(Number);
   const date = new Date();
   date.setHours(hour, minute, 0, 0);

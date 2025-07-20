@@ -5,6 +5,7 @@ import { addDoc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
 import { formatPhone, validateAppointmentDate, validateAppointmentTime, getMinDate, getMaxDate } from '@/utils/formatters';
+import UnifiedDateTimePicker from '../booking/UnifiedDateTimePicker';
 
 interface AddAppointmentModalProps {
     isOpen: boolean;
@@ -419,28 +420,22 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                             <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Date *
                                             </label>
-                                            <input
-                                                type="date"
-                                                id="date"
-                                                name="date"
-                                                value={formData.date}
-                                                onChange={handleInputChange}
-                                                min={getMinDate()}
-                                                max={getMaxDate()}
-                                                className="input-modern"
+                                            <UnifiedDateTimePicker
+                                                detailerId={detailerId}
+                                                serviceName={formData.service}
+                                                value={{ date: formData.date, time: formData.time }}
+                                                onChange={({ date, time }) => setFormData(f => ({ ...f, date, time }))}
                                             />
                                         </div>
                                         <div>
                                             <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Time *
                                             </label>
-                                            <input
-                                                type="time"
-                                                id="time"
-                                                name="time"
-                                                value={formData.time}
-                                                onChange={handleInputChange}
-                                                className="input-modern"
+                                            <UnifiedDateTimePicker
+                                                detailerId={detailerId}
+                                                serviceName={formData.service}
+                                                value={{ date: formData.date, time: formData.time }}
+                                                onChange={({ date, time }) => setFormData(f => ({ ...f, date, time }))}
                                             />
                                         </div>
                                     </div>

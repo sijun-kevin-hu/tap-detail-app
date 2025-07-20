@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppointmentFormData, APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
 import { formatPhone, validateAppointmentDate, validateAppointmentTime, getMinDate, getMaxDate } from '@/utils/formatters';
+import UnifiedDateTimePicker from '../booking/UnifiedDateTimePicker';
 
 interface EditAppointmentModalProps {
     isOpen: boolean;
@@ -10,9 +11,10 @@ interface EditAppointmentModalProps {
     onSave: (data: AppointmentFormData) => void;
     initialData: AppointmentFormData;
     loading?: boolean;
+    detailerId: string;
 }
 
-export default function EditAppointmentModal({ isOpen, onClose, onSave, initialData, loading }: EditAppointmentModalProps) {
+export default function EditAppointmentModal({ isOpen, onClose, onSave, initialData, loading, detailerId }: EditAppointmentModalProps) {
     const [formData, setFormData] = useState<AppointmentFormData>(initialData);
     const [error, setError] = useState('');
 
@@ -271,34 +273,15 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Date *
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Date & Time (Cannot be modified)
                                 </label>
-                                <input
-                                    type="date"
-                                    id="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleInputChange}
-                                    min={getMinDate()}
-                                    max={getMaxDate()}
-                                    className="input-modern"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Time *
-                                </label>
-                                <input
-                                    type="time"
-                                    id="time"
-                                    name="time"
-                                    value={formData.time}
-                                    onChange={handleInputChange}
-                                    className="input-modern"
-                                    required
-                                />
+                                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-700">
+                                    {formData.date} at {formData.time}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Date and time cannot be changed after scheduling. Contact the client to reschedule.
+                                </p>
                             </div>
                         </div>
                         {/* Price Display */}

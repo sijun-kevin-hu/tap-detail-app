@@ -1,5 +1,7 @@
 // Settings page models and types
 
+import { AvailabilitySettings } from './detailer';
+
 export interface ProfileSettings {
   businessName: string;
   bio: string;
@@ -13,6 +15,7 @@ export interface DetailerSettings extends ProfileSettings {
   lastName: string;
   phone: string;
   email: string;
+  availability?: AvailabilitySettings;
 }
 
 export interface ServiceImage {

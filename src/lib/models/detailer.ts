@@ -1,5 +1,16 @@
 import { User as FirebaseUser } from 'firebase/auth';
 
+export interface AvailabilitySettings {
+    businessHours: {
+        [day: string]: { start: string; end: string } | null; // e.g., { Monday: { start: '09:00', end: '17:00' }, ... }
+    };
+    workingDays: string[]; // e.g., ['Monday', 'Tuesday', ...]
+    breaks: { day: string; start: string; end: string }[]; // e.g., [{ day: 'Monday', start: '12:00', end: '13:00' }]
+    bufferMinutes: number; // e.g., 15
+    blockedDates: string[]; // ISO date strings
+    timezone?: string; // e.g., 'America/New_York'
+}
+
 export interface Detailer {
     // Firebase Auth properties
     uid: string;
@@ -24,6 +35,9 @@ export interface Detailer {
     // Optional properties
     location?: string;
     services?: string[];
+
+    // Availability
+    availability?: AvailabilitySettings;
 }
 
 export interface AuthDetailer {

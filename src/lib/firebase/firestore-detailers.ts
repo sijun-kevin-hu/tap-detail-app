@@ -16,6 +16,7 @@ import { db } from './client-app';
 import { Detailer } from '@/lib/models/detailer';
 import { ProfileSettings } from '@/lib/models/settings';
 import { addService } from './firestore-settings';
+import { AvailabilitySettings } from '@/lib/models/detailer';
 
 // Firestore Structure:
 // /detailers/{detailerId} → profile info
@@ -68,6 +69,24 @@ export const getDetailer = async (detailerId: string): Promise<Detailer | null> 
   }
 };
 
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const DEFAULT_HOURS = { start: '09:00', end: '17:00' };
+const DEFAULT_BUFFER = 15;
+const DEFAULT_TIMEZONE = 'America/New_York';
+function getDefaultBusinessHours() {
+  return Object.fromEntries(WEEKDAYS.map(d => [d, { ...DEFAULT_HOURS }])) as { [day: string]: { start: string; end: string } };
+}
+function getDefaultAvailability(): AvailabilitySettings {
+  return {
+    businessHours: getDefaultBusinessHours(),
+    workingDays: [...WEEKDAYS],
+    breaks: [],
+    bufferMinutes: DEFAULT_BUFFER,
+    blockedDates: [],
+    timezone: DEFAULT_TIMEZONE,
+  };
+}
+
 /**
  * Create a new detailer
  * @param detailerData - The detailer data to create
@@ -78,6 +97,7 @@ export const createDetailer = async (detailerData: Omit<Detailer, 'createdAt' | 
     const detailerRef = doc(db, 'detailers', detailerData.uid);
     const firestoreData: FirestoreDetailer = {
       ...detailerData,
+      availability: getDefaultAvailability(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -415,5 +435,30 @@ export const createBaseServices = async (detailerId: string): Promise<void> => {
   } catch (error) {
     console.error('Error creating base services:', error);
     throw new Error('Failed to create base services');
+  }
+}; 
+
+export const getDetailerAvailability = async (detailerId: string): Promise<AvailabilitySettings | null> => {
+  try {
+    const detailerRef = doc(db, 'detailers', detailerId);
+    const detailerDoc = await getDoc(detailerRef);
+    if (detailerDoc.exists()) {
+      const data = detailerDoc.data();
+      return data.availability || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching detailer availability:', error);
+    throw new Error('Failed to fetch detailer availability');
+  }
+};
+
+export const updateDetailerAvailability = async (detailerId: string, availability: AvailabilitySettings): Promise<void> => {
+  try {
+    const detailerRef = doc(db, 'detailers', detailerId);
+    await updateDoc(detailerRef, { availability, updatedAt: serverTimestamp() });
+  } catch (error) {
+    console.error('Error updating detailer availability:', error);
+    throw new Error('Failed to update detailer availability');
   }
 }; 

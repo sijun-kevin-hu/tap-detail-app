@@ -333,3 +333,51 @@ export const updateAppointmentStatus = async (
     throw new Error('Failed to update appointment status');
   }
 }; 
+
+export const getAppointmentsForDate = async (detailerId: string, date: string): Promise<Appointment[]> => {
+  try {
+    const appointmentsRef = collection(db, 'detailers', detailerId, 'appointments');
+    const q = query(
+      appointmentsRef,
+      where('date', '==', date),
+      where('status', 'in', ['pending', 'confirmed', 'in-progress'])
+    );
+    const querySnapshot = await getDocs(q);
+    const appointments: Appointment[] = [];
+    querySnapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const data = doc.data() as FirestoreAppointment;
+      appointments.push({
+        id: doc.id,
+        detailerId: detailerId,
+        assignedDetailerId: data.assignedDetailerId,
+        clientName: data.clientName,
+        clientEmail: data.clientEmail,
+        clientPhone: data.clientPhone,
+        carType: data.carType || '',
+        carMake: data.carMake || '',
+        carModel: data.carModel || '',
+        carYear: data.carYear || '',
+        service: data.service,
+        price: data.price,
+        date: data.date,
+        time: data.time,
+        address: data.address,
+        status: data.status,
+        notes: data.notes,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        deletedAt: data.deletedAt,
+        reminderSent: data.reminderSent || false,
+        reminderSentAt: data.reminderSentAt,
+        estimatedDuration: data.estimatedDuration,
+        actualDuration: data.actualDuration,
+        paymentStatus: data.paymentStatus,
+        paymentMethod: data.paymentMethod,
+      });
+    });
+    return appointments;
+  } catch (error) {
+    console.error('Error fetching appointments for date:', error);
+    throw new Error('Failed to fetch appointments for date');
+  }
+}; 

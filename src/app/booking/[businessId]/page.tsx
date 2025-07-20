@@ -11,6 +11,7 @@ import { NewAppointment } from '@/lib/firebase/firestore-appointments';
 import QRCodeModal from '@/components/QRCodeModal';
 import Toast from '@/components/Toast';
 import { useAuth } from '@/lib/auth-context';
+import UnifiedDateTimePicker from '@/components/booking/UnifiedDateTimePicker';
 
 interface BookingForm {
   clientName: string;
@@ -545,30 +546,12 @@ export default function BookingPage() {
         {/* Date & Time Selection */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Date & Time</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-              <input
-                type="date"
-                value={selectedDateTime.date}
-                onChange={(e) => handleDateTimeChange('date', e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                max={new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="MM/DD/YYYY"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
-              <input
-                type="time"
-                value={selectedDateTime.time}
-                onChange={(e) => handleDateTimeChange('time', e.target.value)}
-                min={new Date().toLocaleTimeString('en-US', { hour12: false }).slice(0, 5)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-          </div>
+          <UnifiedDateTimePicker
+            detailerId={detailer?.uid || ''}
+            serviceName={selectedService?.name || ''}
+            value={selectedDateTime}
+            onChange={setSelectedDateTime}
+          />
         </div>
 
         {/* Client Information */}

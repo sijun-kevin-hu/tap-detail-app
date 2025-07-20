@@ -45,6 +45,7 @@ export interface Appointment {
     date: string;
     time: string;
     address: string;
+    timezone?: string; // e.g., 'America/New_York'
     
     // Status and metadata
     status: AppointmentStatus;

@@ -10,6 +10,7 @@ import AppointmentCard from '@/components/appointments/AppointmentCard';
 import AddAppointmentModal from '@/components/appointments/AddAppointmentModal';
 import EditAppointmentModal from '@/components/appointments/EditAppointmentModal';
 import { Appointment } from '@/lib/models';
+import { AppointmentFormData } from '@/lib/models/appointment';
 
 export default function AppointmentsPage() {
   const router = useRouter();
@@ -265,9 +266,6 @@ export default function AppointmentsPage() {
                 onEdit={() => openEditModal(appointment)}
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
-                onSendReminder={() => {}} // TODO: Re-enable manual reminder sending when Twilio integration is ready
-                processingReminders={processingReminders}
-                sendManualReminder={async () => null} // TODO: Re-enable manual reminder sending when Twilio integration is ready
               />
             ))
           )}
@@ -293,8 +291,9 @@ export default function AppointmentsPage() {
               setEditForm(null);
             }}
             onSave={handleEditSave}
-            initialData={editForm}
+            initialData={editForm as AppointmentFormData}
             loading={editLoading}
+            detailerId={detailer?.uid || ''}
           />
         )}
       </div>

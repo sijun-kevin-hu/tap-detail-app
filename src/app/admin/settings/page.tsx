@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, EyeIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/hooks/useSettings";
@@ -8,6 +8,7 @@ import ProfileSection from "@/components/settings/ProfileSection";
 import AddServiceForm from "@/components/settings/AddServiceForm";
 import ServiceCard from "@/components/settings/ServiceCard";
 import ReminderSettings from "@/components/settings/ReminderSettings";
+import AvailabilitySettings from '@/components/settings/AvailabilitySettings';
 
 // Helper function to format price
 const formatPrice = (price: number): string => {
@@ -51,6 +52,8 @@ export default function SettingsPage() {
     handleAddService,
     handleProfileUpdate
   } = useSettings();
+
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
 
   if (loading) {
     return (
@@ -108,6 +111,26 @@ export default function SettingsPage() {
             />
           )}
         </div>
+
+        {/* Availability Settings */}
+        {detailer?.uid && (
+          <div className="mb-6">
+            <button
+              className="w-full flex justify-between items-center px-4 py-3 bg-white rounded-xl shadow-sm border border-gray-100 mb-2"
+              onClick={() => setAvailabilityOpen((o) => !o)}
+            >
+              <span className="font-semibold text-gray-900">Availability Settings</span>
+              {availabilityOpen ? (
+                <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+              ) : (
+                <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+              )}
+            </button>
+            {availabilityOpen && (
+              <AvailabilitySettings detailerId={detailer.uid} />
+            )}
+          </div>
+        )}
 
         {/* TODO: Re-enable reminder settings when Twilio integration is ready
         <div className="mb-6">
