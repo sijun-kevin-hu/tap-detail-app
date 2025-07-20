@@ -6,8 +6,10 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import AddAppointmentModal from '../../../components/appointments/AddAppointmentModal';
 import { getAppointments, updateAppointment, deleteAppointment } from '@/lib/firebase';
 import EditAppointmentModal from '../../../components/appointments/EditAppointmentModal';
+import AppointmentCard from '../../../components/appointments/AppointmentCard';
 import { Appointment, AppointmentFilters, APPOINTMENT_STATUSES, AppointmentFormData } from '@/lib/models';
 import Link from 'next/link';
+import { useReminders } from '@/hooks/useReminders';
 
 export default function AppointmentsPage() {
     const { detailer, loading: authLoading } = useAuth();
@@ -26,6 +28,12 @@ export default function AppointmentsPage() {
     const [editLoading, setEditLoading] = useState(false);
     const [dateRangeType, setDateRangeType] = useState<'all' | '7' | '30' | 'custom' | 'next7' | 'next30'>('all');
     const [customRange, setCustomRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
+
+    // Initialize reminders hook
+    const {
+        processingReminders,
+        sendManualReminder
+    } = useReminders(appointments);
 
     useEffect(() => {
         if (authLoading) {
@@ -100,11 +108,12 @@ export default function AppointmentsPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'scheduled': return 'bg-blue-100 text-blue-800';
-            case 'in-progress': return 'bg-yellow-100 text-yellow-800';
-            case 'completed': return 'bg-green-100 text-green-800';
-            case 'cancelled': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
+            case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
+            case 'in-progress': return 'bg-purple-100 text-purple-800 border-purple-200';
+            case 'completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
+            default: return 'bg-gray-100 text-gray-800 border-gray-200';
         }
     };
 
@@ -134,7 +143,7 @@ export default function AppointmentsPage() {
         setActionLoading('archive');
         try {
             await updateAppointment(detailer.uid, id, {
-                status: 'cancelled',
+                status: 'archived',
                 deletedAt: new Date().toISOString(),
             });
             fetchAppointments();
@@ -168,6 +177,10 @@ export default function AppointmentsPage() {
             clientName: appointment.clientName,
             clientEmail: appointment.clientEmail,
             clientPhone: appointment.clientPhone,
+            carType: appointment.carType || '',
+            carMake: appointment.carMake || '',
+            carModel: appointment.carModel || '',
+            carYear: appointment.carYear || '',
             service: appointment.service,
             date: appointment.date,
             time: appointment.time,
@@ -196,6 +209,32 @@ export default function AppointmentsPage() {
         }
     };
 
+    // Send manual reminder
+    const handleSendReminder = async (appointment: Appointment) => {
+        const success = await sendManualReminder(appointment);
+        if (success) {
+            fetchAppointments(); // Refresh to show updated reminder status
+        } else {
+            alert('Failed to send reminder.');
+        }
+    };
+
+    // Handle status change
+    const handleStatusChange = async (appointmentId: string, newStatus: Appointment['status']) => {
+        if (!detailer?.uid) return;
+        
+        try {
+            await updateAppointment(detailer.uid, appointmentId, {
+                status: newStatus,
+                updatedAt: new Date().toISOString(),
+            });
+            fetchAppointments(); // Refresh to show updated status
+        } catch (error) {
+            console.error('Error updating appointment status:', error);
+            alert('Failed to update appointment status.');
+        }
+    };
+
     return (
         <ProtectedRoute requiredRole="detailer">
             <div className="min-h-screen gradient-bg">
@@ -217,6 +256,12 @@ export default function AppointmentsPage() {
                                     </svg>
                                 </div>
                                 <h1 className="text-xl font-semibold text-gray-900">Appointments</h1>
+                                {processingReminders && (
+                                    <div className="ml-4 flex items-center text-sm text-indigo-600">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mr-2"></div>
+                                        Processing reminders...
+                                    </div>
+                                )}
                             </div>
                             <button
                                 onClick={() => setShowAddModal(true)}
@@ -262,7 +307,8 @@ export default function AppointmentsPage() {
                                     className="input-modern"
                                 >
                                     <option value="all">All Statuses</option>
-                                    <option value="scheduled">Scheduled</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
                                     <option value="in-progress">In Progress</option>
                                     <option value="completed">Completed</option>
                                     <option value="archived">Archived</option>
@@ -335,72 +381,22 @@ export default function AppointmentsPage() {
                     ) : (
                         <div className="space-y-4">
                             {filteredAppointments.map((appointment) => (
-                                <div key={appointment.id} className="card p-6">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h3 className="text-lg font-semibold text-gray-900">
-                                                    {appointment.clientName}
-                                                </h3>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
-                                                    {appointment.status}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-700 mb-2">
-                                                <span className="font-medium">Date:</span> {formatDate(appointment.date)}
-                                            </p>
-                                            <p className="text-sm text-gray-700 mb-2">
-                                                <span className="font-medium">Time:</span> {formatTime(appointment.time)}
-                                            </p>
-                                            <p className="text-sm text-gray-700 mb-2">
-                                                <span className="font-medium">Service:</span> {appointment.service}
-                                            </p>
-                                            <p className="text-sm text-gray-700 mb-2">
-                                                <span className="font-medium">Price:</span> ${appointment.price}
-                                            </p>
-                                            <p className="text-sm text-gray-700 mb-2">
-                                                <span className="font-medium">Address:</span> {appointment.address}
-                                            </p>
-                                            <p className="text-sm text-gray-700 mb-2">
-                                                <span className="font-medium">Notes:</span> {appointment.notes || 'No notes'}
-                                            </p>
-                                            <div className={`flex ${window.innerWidth < 640 ? 'flex-col gap-2 mt-4' : 'flex-row gap-4 mt-4 sm:mt-0 sm:ml-4'}`}>
-                                                {appointment.status !== 'archived' ? (
-                                                    <>
-                                                        <button
-                                                            onClick={() => openEditModal(appointment)}
-                                                            className="flex items-center justify-center gap-2 btn-secondary w-full sm:w-auto px-4 py-3 text-base font-semibold rounded-lg touch-target"
-                                                        >
-                                                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => setConfirmingId(appointment.id)}
-                                                            className="flex items-center justify-center gap-2 btn-secondary w-full sm:w-auto px-4 py-3 text-base font-semibold rounded-lg touch-target bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-                                                        >
-                                                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
-                                                            Cancel
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => setConfirmingId(appointment.id)}
-                                                        className="flex items-center justify-center gap-2 btn-secondary w-full sm:w-auto px-4 py-3 text-base font-semibold rounded-lg touch-target bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-                                                    >
-                                                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                        Delete Permanently
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <AppointmentCard
+                                    key={appointment.id}
+                                    appointment={appointment}
+                                    onEdit={() => openEditModal(appointment)}
+                                    onStatusChange={handleStatusChange}
+                                    onSendReminder={handleSendReminder}
+                                    onArchive={handleArchive}
+                                    onDeletePermanently={handlePermanentDelete}
+                                    onConfirmCancel={() => setConfirmingId(appointment.id)}
+                                    actionLoading={actionLoading}
+                                    setActionLoading={setActionLoading}
+                                    confirmingId={confirmingId}
+                                    setConfirmingId={setConfirmingId}
+                                    processingReminders={processingReminders}
+                                    sendManualReminder={sendManualReminder}
+                                />
                             ))}
                             {/* Cancel Confirmation Modal (outside map) */}
                             {confirmingId && (() => {

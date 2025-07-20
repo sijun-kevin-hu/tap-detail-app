@@ -16,6 +16,10 @@ interface BookingForm {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  carType: string;
+  carMake?: string;
+  carModel?: string;
+  carYear?: string;
   notes: string;
 }
 
@@ -43,6 +47,10 @@ export default function BookingPage() {
     clientName: '',
     clientEmail: '',
     clientPhone: '',
+    carType: '',
+    carMake: '',
+    carModel: '',
+    carYear: '',
     notes: ''
   });
   const [loading, setLoading] = useState(true);
@@ -203,6 +211,11 @@ export default function BookingPage() {
       setShowToast(true);
       return false;
     }
+    if (!formData.carType) {
+      setToastMessage('Please select your car type');
+      setShowToast(true);
+      return false;
+    }
     
     // Validate date format and is in the future
     const selectedDate = new Date(`${selectedDateTime.date}T${selectedDateTime.time}`);
@@ -266,6 +279,10 @@ export default function BookingPage() {
         clientName: formData.clientName.trim(),
         clientEmail: formData.clientEmail.trim(),
         clientPhone: formData.clientPhone.trim(),
+        carType: formData.carType,
+        carMake: formData.carMake || '',
+        carModel: formData.carModel || '',
+        carYear: formData.carYear || '',
         date: selectedDateTime.date,
         time: selectedDateTime.time,
         address: '', // Will be filled by detailer
@@ -596,6 +613,80 @@ export default function BookingPage() {
                 required
                 maxLength={14}
               />
+            </div>
+            
+            {/* Vehicle Information */}
+            <div className="border-t border-gray-200 pt-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Vehicle Information</h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Car Type *
+                  </label>
+                  <select
+                    value={formData.carType}
+                    onChange={(e) => handleFormChange('carType', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  >
+                    <option value="">Select car type</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Truck">Truck</option>
+                    <option value="Van">Van</option>
+                    <option value="Coupe">Coupe</option>
+                    <option value="Convertible">Convertible</option>
+                    <option value="Wagon">Wagon</option>
+                    <option value="Hatchback">Hatchback</option>
+                    <option value="Sports Car">Sports Car</option>
+                    <option value="Luxury Car">Luxury Car</option>
+                    <option value="Electric Vehicle">Electric Vehicle</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Motorcycle">Motorcycle</option>
+                    <option value="RV">RV</option>
+                    <option value="Boat">Boat</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Make
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.carMake || ''}
+                      onChange={(e) => handleFormChange('carMake', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="e.g., Toyota"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Model
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.carModel || ''}
+                      onChange={(e) => handleFormChange('carModel', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="e.g., Camry"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Year
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.carYear || ''}
+                      onChange={(e) => handleFormChange('carYear', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="e.g., 2020"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

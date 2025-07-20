@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { doc, addDoc, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
-import { AppointmentFormData, APPOINTMENT_SERVICES } from '@/lib/models';
+import { AppointmentFormData, APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
 
 interface AddAppointmentModalProps {
     isOpen: boolean;
@@ -17,6 +17,10 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
         clientName: '',
         clientEmail: '',
         clientPhone: '',
+        carType: '',
+        carMake: '',
+        carModel: '',
+        carYear: '',
         service: '',
         date: '',
         time: '',
@@ -28,12 +32,36 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
     const [error, setError] = useState('');
     const [currentStep, setCurrentStep] = useState(1);
 
+    const formatPhoneNumber = (value: string) => {
+        // Remove all non-digits
+        const digits = value.replace(/\D/g, '');
+        
+        // Format as (XXX) XXX-XXXX
+        if (digits.length <= 3) {
+            return digits;
+        } else if (digits.length <= 6) {
+            return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+        } else {
+            return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+        }
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        
+        // Format phone number as user types
+        if (name === 'clientPhone') {
+            const formattedValue = formatPhoneNumber(value);
+            setFormData(prev => ({
+                ...prev,
+                [name]: formattedValue
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
 
         // Auto-update price when service changes
         if (name === 'service') {
@@ -49,12 +77,26 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
     const validateStep = (step: number) => {
         switch (step) {
             case 1:
-                if (!formData.clientName || !formData.clientEmail) {
-                    setError('Please fill in client name and email');
+                if (!formData.clientName) {
+                    setError('Please fill in client name');
                     return false;
                 }
-                if (!formData.clientEmail.includes('@')) {
+                if (!formData.clientPhone) {
+                    setError('Please fill in client phone number');
+                    return false;
+                }
+                // Validate phone number has at least 10 digits
+                const phoneDigits = formData.clientPhone.replace(/\D/g, '');
+                if (phoneDigits.length < 10) {
+                    setError('Please enter a complete phone number');
+                    return false;
+                }
+                if (formData.clientEmail && !formData.clientEmail.includes('@')) {
                     setError('Please enter a valid email address');
+                    return false;
+                }
+                if (!formData.carType) {
+                    setError('Please select the car type');
                     return false;
                 }
                 break;
@@ -87,11 +129,17 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
     };
 
     const validateForm = () => {
-        if (!formData.clientName || !formData.clientEmail || !formData.service || !formData.date || !formData.time || !formData.address) {
+        if (!formData.clientName || !formData.clientPhone || !formData.service || !formData.date || !formData.time || !formData.address) {
             setError('Please fill in all required fields');
             return false;
         }
-        if (!formData.clientEmail.includes('@')) {
+        // Validate phone number has at least 10 digits
+        const phoneDigits = formData.clientPhone.replace(/\D/g, '');
+        if (phoneDigits.length < 10) {
+            setError('Please enter a complete phone number');
+            return false;
+        }
+        if (formData.clientEmail && !formData.clientEmail.includes('@')) {
             setError('Please enter a valid email address');
             return false;
         }
@@ -117,17 +165,21 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                 clientName: formData.clientName,
                 clientEmail: formData.clientEmail,
                 clientPhone: formData.clientPhone,
+                carType: formData.carType,
+                carMake: formData.carMake || '',
+                carModel: formData.carModel || '',
+                carYear: formData.carYear || '',
                 service: formData.service,
                 date: formData.date,
                 time: formData.time,
                 address: formData.address,
                 notes: formData.notes,
                 price: formData.price,
-                status: 'scheduled',
+                status: 'pending',
                 createdAt: new Date().toISOString()
             });
 
-            onSuccess();
+            handleSuccess();
         } catch (error: any) {
             console.error('Error creating appointment:', error);
             setError('Failed to create appointment. Please try again.');
@@ -141,6 +193,10 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
             clientName: '',
             clientEmail: '',
             clientPhone: '',
+            carType: '',
+            carMake: '',
+            carModel: '',
+            carYear: '',
             service: '',
             date: '',
             time: '',
@@ -150,11 +206,17 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
         });
         setCurrentStep(1);
         setError('');
+        setLoading(false);
     };
 
     const handleClose = () => {
         resetForm();
         onClose();
+    };
+
+    const handleSuccess = () => {
+        resetForm();
+        onSuccess();
     };
 
     if (!isOpen) return null;
@@ -219,7 +281,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                     </div>
                                     <div>
                                         <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Email Address *
+                                            Email Address
                                         </label>
                                         <input
                                             type="email"
@@ -228,12 +290,12 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                             value={formData.clientEmail}
                                             onChange={handleInputChange}
                                             className="input-modern"
-                                            placeholder="Enter email address"
+                                            placeholder="Enter email address (optional)"
                                         />
                                     </div>
                                     <div>
                                         <label htmlFor="clientPhone" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Phone Number
+                                            Phone Number *
                                         </label>
                                         <input
                                             type="tel"
@@ -244,6 +306,76 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                             className="input-modern"
                                             placeholder="Enter phone number"
                                         />
+                                    </div>
+                                    
+                                    {/* Vehicle Information */}
+                                    <div className="border-t border-gray-200 pt-4 mt-4">
+                                        <h4 className="text-sm font-medium text-gray-900 mb-3">Vehicle Information</h4>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label htmlFor="carType" className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Car Type *
+                                                </label>
+                                                <select
+                                                    id="carType"
+                                                    name="carType"
+                                                    value={formData.carType}
+                                                    onChange={handleInputChange}
+                                                    className="input-modern"
+                                                >
+                                                    <option value="">Select car type</option>
+                                                    {CAR_TYPES.map((type) => (
+                                                        <option key={type} value={type}>
+                                                            {type}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div>
+                                                    <label htmlFor="carMake" className="block text-sm font-medium text-gray-700 mb-2">
+                                                        Make
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id="carMake"
+                                                        name="carMake"
+                                                        value={formData.carMake}
+                                                        onChange={handleInputChange}
+                                                        className="input-modern"
+                                                        placeholder="e.g., Toyota"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="carModel" className="block text-sm font-medium text-gray-700 mb-2">
+                                                        Model
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id="carModel"
+                                                        name="carModel"
+                                                        value={formData.carModel}
+                                                        onChange={handleInputChange}
+                                                        className="input-modern"
+                                                        placeholder="e.g., Camry"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="carYear" className="block text-sm font-medium text-gray-700 mb-2">
+                                                        Year
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id="carYear"
+                                                        name="carYear"
+                                                        value={formData.carYear}
+                                                        onChange={handleInputChange}
+                                                        className="input-modern"
+                                                        placeholder="e.g., 2020"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -359,6 +491,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                         <h4 className="text-sm font-medium text-gray-900 mb-2">Appointment Summary</h4>
                                         <div className="space-y-1 text-sm text-gray-600">
                                             <div><span className="font-medium">Client:</span> {formData.clientName}</div>
+                                            <div><span className="font-medium">Vehicle:</span> {formData.carType} {formData.carMake && formData.carModel ? `(${formData.carMake} ${formData.carModel}${formData.carYear ? ` ${formData.carYear}` : ''})` : ''}</div>
                                             <div><span className="font-medium">Service:</span> {formData.service}</div>
                                             <div><span className="font-medium">Date:</span> {formData.date} at {formData.time}</div>
                                             <div><span className="font-medium">Price:</span> ${formData.price}</div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { AppointmentFormData, APPOINTMENT_SERVICES } from '@/lib/models';
+import { AppointmentFormData, APPOINTMENT_SERVICES, CAR_TYPES } from '@/lib/models';
 
 interface EditAppointmentModalProps {
     isOpen: boolean;
@@ -38,7 +38,7 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
     };
 
     const validateForm = () => {
-        if (!formData.clientName || !formData.clientEmail || !formData.service || !formData.date || !formData.time || !formData.address) {
+        if (!formData.clientName || !formData.clientEmail || !formData.carType || !formData.service || !formData.date || !formData.time || !formData.address) {
             setError('Please fill in all required fields');
             return false;
         }
@@ -141,6 +141,75 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
                                 placeholder="Enter service address"
                                 required
                             />
+                        </div>
+                    </div>
+                    
+                    {/* Vehicle Information */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-medium text-gray-900">Vehicle Information</h3>
+                        <div>
+                            <label htmlFor="carType" className="block text-sm font-medium text-gray-700 mb-2">
+                                Car Type *
+                            </label>
+                            <select
+                                id="carType"
+                                name="carType"
+                                value={formData.carType}
+                                onChange={handleInputChange}
+                                className="input-modern"
+                                required
+                            >
+                                <option value="">Select car type</option>
+                                {CAR_TYPES.map((type) => (
+                                    <option key={type} value={type}>
+                                        {type}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div>
+                                <label htmlFor="carMake" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Make
+                                </label>
+                                <input
+                                    id="carMake"
+                                    name="carMake"
+                                    type="text"
+                                    value={formData.carMake || ''}
+                                    onChange={handleInputChange}
+                                    className="input-modern"
+                                    placeholder="e.g., Toyota"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="carModel" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Model
+                                </label>
+                                <input
+                                    id="carModel"
+                                    name="carModel"
+                                    type="text"
+                                    value={formData.carModel || ''}
+                                    onChange={handleInputChange}
+                                    className="input-modern"
+                                    placeholder="e.g., Camry"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="carYear" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Year
+                                </label>
+                                <input
+                                    id="carYear"
+                                    name="carYear"
+                                    type="text"
+                                    value={formData.carYear || ''}
+                                    onChange={handleInputChange}
+                                    className="input-modern"
+                                    placeholder="e.g., 2020"
+                                />
+                            </div>
                         </div>
                     </div>
                     {/* Service & Scheduling */}

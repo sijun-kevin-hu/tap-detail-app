@@ -9,3 +9,4 @@ alwaysApply: false
 - Keep the code minimal and only put lines of code where necessary
 - Use proper documentation practices
 - Try to use minimal, modern solutions
+- Focus on mobile-friendly design

@@ -7,6 +7,7 @@ import { useSettings } from "@/hooks/useSettings";
 import ProfileSection from "@/components/settings/ProfileSection";
 import AddServiceForm from "@/components/settings/AddServiceForm";
 import ServiceCard from "@/components/settings/ServiceCard";
+import ReminderSettings from "@/components/settings/ReminderSettings";
 
 // Helper function to format price
 const formatPrice = (price: number): string => {
@@ -106,6 +107,21 @@ export default function SettingsPage() {
               onRemoveGalleryImage={removeGalleryImage}
             />
           )}
+        </div>
+
+        {/* Reminder Settings */}
+        <div className="mb-6">
+          <ReminderSettings
+            config={{
+              enabled: true,
+              hoursBeforeAppointment: 24,
+              messageTemplate: undefined
+            }}
+            onConfigChange={(config) => {
+              console.log('Reminder config changed:', config);
+              // TODO: Save reminder config to Firestore
+            }}
+          />
         </div>
 
         {/* Service Menu */}

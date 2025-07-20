@@ -24,16 +24,22 @@ export interface Appointment {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  carType: string;
+  carMake?: string;
+  carModel?: string;
+  carYear?: string;
   service: string;
   price: number;
   date: string;
   time: string;
   address: string;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled' | 'archived';
+  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'archived';
   notes?: string;
   createdAt: string;
   updatedAt?: string;
   deletedAt?: string;
+  reminderSent?: boolean;
+  reminderSentAt?: string;
   estimatedDuration?: number;
   actualDuration?: number;
   paymentStatus?: 'pending' | 'paid' | 'refunded';
@@ -50,6 +56,10 @@ export interface NewAppointment {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  carType: string;
+  carMake?: string;
+  carModel?: string;
+  carYear?: string;
   date: string;
   time: string;
   address: string;
@@ -81,6 +91,10 @@ export const getAppointments = async (detailerId: string): Promise<Appointment[]
         clientName: data.clientName,
         clientEmail: data.clientEmail,
         clientPhone: data.clientPhone,
+        carType: data.carType || '',
+        carMake: data.carMake || '',
+        carModel: data.carModel || '',
+        carYear: data.carYear || '',
         service: data.service,
         price: data.price,
         date: data.date,
@@ -91,6 +105,8 @@ export const getAppointments = async (detailerId: string): Promise<Appointment[]
         createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
         updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
         deletedAt: data.deletedAt,
+        reminderSent: data.reminderSent || false,
+        reminderSentAt: data.reminderSentAt,
         estimatedDuration: data.estimatedDuration,
         actualDuration: data.actualDuration,
         paymentStatus: data.paymentStatus,
@@ -134,6 +150,10 @@ export const getAppointmentsByStatus = async (
         clientName: data.clientName,
         clientEmail: data.clientEmail,
         clientPhone: data.clientPhone,
+        carType: data.carType || '',
+        carMake: data.carMake || '',
+        carModel: data.carModel || '',
+        carYear: data.carYear || '',
         service: data.service,
         price: data.price,
         date: data.date,
@@ -144,6 +164,8 @@ export const getAppointmentsByStatus = async (
         createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
         updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
         deletedAt: data.deletedAt,
+        reminderSent: data.reminderSent || false,
+        reminderSentAt: data.reminderSentAt,
         estimatedDuration: data.estimatedDuration,
         actualDuration: data.actualDuration,
         paymentStatus: data.paymentStatus,
@@ -171,7 +193,7 @@ export const createAppointment = async (detailerId: string, appointmentData: New
       ...appointmentData,
       id: '', // Will be set by Firestore
       detailerId: detailerId,
-      status: 'scheduled',
+      status: 'pending',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -258,6 +280,10 @@ export const getAppointment = async (
         clientName: data.clientName,
         clientEmail: data.clientEmail,
         clientPhone: data.clientPhone,
+        carType: data.carType || '',
+        carMake: data.carMake || '',
+        carModel: data.carModel || '',
+        carYear: data.carYear || '',
         service: data.service,
         price: data.price,
         date: data.date,
@@ -268,6 +294,8 @@ export const getAppointment = async (
         createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
         updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
         deletedAt: data.deletedAt,
+        reminderSent: data.reminderSent || false,
+        reminderSentAt: data.reminderSentAt,
         estimatedDuration: data.estimatedDuration,
         actualDuration: data.actualDuration,
         paymentStatus: data.paymentStatus,

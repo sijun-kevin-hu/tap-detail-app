@@ -1,16 +1,16 @@
 // Appointment status values
 export type AppointmentStatus =
-  | 'scheduled'      // Appointment is scheduled and upcoming
+  | 'pending'        // Appointment is pending confirmation by detailer
+  | 'confirmed'      // Appointment is confirmed and ready for service
   | 'in-progress'    // Appointment is currently being serviced
   | 'completed'      // Appointment has been completed
-  | 'cancelled'      // Appointment was cancelled by client or detailer
   | 'archived';      // Appointment was deleted/archived by detailer
 
 export const APPOINTMENT_STATUSES: AppointmentStatus[] = [
-  'scheduled',
+  'pending',
+  'confirmed',
   'in-progress',
   'completed',
-  'cancelled',
   'archived',
 ];
 
@@ -31,6 +31,12 @@ export interface Appointment {
     clientEmail: string;
     clientPhone: string;
     
+    // Vehicle information
+    carType: string;
+    carMake?: string;
+    carModel?: string;
+    carYear?: string;
+    
     // Service details
     service: string;
     price: number;
@@ -47,6 +53,10 @@ export interface Appointment {
     updatedAt?: string;
     deletedAt?: string; // Timestamp when appointment was archived/deleted
     
+    // Reminder system
+    reminderSent?: boolean;
+    reminderSentAt?: string;
+    
     // Optional fields
     estimatedDuration?: number;
     actualDuration?: number;
@@ -58,6 +68,10 @@ export interface AppointmentFormData {
     clientName: string;
     clientEmail: string;
     clientPhone: string;
+    carType: string;
+    carMake?: string;
+    carModel?: string;
+    carYear?: string;
     service: string;
     date: string;
     time: string;
@@ -65,11 +79,12 @@ export interface AppointmentFormData {
     notes: string;
     price: number;
     assignedDetailerId?: string;
+    reminderSent?: boolean;
 }
 
 export interface AppointmentFilters {
     searchTerm: string;
-    statusFilter: 'all' | 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+    statusFilter: 'all' | 'pending' | 'confirmed' | 'in-progress' | 'completed';
     dateFilter?: string;
     detailerFilter?: string;
 }
@@ -84,4 +99,26 @@ export const APPOINTMENT_SERVICES: Service[] = [
     { name: 'Exterior Only', price: 40, description: 'Exterior wash, wax, and tire dressing', duration: 75 },
     { name: 'Paint Correction', price: 300, description: 'Professional paint correction and protection', duration: 300 },
     { name: 'Ceramic Coating', price: 500, description: 'Long-term paint protection coating', duration: 360 }
-]; 
+];
+
+// Common car types for better organization
+export const CAR_TYPES = [
+    'Sedan',
+    'SUV',
+    'Truck',
+    'Van',
+    'Coupe',
+    'Convertible',
+    'Wagon',
+    'Hatchback',
+    'Sports Car',
+    'Luxury Car',
+    'Electric Vehicle',
+    'Hybrid',
+    'Motorcycle',
+    'RV',
+    'Boat',
+    'Other'
+] as const;
+
+export type CarType = typeof CAR_TYPES[number]; 

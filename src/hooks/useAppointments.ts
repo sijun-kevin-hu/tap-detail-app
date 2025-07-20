@@ -132,17 +132,22 @@ export function useAppointments() {
   // Open edit modal
   const openEditModal = (appointment: Appointment) => {
     setEditingAppointment(appointment);
-    setEditForm({
-      clientName: appointment.clientName,
-      clientEmail: appointment.clientEmail,
-      clientPhone: appointment.clientPhone,
-      service: appointment.service,
-      date: appointment.date,
-      time: appointment.time,
-      address: appointment.address,
-      notes: appointment.notes || '',
-      price: appointment.price,
-    });
+          setEditForm({
+        clientName: appointment.clientName,
+        clientEmail: appointment.clientEmail,
+        clientPhone: appointment.clientPhone,
+        carType: appointment.carType || '',
+        carMake: appointment.carMake || '',
+        carModel: appointment.carModel || '',
+        carYear: appointment.carYear || '',
+        service: appointment.service,
+        date: appointment.date,
+        time: appointment.time,
+        address: appointment.address,
+        notes: appointment.notes || '',
+        price: appointment.price,
+        reminderSent: appointment.reminderSent || false,
+      });
   };
 
   // Save edited appointment
