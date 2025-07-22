@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getActiveDetailers } from '@/lib/firebase';
 import Link from 'next/link';
+import NavBar from '@/components/NavBar';
 
 interface Detailer {
     uid: string;
@@ -53,16 +54,7 @@ export default function BookPage() {
 
     return (
         <div className="min-h-screen bg-blue-50 flex flex-col">
-            <nav className="border-b bg-white">
-                <div className="max-w-3xl mx-auto px-4 flex justify-between items-center h-20">
-                    <div className="font-extrabold text-2xl text-indigo-700 tracking-tight">Tap Detail</div>
-                    <div className="flex gap-6">
-                        <Link href="/" className="text-indigo-700 font-medium hover:text-indigo-900 transition">Home</Link>
-                        <Link href="/signup" className="text-indigo-700 font-medium hover:text-indigo-900 transition">Join as Detailer</Link>
-                        <Link href="/login" className="text-indigo-700 font-medium hover:text-indigo-900 transition">Login</Link>
-                    </div>
-                </div>
-            </nav>
+            <NavBar />
             <main className="flex-1 max-w-3xl mx-auto px-4 py-8">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-4">Find Local Detailers</h1>
