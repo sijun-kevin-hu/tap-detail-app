@@ -56,6 +56,8 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+GMAIL_USER=your_gmail_user_id
+GMAIL_PASS=your_gmail_password
 ```
 
 4. Run the development server:
@@ -108,19 +110,6 @@ src/
 4. Set up security rules for Firestore
 5. Get your Firebase configuration and add it to `.env.local`
 
-### Firestore Security Rules (Basic)
-
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
-
 ## Deployment
 
 ### Vercel (Recommended)
@@ -163,4 +152,4 @@ This project is licensed under the MIT License.
 
 ## Support
 
-For support, email support@tapdetail.com or create an issue in the repository.
+For support, email tapdetail@gmail.com or create an issue in the repository.
