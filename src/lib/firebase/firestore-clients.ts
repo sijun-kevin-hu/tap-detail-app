@@ -133,6 +133,52 @@ export const findClientByPhone = async (detailerId: string, phone: string): Prom
 };
 
 /**
+ * Find client by email
+ * @param detailerId - The detailer's unique identifier
+ * @param email - The email to search for
+ * @returns Promise<Client | null> - The client data or null if not found
+ */
+export const findClientByEmail = async (detailerId: string, email: string): Promise<Client | null> => {
+  try {
+    const clientsRef = collection(db, 'detailers', detailerId, 'clients');
+    const q = query(clientsRef, where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const data = doc.data() as FirestoreClient;
+      return {
+        id: doc.id,
+        fullName: data.fullName || '',
+        phone: data.phone || '',
+        email: data.email || '',
+        notes: data.notes || '',
+        source: data.source || 'manual',
+        totalAppointments: data.totalAppointments || 0,
+        lastServiceDate: data.lastServiceDate || '',
+        createdAt:
+          data.createdAt && typeof (data.createdAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+            ? (data.createdAt as Timestamp).toDate().toISOString()
+            : data.createdAt instanceof Date
+              ? data.createdAt.toISOString()
+              : new Date().toISOString(),
+        updatedAt:
+          data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+            ? (data.updatedAt as Timestamp).toDate().toISOString()
+            : data.updatedAt instanceof Date
+              ? data.updatedAt.toISOString()
+              : undefined,
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error finding client by email:', error);
+    throw new Error('Failed to find client');
+  }
+};
+
+/**
  * Auto-create client from appointment data
  * @param detailerId - The detailer's unique identifier
  * @param appointmentData - The appointment data containing client info

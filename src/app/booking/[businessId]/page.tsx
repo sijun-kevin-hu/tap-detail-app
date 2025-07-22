@@ -13,6 +13,7 @@ import Toast from '@/components/Toast';
 import { useAuth } from '@/lib/auth-context';
 import UnifiedDateTimePicker from '@/components/booking/UnifiedDateTimePicker';
 import Image from 'next/image';
+import { appointmentConfirmationEmail } from './emailTemplate';
 
 interface BookingForm {
   clientName: string;
@@ -157,6 +158,17 @@ export default function BookingPage() {
       setShowToast(true);
       return false;
     }
+    if (!formData.clientEmail.trim()) {
+      setToastMessage('Please enter your email address');
+      setShowToast(true);
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.clientEmail.trim())) {
+      setToastMessage('Please enter a valid email address');
+      setShowToast(true);
+      return false;
+    }
     if (!formData.carType) {
       setToastMessage('Please select your car type');
       setShowToast(true);
@@ -189,25 +201,6 @@ export default function BookingPage() {
       return false;
     }
     
-    // Validate phone number (basic US format)
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    const cleanPhone = formData.clientPhone.replace(/[\s\-\(\)]/g, '');
-    if (!phoneRegex.test(cleanPhone) || cleanPhone.length < 10) {
-      setToastMessage('Please enter a valid phone number');
-      setShowToast(true);
-      return false;
-    }
-    
-    // Validate email if provided
-    if (formData.clientEmail.trim()) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.clientEmail.trim())) {
-        setToastMessage('Please enter a valid email address');
-        setShowToast(true);
-        return false;
-      }
-    }
-    
     return true;
   };
 
@@ -238,6 +231,39 @@ export default function BookingPage() {
       };
       
       await createAppointment(detailer!.uid, appointmentData);
+      // Send confirmation email if client email is provided
+      if (formData.clientEmail.trim()) {
+        try {
+          const bookingUrl = `${window.location.origin}/booking/${businessId}`;
+          const detailerName = detailer?.businessName || 'your detailer';
+          const detailerPhone = detailer?.phone || 'N/A';
+          const date = selectedDateTime.date;
+          const time = selectedDateTime.time;
+          const subject = 'Your Car Detailing Appointment is Confirmed!';
+          const text = `Thank you for booking with ${detailerName} on Tap Detail!\n\nYour appointment is confirmed for ${date} at ${time}.\n\nDetailer: ${detailerName}\nPhone: ${detailerPhone}\n\nYou can view or manage your booking here: ${bookingUrl}\n\nWe look forward to serving you!`;
+          const html = appointmentConfirmationEmail({
+            clientName: formData.clientName,
+            detailerName,
+            detailerPhone,
+            date,
+            time,
+            bookingUrl,
+          });
+          await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: formData.clientEmail.trim(),
+              subject,
+              text,
+              html,
+            }),
+          });
+        } catch (err) { // eslint-disable-line @typescript-eslint/no-explicit-any
+          setToastMessage('Appointment booked, but failed to send confirmation email.');
+          setShowToast(true);
+        }
+      }
       setBookingSuccess(true);
       
     } catch (err) {
@@ -522,14 +548,15 @@ export default function BookingPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address (Optional)
+                Email Address *
               </label>
               <input
                 type="email"
                 value={formData.clientEmail}
                 onChange={(e) => handleFormChange('clientEmail', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your email address (optional)"
+                placeholder="Enter your email address"
+                required
               />
             </div>
             <div>

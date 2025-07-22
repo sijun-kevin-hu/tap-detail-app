@@ -44,7 +44,12 @@ export default function AppointmentCard({
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900 text-lg">{appointment.clientName}</h3>
-          <p className="text-sm text-gray-600">{appointment.clientEmail}</p>
+          {appointment.clientPhone && (
+            <p className="text-sm text-gray-600">{appointment.clientPhone}</p>
+          )}
+          {appointment.clientEmail && (
+            <p className="text-sm text-gray-500">{appointment.clientEmail}</p>
+          )}
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <StatusDropdown

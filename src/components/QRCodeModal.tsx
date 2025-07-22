@@ -17,19 +17,19 @@ export default function QRCodeModal({ isOpen, onClose, url, detailerName }: QRCo
   useEffect(() => {
     if (isOpen && url) {
       (async () => {
-        try {
-          const dataUrl = await QRCode.toDataURL(url, {
-            width: 200,
-            margin: 2,
-            color: {
-              dark: '#1F2937',
-              light: '#FFFFFF'
-            }
-          });
-          setQrCodeDataUrl(dataUrl);
-        } catch (err) {
-          console.error('Error generating QR code:', err);
+    try {
+      const dataUrl = await QRCode.toDataURL(url, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#1F2937',
+          light: '#FFFFFF'
         }
+      });
+      setQrCodeDataUrl(dataUrl);
+    } catch (err) {
+      console.error('Error generating QR code:', err);
+    }
       })();
     }
   }, [isOpen, url]);

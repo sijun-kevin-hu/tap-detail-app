@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
         url: `${window.location.origin}/login`,
       });
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       setError(
         err?.message ||
           "Failed to send reset email. Please check your email and try again."
