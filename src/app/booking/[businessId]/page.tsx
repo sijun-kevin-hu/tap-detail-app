@@ -14,6 +14,10 @@ import { useAuth } from '@/lib/auth-context';
 import UnifiedDateTimePicker from '@/components/booking/UnifiedDateTimePicker';
 import Image from 'next/image';
 import { appointmentConfirmationEmail } from './emailTemplate';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
 
 interface BookingForm {
   clientName: string;
@@ -61,6 +65,8 @@ export default function BookingPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     if (businessId) {
@@ -478,8 +484,63 @@ export default function BookingPage() {
               </div>
             </div>
             {detailer.bio && (
-              <p className="text-gray-600 text-sm leading-relaxed">{detailer.bio}</p>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">{detailer.bio}</p>
             )}
+            {/* Gallery Images Carousel */}
+            {detailer.galleryImages && detailer.galleryImages.length > 0 && (
+              <div className="mb-4">
+                <Swiper
+                  spaceBetween={16}
+                  slidesPerView={1}
+                  navigation
+                  modules={[Navigation]}
+                  className="w-full rounded-xl"
+                  style={{ maxWidth: '100%' }}
+                >
+                  {detailer.galleryImages.map((img, idx) => (
+                    <SwiperSlide key={img}>
+                      <div className="rounded-xl overflow-hidden shadow-sm border border-gray-200 bg-gray-50 cursor-pointer" onClick={() => { setLightboxOpen(true); setLightboxIndex(idx); }}>
+                        <Image
+                          src={img}
+                          alt={`Gallery image ${idx + 1}`}
+                          width={800}
+                          height={400}
+                          className="w-full h-64 object-cover transition-transform duration-200 hover:scale-105"
+                          priority={idx === 0}
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+                {/* Lightbox Modal */}
+                {lightboxOpen && detailer.galleryImages && detailer.galleryImages.length > 0 && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setLightboxOpen(false)}>
+                    <div className="relative max-w-2xl w-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
+                      <button className="absolute top-2 right-2 text-white text-2xl z-10" onClick={() => setLightboxOpen(false)}>&times;</button>
+                      <Image
+                        src={detailer.galleryImages[lightboxIndex] || ''}
+                        alt={`Gallery image ${lightboxIndex + 1}`}
+                        width={1200}
+                        height={700}
+                        className="w-full max-h-[80vh] object-contain rounded-xl"
+                        priority
+                      />
+                      <div className="flex justify-between w-full mt-4">
+                        <button
+                          className="text-white text-3xl px-4 py-2"
+                          onClick={() => setLightboxIndex((lightboxIndex - 1 + (detailer.galleryImages?.length || 1)) % (detailer.galleryImages?.length || 1))}
+                        >&#8592;</button>
+                        <button
+                          className="text-white text-3xl px-4 py-2"
+                          onClick={() => setLightboxIndex((lightboxIndex + 1) % (detailer.galleryImages?.length || 1))}
+                        >&#8594;</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {/* End Gallery Images Carousel */}
           </div>
         )}
 

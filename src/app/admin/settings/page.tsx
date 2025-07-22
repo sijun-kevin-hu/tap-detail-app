@@ -47,7 +47,10 @@ export default function SettingsPage() {
     handleCancelProfileChanges,
     handleCancelChanges,
     handleAddService,
-    handleProfileUpdate
+    handleProfileUpdate,
+    handleServiceImage,
+    pendingProfileImage,
+    pendingGalleryImages
   } = useSettings();
 
   const [availabilityOpen, setAvailabilityOpen] = useState(false);
@@ -104,6 +107,8 @@ export default function SettingsPage() {
               onProfileImageChange={handleProfileImage}
               onGalleryImagesChange={handleGalleryImages}
               onRemoveGalleryImage={removeGalleryImage}
+              pendingProfileImage={pendingProfileImage}
+              pendingGalleryImages={pendingGalleryImages}
             />
           )}
         </div>
@@ -246,6 +251,7 @@ export default function SettingsPage() {
                 setNewService={setNewService}
                 onSubmit={handleAddService}
                 saving={saving}
+                handleServiceImage={handleServiceImage}
               />
               
               {/* Service Cards */}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Switch } from "@headlessui/react";
 import { NewService, serviceCategories, ServiceCategory } from '@/lib/models/settings';
+import Image from 'next/image';
 
 interface AddServiceFormProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface AddServiceFormProps {
   setNewService: (service: NewService) => void;
   onSubmit: () => void;
   saving: boolean;
+  handleServiceImage: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function AddServiceForm({
@@ -15,7 +17,8 @@ export default function AddServiceForm({
   newService,
   setNewService,
   onSubmit,
-  saving
+  saving,
+  handleServiceImage
 }: AddServiceFormProps) {
   if (!isOpen) return null;
 
@@ -43,6 +46,28 @@ export default function AddServiceForm({
             rows={3}
             placeholder="Describe what's included in this service..."
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Service Image</label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
+              {newService.image ? (
+                <Image src={newService.image} alt="Service" className="object-cover w-full h-full" width={80} height={80} />
+              ) : (
+                <span className="text-gray-400">No Image</span>
+              )}
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="service-image-input"
+              onChange={handleServiceImage}
+            />
+            <label htmlFor="service-image-input" className="btn-secondary px-3 py-2 cursor-pointer">
+              Upload
+            </label>
+          </div>
         </div>
       </div>
 

@@ -13,6 +13,8 @@ interface ProfileSectionProps {
   onProfileImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onGalleryImagesChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveGalleryImage: (idx: number) => void;
+  pendingProfileImage?: File | null;
+  pendingGalleryImages?: File[];
 }
 
 export default function ProfileSection({
@@ -24,7 +26,9 @@ export default function ProfileSection({
   onCancelProfileChanges,
   onProfileImageChange,
   onGalleryImagesChange,
-  onRemoveGalleryImage
+  onRemoveGalleryImage,
+  pendingProfileImage,
+  pendingGalleryImages
 }: ProfileSectionProps) {
   const profileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -56,7 +60,9 @@ export default function ProfileSection({
         <label className="block text-sm font-medium text-gray-700 mb-2">Profile Image</label>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
-            {profile.profileImage ? (
+            {pendingProfileImage ? (
+              <img src={URL.createObjectURL(pendingProfileImage)} alt="Profile Preview" className="object-cover w-full h-full" width={80} height={80} />
+            ) : profile.profileImage ? (
               <Image src={profile.profileImage} alt="Profile" className="object-cover w-full h-full" width={80} height={80} />
             ) : (
               <span className="text-gray-400">No Image</span>
@@ -89,6 +95,19 @@ export default function ProfileSection({
                 type="button"
                 className="absolute top-1 right-1 bg-white/80 rounded-full p-1"
                 onClick={() => onRemoveGalleryImage(idx)}
+                aria-label="Delete image"
+              >
+                <TrashIcon className="h-4 w-4 text-red-500" />
+              </button>
+            </div>
+          ))}
+          {pendingGalleryImages && pendingGalleryImages.map((file, idx) => (
+            <div key={`pending-${idx}`} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
+              <img src={URL.createObjectURL(file)} alt="Pending Gallery Preview" className="object-cover w-full h-full" width={80} height={80} />
+              <button
+                type="button"
+                className="absolute top-1 right-1 bg-white/80 rounded-full p-1"
+                onClick={() => onRemoveGalleryImage(profile.galleryImages.length + idx)}
                 aria-label="Delete image"
               >
                 <TrashIcon className="h-4 w-4 text-red-500" />

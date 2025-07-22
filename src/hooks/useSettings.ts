@@ -23,6 +23,7 @@ import {
   addDetailerGalleryImage,
   removeDetailerGalleryImage
 } from '@/lib/firebase/firestore-detailers';
+import { uploadImage, deleteImage } from '@/lib/firebase/storage';
 
 export function useSettings() {
   const { firebaseUser } = useAuth();
@@ -48,6 +49,10 @@ export function useSettings() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [newService, setNewService] = useState<NewService>(defaultNewService);
+
+  // Add state for pending images
+  const [pendingProfileImage, setPendingProfileImage] = useState<File | null>(null);
+  const [pendingGalleryImages, setPendingGalleryImages] = useState<File[]>([]);
 
   // Load data from Firestore
   useEffect(() => {
@@ -87,41 +92,33 @@ export function useSettings() {
     loadData();
   }, [firebaseUser?.uid]);
 
-  // Profile image upload
+  // Profile image selection (defer upload)
   const handleProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) return;
-    
-    const file = e.target.files[0];
-    const url = URL.createObjectURL(file);
-    
-    // Update local state immediately for UI responsiveness
-    setProfile(prev => ({ ...prev, profileImage: url }));
-    
-    // Track that profile has been modified
+    setPendingProfileImage(e.target.files[0]);
     setProfileModified(true);
   };
   
-  // Gallery image upload
+  // Gallery image selection (defer upload)
   const handleGalleryImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    
     const files = Array.from(e.target.files);
-    const urls = files.map((file) => URL.createObjectURL(file));
-    
-    // Update local state immediately for UI responsiveness
-    setProfile(prev => ({ ...prev, galleryImages: [...prev.galleryImages, ...urls] }));
-    
-    // Track that profile has been modified
+    setPendingGalleryImages(prev => [...prev, ...files]);
     setProfileModified(true);
   };
   
+  // Remove pending gallery image
   const removeGalleryImage = (idx: number) => {
-    const updatedGallery = profile.galleryImages.filter((_, i) => i !== idx);
-    
-    // Update local state immediately for UI responsiveness
-    setProfile(prev => ({ ...prev, galleryImages: updatedGallery }));
-    
-    // Track that profile has been modified
+    // Remove from pending if present, else from saved
+    if (idx < profile.galleryImages.length) {
+      // Remove from saved gallery images
+      const updatedGallery = profile.galleryImages.filter((_, i) => i !== idx);
+      setProfile(prev => ({ ...prev, galleryImages: updatedGallery }));
+    } else {
+      // Remove from pending
+      const pendingIdx = idx - profile.galleryImages.length;
+      setPendingGalleryImages(prev => prev.filter((_, i) => i !== pendingIdx));
+    }
     setProfileModified(true);
   };
 
@@ -237,42 +234,50 @@ export function useSettings() {
     }
   };
 
-  // Save profile changes
+  // Save profile changes (upload images if needed)
   const handleSaveProfile = async () => {
     if (!firebaseUser?.uid || !profileModified) return;
-    
     try {
       setSaving(true);
-      
-      // Handle profile image changes
-      if (profile.profileImage !== originalProfile.profileImage && profile.profileImage) {
-        await updateDetailerProfileImage(firebaseUser.uid, profile.profileImage);
+      let profileImageUrl = profile.profileImage;
+      // Upload pending profile image if present
+      if (pendingProfileImage) {
+        const storagePath = `detailers/${firebaseUser.uid}/profile.jpg`;
+        profileImageUrl = await uploadImage(pendingProfileImage, storagePath);
       }
-      
-      // Handle gallery image changes
-      const addedImages = profile.galleryImages.filter(img => !originalProfile.galleryImages.includes(img));
-      const removedImages = originalProfile.galleryImages.filter(img => !profile.galleryImages.includes(img));
-      
-      // Add new gallery images
-      for (const imageUrl of addedImages) {
-        await addDetailerGalleryImage(firebaseUser.uid, imageUrl);
+      // Upload pending gallery images
+      let galleryImages = [...profile.galleryImages];
+      if (pendingGalleryImages.length > 0) {
+        const uploadPromises = pendingGalleryImages.map((file) => {
+          const storagePath = `detailers/${firebaseUser.uid}/gallery/${Date.now()}_${file.name}`;
+          return uploadImage(file, storagePath);
+        });
+        const newUrls = await Promise.all(uploadPromises);
+        galleryImages = [...galleryImages, ...newUrls];
       }
-      
-      // Remove deleted gallery images
+      // Handle removed images (from saved gallery)
+      const removedImages = originalProfile.galleryImages.filter(img => !galleryImages.includes(img));
       for (const imageUrl of removedImages) {
         await removeDetailerGalleryImage(firebaseUser.uid, imageUrl);
       }
-      
-      // Save other profile changes
-      await updateProfile(firebaseUser.uid, profile);
-      
-      // Update original profile and clear modified flag
-      setOriginalProfile({ ...profile });
+      // Save to Firestore
+      const updatedProfile = {
+        ...profile,
+        profileImage: profileImageUrl,
+        galleryImages,
+      };
+      await updateDetailerProfileImage(firebaseUser.uid, profileImageUrl || '');
+      for (const imageUrl of galleryImages.filter(img => !originalProfile.galleryImages.includes(img))) {
+        await addDetailerGalleryImage(firebaseUser.uid, imageUrl);
+      }
+      await updateProfile(firebaseUser.uid, updatedProfile);
+      setProfile(updatedProfile);
+      setOriginalProfile(updatedProfile);
+      setPendingProfileImage(null);
+      setPendingGalleryImages([]);
       setProfileModified(false);
-      
     } catch (error) {
       console.error('Error saving profile:', error);
-      // Revert on error
       setProfile(originalProfile);
     } finally {
       setSaving(false);
@@ -282,6 +287,8 @@ export function useSettings() {
   // Cancel profile changes
   const handleCancelProfileChanges = () => {
     setProfile({ ...originalProfile });
+    setPendingProfileImage(null);
+    setPendingGalleryImages([]);
     setProfileModified(false);
   };
 
@@ -330,6 +337,22 @@ export function useSettings() {
     }
   };
 
+  // Service image upload for new service
+  const handleServiceImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !firebaseUser?.uid) return;
+    const file = e.target.files[0];
+    const storagePath = `detailers/${firebaseUser.uid}/services/${Date.now()}_${file.name}`;
+    setSaving(true);
+    try {
+      const url = await uploadImage(file, storagePath);
+      setNewService(prev => ({ ...prev, image: url }));
+    } catch (error) {
+      console.error('Error uploading service image:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Profile update handler
   const handleProfileUpdate = (field: keyof ProfileSettings, value: string | number | boolean | string[] | null) => {
     const updatedProfile = { ...profile, [field]: value };
@@ -355,6 +378,8 @@ export function useSettings() {
     draggedIndex,
     addOpen,
     newService,
+    pendingProfileImage,
+    pendingGalleryImages,
     
     // Actions
     setProfileOpen,
@@ -374,6 +399,7 @@ export function useSettings() {
     handleCancelProfileChanges,
     handleCancelChanges,
     handleAddService,
-    handleProfileUpdate
+    handleProfileUpdate,
+    handleServiceImage
   };
 } 
