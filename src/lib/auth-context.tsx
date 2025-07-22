@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             setFirebaseUser(firebaseUser);
             
-            if (firebaseUser) {
+            if (firebaseUser && firebaseUser.emailVerified) {
                 try {
                     const detailer = await getDetailer(firebaseUser.uid);
                     setDetailer(detailer);

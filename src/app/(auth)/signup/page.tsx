@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, signOut} from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -101,7 +101,13 @@ export default function Signup() {
             // Create base services for the new detailer
             await createBaseServices(userCredential.user.uid);
 
-            // Don't redirect here - let the useEffect handle it
+            // Send email verification
+            await sendEmailVerification(userCredential.user);
+            alert('Email verification sent. Please check your email to verify your account.');
+            await signOut(auth);
+            
+            // Redirect to login page after successful signup
+            router.push('/login');
         } catch (error: unknown) {
             console.error('Signup error:', error);
             if (typeof error === 'object' && error && 'code' in error && 'message' in error) {

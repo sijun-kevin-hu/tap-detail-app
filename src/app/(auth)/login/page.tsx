@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -11,6 +11,7 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showResendVerification, setShowResendVerification] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
     const { detailer, loading: authLoading } = useAuth();
@@ -28,7 +29,12 @@ export default function Login() {
         setError('');
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            if (!userCredential.user.emailVerified) {
+                setError('Your email isn\'t verified. Check your inbox or resend verification below.');
+                setShowResendVerification(true);
+                return;
+            }
             // Don't redirect here - let the useEffect handle it
         } catch (error: unknown) {
             console.error('Login error:', error);
@@ -42,6 +48,22 @@ export default function Login() {
         }
     };
 
+    // Resend verification email
+    const handleResendVerification = async () => {
+        const user = auth.currentUser;
+        if (user && !user.emailVerified) {
+          try {
+            await sendEmailVerification(user);
+            alert("Verification email resent!");
+          } catch (err) {
+            console.error("Error resending email:", err);
+            alert("Could not resend email. Try again later.");
+          }
+        } else {
+          alert("You're either not logged in or already verified.");
+        }
+      };
+      
     // Show loading if auth is still loading
     if (authLoading) {
         return (
@@ -121,6 +143,14 @@ export default function Login() {
                                     className="input-modern"
                                     placeholder="Enter your password"
                                 />
+                                <div className="text-right mt-1">
+                                    <Link
+                                        href="/forgot-password"
+                                        className="text-xs text-indigo-500 hover:text-indigo-600 underline-offset-2 hover:underline transition duration-200"
+                                    >
+                                        Forgot password?
+                                    </Link>
+                                </div>
                             </div>
                         </div>
 
@@ -152,6 +182,19 @@ export default function Login() {
                                 'Sign In'
                             )}
                         </button>
+
+                        {/* Resend Verification Button */}
+                        {showResendVerification && (
+                            <div className="text-center pt-2">
+                                <button
+                                    type="button"
+                                    onClick={handleResendVerification}
+                                    className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-200 underline-offset-2 hover:underline px-2 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400 touch-target"
+                                >
+                                    Resend Verification Email
+                                </button>
+                            </div>
+                        )}
 
                         {/* Sign Up Link */}
                         <div className="text-center pt-4">

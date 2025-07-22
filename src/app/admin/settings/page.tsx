@@ -8,6 +8,7 @@ import ProfileSection from "@/components/settings/ProfileSection";
 import AddServiceForm from "@/components/settings/AddServiceForm";
 import ServiceCard from "@/components/settings/ServiceCard";
 import AvailabilitySettings from '@/components/settings/AvailabilitySettings';
+import Link from "next/link";
 
 // Helper function to format price
 // const formatPrice = (price: number): string => {
@@ -266,10 +267,10 @@ export default function SettingsPage() {
 
         {/* Preview Booking Page Button */}
         {detailer?.businessId && (
-          <a href={`/booking/${detailer.businessId}`} className="btn-primary w-full flex items-center justify-center gap-2 mt-8 py-3 rounded-xl">
+          <Link href={`/booking/${detailer.businessId}`} className="btn-primary w-full flex items-center justify-center gap-2 mt-8 py-3 rounded-xl">
             <EyeIcon className="h-5 w-5" />
-            Preview My Booking Page
-          </a>
+            View My Booking Page
+          </Link>
         )}
       </div>
     </div>
