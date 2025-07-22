@@ -7,6 +7,7 @@ import NavBar from '@/components/NavBar';
 
 interface Detailer {
     uid: string;
+    businessId: string;
     businessName: string;
     firstName: string;
     lastName: string;
@@ -117,7 +118,9 @@ export default function BookPage() {
                                 <div className="font-bold text-lg text-gray-900 mb-1">{detailer.businessName}</div>
                                 <div className="text-sm text-gray-600 mb-1">{detailer.firstName} {detailer.lastName}</div>
                                 {detailer.location && <div className="text-xs text-gray-500 mb-1">{detailer.location}</div>}
-                                <button className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-full text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">Book</button>
+                                <Link href={`/booking/${detailer.businessId}`} className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-full text-base font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition text-center">
+                                    Book
+                                </Link>
                             </li>
                         ))}
                     </ul>
