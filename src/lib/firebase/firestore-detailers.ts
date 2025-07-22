@@ -11,7 +11,8 @@ import {
   serverTimestamp,
   DocumentData,
   QueryDocumentSnapshot,
-  Timestamp
+  Timestamp,
+  FieldValue
 } from 'firebase/firestore';
 import { db } from './client-app';
 import { Detailer } from '@/lib/models/detailer';
@@ -27,8 +28,8 @@ import { AvailabilitySettings } from '@/lib/models/detailer';
 // Types for Firestore data
 export interface FirestoreDetailer extends Omit<Detailer, 'createdAt' | 'updatedAt'> {
   businessId: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue | Date;
+  updatedAt: Timestamp | FieldValue | Date;
 }
 
 /**
@@ -58,8 +59,8 @@ export const getDetailer = async (detailerId: string): Promise<Detailer | null> 
         galleryImages: data.galleryImages || [],
         location: data.location || '',
         services: data.services || [],
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
       };
     }
     
@@ -187,8 +188,8 @@ export const getDetailerByBusinessId = async (businessId: string): Promise<Detai
         galleryImages: data.galleryImages || [],
         location: data.location || '',
         services: data.services || [],
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
       };
     }
     
@@ -227,8 +228,8 @@ export const getAllDetailers = async (): Promise<Detailer[]> => {
         galleryImages: data.galleryImages || [],
         location: data.location || '',
         services: data.services || [],
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
       });
     });
     
@@ -267,8 +268,8 @@ export const getActiveDetailers = async (): Promise<Detailer[]> => {
         galleryImages: data.galleryImages || [],
         location: data.location || '',
         services: data.services || [],
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(), // eslint-disable-line @typescript-eslint/no-explicit-any
       });
     });
     

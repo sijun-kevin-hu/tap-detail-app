@@ -12,6 +12,7 @@ import QRCodeModal from '@/components/QRCodeModal';
 import Toast from '@/components/Toast';
 import { useAuth } from '@/lib/auth-context';
 import UnifiedDateTimePicker from '@/components/booking/UnifiedDateTimePicker';
+import Image from 'next/image';
 
 interface BookingForm {
   clientName: string;
@@ -64,6 +65,7 @@ export default function BookingPage() {
     if (businessId) {
       fetchDetailerData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessId]);
 
   const fetchDetailerData = async () => {
@@ -93,63 +95,6 @@ export default function BookingPage() {
 
   const handleServiceSelect = (service: ServiceMenu) => {
     setSelectedService(service);
-  };
-
-  const handleDateTimeChange = (field: 'date' | 'time', value: string) => {
-    // Always update the state first for better UX
-    setSelectedDateTime(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Then validate and show toast if needed
-    if (field === 'date' && value) {
-      const date = new Date(value);
-      if (isNaN(date.getTime())) {
-        setToastMessage('Please enter a valid date');
-        setShowToast(true);
-        return;
-      }
-      
-      // Check if date is in the past
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (date < today) {
-        setToastMessage('Please select a future date');
-        setShowToast(true);
-        return;
-      }
-      
-      // Check if date is within 6 months
-      const sixMonthsFromNow = new Date();
-      sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
-      if (date > sixMonthsFromNow) {
-        setToastMessage('Please select a date within 6 months');
-        setShowToast(true);
-        return;
-      }
-    }
-    
-    // Validate time input
-    if (field === 'time' && value) {
-      const [hours, minutes] = value.split(':').map(Number);
-      if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        setToastMessage('Please enter a valid time');
-        setShowToast(true);
-        return;
-      }
-      
-      // If date is today, check if time is in the future
-      if (selectedDateTime.date === new Date().toISOString().split('T')[0]) {
-        const now = new Date();
-        const selectedTime = new Date(`${selectedDateTime.date}T${value}`);
-        if (selectedTime <= now) {
-          setToastMessage('Please select a future time for today');
-          setShowToast(true);
-          return;
-        }
-      }
-    }
   };
 
   const handleFormChange = (field: keyof BookingForm, value: string) => {
@@ -485,10 +430,12 @@ export default function BookingPage() {
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center space-x-4 mb-4">
               {detailer.profileImage ? (
-                <img
+                <Image
                   src={detailer.profileImage}
                   alt={detailer.businessName}
                   className="w-16 h-16 rounded-full object-cover"
+                  width={64}
+                  height={64}
                 />
               ) : (
                 <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center">

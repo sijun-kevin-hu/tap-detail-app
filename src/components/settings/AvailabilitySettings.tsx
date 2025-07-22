@@ -43,7 +43,7 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
             timezone: DEFAULT_TIMEZONE,
           }
         );
-      } catch (e) {
+      } catch {
         setToastMessage('Failed to load availability settings');
         setShowToast(true);
       } finally {
@@ -126,7 +126,7 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
       await updateDetailerAvailability(detailerId, availability);
       setToastMessage('Settings saved successfully!');
       setShowToast(true);
-    } catch (e) {
+    } catch {
       setToastMessage('Failed to save settings');
       setShowToast(true);
     } finally {

@@ -9,7 +9,8 @@ import {
   deleteDoc,
   serverTimestamp,
   query,
-  where
+  where,
+  Timestamp
 } from 'firebase/firestore';
 import { Client, NewClient, FirestoreClient } from '@/lib/models/client';
 
@@ -34,8 +35,18 @@ export async function getClients(detailerId: string): Promise<Client[]> {
   return snapshot.docs.map(docSnap => ({
         id: docSnap.id,
     ...docSnap.data(),
-    createdAt: docSnap.data().createdAt?.toDate?.().toISOString?.() || '',
-    updatedAt: docSnap.data().updatedAt?.toDate?.().toISOString?.() || '',
+    createdAt:
+      docSnap.data().createdAt && typeof (docSnap.data().createdAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+        ? (docSnap.data().createdAt as Timestamp).toDate().toISOString()
+        : docSnap.data().createdAt instanceof Date
+          ? docSnap.data().createdAt.toISOString()
+          : new Date().toISOString(),
+    updatedAt:
+      docSnap.data().updatedAt && typeof (docSnap.data().updatedAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+        ? (docSnap.data().updatedAt as Timestamp).toDate().toISOString()
+        : docSnap.data().updatedAt instanceof Date
+          ? docSnap.data().updatedAt.toISOString()
+          : undefined,
   }) as Client);
 }
 
@@ -47,8 +58,18 @@ export async function getClientById(detailerId: string, clientId: string): Promi
   return {
     id: snap.id,
     ...data,
-    createdAt: data.createdAt?.toDate?.().toISOString?.() || '',
-    updatedAt: data.updatedAt?.toDate?.().toISOString?.() || '',
+    createdAt:
+      data.createdAt && typeof (data.createdAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+        ? (data.createdAt as Timestamp).toDate().toISOString()
+        : data.createdAt instanceof Date
+          ? data.createdAt.toISOString()
+          : new Date().toISOString(),
+    updatedAt:
+      data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+        ? (data.updatedAt as Timestamp).toDate().toISOString()
+        : data.updatedAt instanceof Date
+          ? data.updatedAt.toISOString()
+          : undefined,
   } as Client;
   }
 
@@ -89,8 +110,18 @@ export const findClientByPhone = async (detailerId: string, phone: string): Prom
         source: data.source || 'manual',
         totalAppointments: data.totalAppointments || 0,
         lastServiceDate: data.lastServiceDate || '',
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        createdAt:
+          data.createdAt && typeof (data.createdAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+            ? (data.createdAt as Timestamp).toDate().toISOString()
+            : data.createdAt instanceof Date
+              ? data.createdAt.toISOString()
+              : new Date().toISOString(),
+        updatedAt:
+          data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' // eslint-disable-line @typescript-eslint/no-explicit-any
+            ? (data.updatedAt as Timestamp).toDate().toISOString()
+            : data.updatedAt instanceof Date
+              ? data.updatedAt.toISOString()
+              : undefined,
       };
     }
     

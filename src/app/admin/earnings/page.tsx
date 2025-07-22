@@ -37,7 +37,6 @@ const defaultNewEarning: NewEarning = {
 export default function EarningsPage() {
   const { detailer } = useAuth();
   const [earnings, setEarnings] = useState<Earning[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newEarning, setNewEarning] = useState<NewEarning>(defaultNewEarning);
   const [addError, setAddError] = useState("");
@@ -45,17 +44,15 @@ export default function EarningsPage() {
 
   async function fetchEarnings() {
     if (!detailer?.uid) return;
-    setLoading(true);
     const from = getMonthStart().toISOString().split("T")[0];
     const to = getMonthEnd().toISOString().split("T")[0];
     const data = await getEarnings(detailer.uid, from, to);
     setEarnings(data);
-    setLoading(false);
   }
 
   useEffect(() => {
     if (detailer?.uid) fetchEarnings();
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailer?.uid]);
 
   if (!detailer?.uid) {
@@ -109,7 +106,7 @@ export default function EarningsPage() {
       setShowAddModal(false);
       setNewEarning(defaultNewEarning);
       fetchEarnings();
-    } catch (err) {
+    } catch {
       setAddError("Failed to add earning");
     } finally {
       setAdding(false);

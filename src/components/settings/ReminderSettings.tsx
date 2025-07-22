@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BellIcon, ClockIcon, ChatBubbleLeftRightIcon, KeyIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import React, { useEffect } from 'react';
+import { BellIcon } from '@heroicons/react/24/outline';
 import { ReminderConfig } from '@/lib/models/reminder';
 
 interface ReminderSettingsProps {
@@ -8,43 +8,13 @@ interface ReminderSettingsProps {
   loading?: boolean;
 }
 
-export default function ReminderSettings({ config, onConfigChange, loading = false }: ReminderSettingsProps) {
-  const [localConfig, setLocalConfig] = useState<ReminderConfig>(config);
-
+export default function ReminderSettings({ config }: ReminderSettingsProps) {
   // Update local config when prop changes
   useEffect(() => {
-    setLocalConfig(config);
+    // setLocalConfig(config); // This line is removed as per the edit hint
   }, [config]);
 
-  const handleToggle = () => {
-    const newConfig = { ...localConfig, enabled: !localConfig.enabled };
-    setLocalConfig(newConfig);
-    onConfigChange({ enabled: newConfig.enabled });
-  };
-
-  const handleHoursChange = (hours: number) => {
-    const newConfig = { ...localConfig, hoursBeforeAppointment: hours };
-    setLocalConfig(newConfig);
-    onConfigChange({ hoursBeforeAppointment: hours });
-  };
-
-  const handleTemplateChange = (template: string) => {
-    const newConfig = { ...localConfig, messageTemplate: template };
-    setLocalConfig(newConfig);
-    onConfigChange({ messageTemplate: template });
-  };
-
-  const handleBusinessNameChange = (businessName: string) => {
-    const newConfig = { ...localConfig, businessName };
-    setLocalConfig(newConfig);
-    onConfigChange({ businessName });
-  };
-
-  const handleTwilioConfigChange = (field: keyof ReminderConfig, value: string) => {
-    const newConfig = { ...localConfig, [field]: value };
-    setLocalConfig(newConfig);
-    onConfigChange({ [field]: value });
-  };
+  // Remove unused variables and handlers
 
   // TODO: Re-enable reminder settings UI when Twilio integration is ready
   // This feature has been temporarily disabled but the code is preserved for future implementation

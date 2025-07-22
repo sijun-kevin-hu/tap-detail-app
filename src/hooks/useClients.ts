@@ -32,8 +32,9 @@ export function useClients() {
   // Load clients
   useEffect(() => {
     if (firebaseUser?.uid) {
-      loadClients();
+      (async () => { await loadClients(); })();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser?.uid]);
 
   // Filter clients based on search

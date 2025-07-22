@@ -144,10 +144,15 @@ export function useAppointments() {
     if (!editingAppointment || !editForm || !detailer?.uid) return;
     setEditLoading(true);
     try {
-      await updateAppointment(detailer.uid, editingAppointment.id, {
-        ...editForm,
-        updatedAt: new Date().toISOString(),
-      });
+      // Remove 'createdAt' from the update object by destructuring, but do not assign it to a variable.
+      const editFormWithoutCreatedAt = { ...editForm };
+      delete editFormWithoutCreatedAt.createdAt;
+
+      await updateAppointment(
+        detailer.uid,
+        editingAppointment.id,
+        editFormWithoutCreatedAt as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      );
       setEditingAppointment(null);
       setEditForm(null);
       await fetchAppointments();

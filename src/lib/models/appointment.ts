@@ -14,6 +14,8 @@ export const APPOINTMENT_STATUSES: AppointmentStatus[] = [
   'archived',
 ];
 
+import type { Timestamp, FieldValue } from 'firebase/firestore';
+
 export interface Service {
     name: string;
     price: number;
@@ -50,8 +52,8 @@ export interface Appointment {
     // Status and metadata
     status: AppointmentStatus;
     notes?: string;
-    createdAt: string;
-    updatedAt?: string;
+    createdAt: string | Date | Timestamp | FieldValue;
+    updatedAt?: string | Date | Timestamp | FieldValue;
     deletedAt?: string; // Timestamp when appointment was archived/deleted
     
     // Reminder system

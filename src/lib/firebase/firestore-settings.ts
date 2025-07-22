@@ -1,7 +1,6 @@
 import { 
   collection, 
   doc, 
-  getDoc, 
   getDocs, 
   setDoc, 
   updateDoc, 
@@ -12,19 +11,32 @@ import {
   serverTimestamp,
   DocumentData,
   QueryDocumentSnapshot,
-  Timestamp
+  Timestamp,
+  FieldValue
 } from 'firebase/firestore';
 import { db } from './client-app';
 import { ServiceMenu, ProfileSettings, NewService } from '@/lib/models/settings';
 import { getDetailer, updateDetailerProfile } from './firestore-detailers';
 
 // Types for Firestore data
-export interface FirestoreService extends Omit<ServiceMenu, 'id' | 'documentId'> {
-  id: string; // Firestore document ID
-  documentId: string; // Firestore document ID (same as id)
+export interface FirestoreService {
+  id: string;
+  documentId: string;
   sortIndex: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  name: string;
+  description: string;
+  duration: number;
+  durationUnit: string;
+  price: number;
+  category: string;
+  image: string;
+  active: boolean;
+  buffer: number;
+  maxBookings: number;
+  requireConfirmation: boolean;
+  tags: string[];
+  createdAt: Date | Timestamp | FieldValue;
+  updatedAt: Date | Timestamp | FieldValue;
 }
 
 export interface FirestoreProfile extends ProfileSettings {
@@ -67,8 +79,8 @@ export const getServices = async (detailerId: string): Promise<ServiceMenu[]> =>
         maxBookings: data.maxBookings || 1,
         requireConfirmation: data.requireConfirmation || false,
         tags: data.tags || [],
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
+        createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(),
+        updatedAt: data.updatedAt && typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate() : new Date(),
       });
     });
     
@@ -98,8 +110,8 @@ export const addService = async (detailerId: string, serviceData: NewService): P
       id: '', // Will be set by Firestore
       documentId: '', // Will be set by Firestore
       sortIndex,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      createdAt: serverTimestamp(), // FieldValue
+      updatedAt: serverTimestamp(), // FieldValue
     };
     
     const docRef = doc(servicesRef);
@@ -248,8 +260,8 @@ export const convertServiceToFirestore = (service: ServiceMenu): FirestoreServic
     ...service,
     id: service.id.toString(),
     sortIndex: 0, // Will be set by reorderServices
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date(), // Always use Date for ServiceMenu
+    updatedAt: new Date(), // Always use Date for ServiceMenu
   };
 };
 

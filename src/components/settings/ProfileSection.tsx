@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { ProfileSettings } from '@/lib/models/settings';
+import Image from 'next/image';
 
 interface ProfileSectionProps {
   profile: ProfileSettings;
-  originalProfile: ProfileSettings;
   profileModified: boolean;
   saving: boolean;
   onProfileUpdate: (field: keyof ProfileSettings, value: string | string[] | null) => void;
@@ -17,7 +17,6 @@ interface ProfileSectionProps {
 
 export default function ProfileSection({
   profile,
-  originalProfile,
   profileModified,
   saving,
   onProfileUpdate,
@@ -58,7 +57,7 @@ export default function ProfileSection({
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
             {profile.profileImage ? (
-              <img src={profile.profileImage} alt="Profile" className="object-cover w-full h-full" />
+              <Image src={profile.profileImage} alt="Profile" className="object-cover w-full h-full" width={80} height={80} />
             ) : (
               <span className="text-gray-400">No Image</span>
             )}
@@ -85,7 +84,7 @@ export default function ProfileSection({
         <div className="flex gap-2 overflow-x-auto pb-2">
           {profile.galleryImages.map((img: string, idx: number) => (
             <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
-              <img src={img} alt="Gallery" className="object-cover w-full h-full" />
+              <Image src={img} alt="Gallery" className="object-cover w-full h-full" width={80} height={80} />
               <button
                 type="button"
                 className="absolute top-1 right-1 bg-white/80 rounded-full p-1"

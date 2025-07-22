@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/lib/auth-context';
 import { useAppointments } from '@/hooks/useAppointments';
-import { useReminders } from '@/hooks/useReminders';
+// import { useReminders } from '@/hooks/useReminders';
 import AppointmentCard from '@/components/appointments/AppointmentCard';
 import AddAppointmentModal from '@/components/appointments/AddAppointmentModal';
 import EditAppointmentModal from '@/components/appointments/EditAppointmentModal';
@@ -16,7 +15,6 @@ export default function AppointmentsPage() {
   const router = useRouter();
   const { detailer } = useAuth();
   const {
-    appointments,
     filteredAppointments,
     loading,
     filters,
@@ -30,7 +28,6 @@ export default function AppointmentsPage() {
     setShowAddModal,
     setEditingAppointment,
     setEditForm,
-    setEditLoading,
     setDateRangeType,
     setCustomRange,
     fetchAppointments,
@@ -38,13 +35,13 @@ export default function AppointmentsPage() {
     handleEditSave
   } = useAppointments();
 
-  const {
-    config: reminderConfig,
-    processing: processingReminders,
-    updateConfig: updateReminderConfig,
-    processAutomaticReminders,
-    sendManualReminderForAppointment
-  } = useReminders();
+  // const {
+  //   config: reminderConfig,
+  //   processing: processingReminders,
+  //   updateConfig: updateReminderConfig,
+  //   processAutomaticReminders,
+  //   sendManualReminderForAppointment
+  // } = useReminders();
 
   // TODO: Re-enable automatic reminder processing when Twilio integration is ready
   // Process automatic reminders when appointments change

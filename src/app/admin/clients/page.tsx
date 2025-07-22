@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
 import { useClients } from '@/hooks/useClients';
 import { Client } from '@/lib/models/client';
 import { 
@@ -15,11 +14,10 @@ import ClientCard from '@/components/clients/ClientCard';
 import AddClientModal from '@/components/clients/AddClientModal';
 import ClientDetailsModal from '@/components/clients/ClientDetailsModal';
 import Toast from '@/components/Toast';
-import { formatDate, formatTime, getStatusColor, getStatusIcon } from '@/utils/formatters';
+import { formatDate, formatTime, getStatusColor } from '@/utils/formatters';
 
 export default function ClientsPage() {
   const router = useRouter();
-  const { firebaseUser } = useAuth();
   const {
     filteredClients,
     loading,
@@ -176,11 +174,6 @@ export default function ClientsPage() {
           submitting={submitting}
           formatDate={formatDate}
           formatTime={formatTime}
-          getStatusIcon={(status) => {
-            const iconName = getStatusIcon(status);
-            // Return appropriate icon component based on status
-            return <div className={`h-4 w-4 ${getStatusColor(status)}`} />;
-          }}
           getStatusColor={getStatusColor}
         />
       )}

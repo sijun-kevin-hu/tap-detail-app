@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
+import Image from 'next/image';
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -15,25 +16,23 @@ export default function QRCodeModal({ isOpen, onClose, url, detailerName }: QRCo
 
   useEffect(() => {
     if (isOpen && url) {
-      generateQRCode();
+      (async () => {
+        try {
+          const dataUrl = await QRCode.toDataURL(url, {
+            width: 200,
+            margin: 2,
+            color: {
+              dark: '#1F2937',
+              light: '#FFFFFF'
+            }
+          });
+          setQrCodeDataUrl(dataUrl);
+        } catch (err) {
+          console.error('Error generating QR code:', err);
+        }
+      })();
     }
   }, [isOpen, url]);
-
-  const generateQRCode = async () => {
-    try {
-      const dataUrl = await QRCode.toDataURL(url, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#1F2937',
-          light: '#FFFFFF'
-        }
-      });
-      setQrCodeDataUrl(dataUrl);
-    } catch (err) {
-      console.error('Error generating QR code:', err);
-    }
-  };
 
   const copyLink = async () => {
     try {
@@ -68,10 +67,12 @@ export default function QRCodeModal({ isOpen, onClose, url, detailerName }: QRCo
           
           {qrCodeDataUrl && (
             <div className="mb-4">
-              <img
+              <Image
                 src={qrCodeDataUrl}
                 alt="QR Code"
                 className="mx-auto border border-gray-200 rounded-lg"
+                width={200}
+                height={200}
               />
             </div>
           )}

@@ -1,13 +1,12 @@
 import React from 'react';
 import { Switch } from "@headlessui/react";
-import { NewService, defaultNewService, serviceCategories, ServiceCategory } from '@/lib/models/settings';
+import { NewService, serviceCategories, ServiceCategory } from '@/lib/models/settings';
 
 interface AddServiceFormProps {
   isOpen: boolean;
   newService: NewService;
   setNewService: (service: NewService) => void;
   onSubmit: () => void;
-  onClose: () => void;
   saving: boolean;
 }
 
@@ -16,7 +15,6 @@ export default function AddServiceForm({
   newService,
   setNewService,
   onSubmit,
-  onClose,
   saving
 }: AddServiceFormProps) {
   if (!isOpen) return null;

@@ -12,7 +12,6 @@ interface ClientDetailsModalProps {
   submitting: boolean;
   formatDate: (date: string) => string;
   formatTime: (time: string) => string;
-  getStatusIcon: (status: string) => React.ReactElement;
   getStatusColor: (status: string) => string;
 }
 
@@ -25,7 +24,6 @@ export default function ClientDetailsModal({
   submitting,
   formatDate,
   formatTime,
-  getStatusIcon,
   getStatusColor
 }: ClientDetailsModalProps) {
   const [isEditing, setIsEditing] = useState(false);

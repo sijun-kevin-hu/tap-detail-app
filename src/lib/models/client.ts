@@ -1,3 +1,5 @@
+import { Timestamp, FieldValue } from "firebase/firestore";
+
 export interface Client {
   id: string;
   fullName: string;
@@ -41,6 +43,6 @@ export interface ClientFormData {
 }
 
 export interface FirestoreClient extends Omit<Client, 'id' | 'createdAt' | 'updatedAt'> {
-  createdAt: Timestamp;
-  updatedAt?: Timestamp;
+  createdAt: Timestamp | FieldValue | Date;
+  updatedAt?: Timestamp | FieldValue | Date;
 } 

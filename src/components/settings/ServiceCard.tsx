@@ -2,11 +2,11 @@ import React from 'react';
 import { Switch } from "@headlessui/react";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { ServiceMenu, serviceCategories } from '@/lib/models/settings';
+import Image from 'next/image';
 
 interface ServiceCardProps {
   service: ServiceMenu;
   index: number;
-  draggedIndex: number | null;
   onServiceChange: (idx: number, field: string, value: string | number | boolean) => void;
   onServiceDelete: (idx: number) => void;
   onDragStart: (idx: number) => void;
@@ -17,7 +17,6 @@ interface ServiceCardProps {
 export default function ServiceCard({
   service,
   index,
-  draggedIndex,
   onServiceChange,
   onServiceDelete,
   onDragStart,
@@ -37,7 +36,7 @@ export default function ServiceCard({
         <div className="flex items-center gap-3 flex-1">
           <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
             {service.image ? (
-              <img src={service.image} alt="Service" className="object-cover w-full h-full" />
+              <Image src={service.image} alt="Service" className="object-cover w-full h-full" width={48} height={48} />
             ) : (
               <span className="text-gray-400"><PencilIcon className="h-5 w-5" /></span>
             )}

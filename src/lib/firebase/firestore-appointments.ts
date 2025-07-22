@@ -12,7 +12,8 @@ import {
   serverTimestamp,
   DocumentData,
   QueryDocumentSnapshot,
-  Timestamp
+  Timestamp,
+  FieldValue
 } from 'firebase/firestore';
 import { db } from './client-app';
 import { autoCreateClientFromAppointment } from './firestore-clients';
@@ -48,8 +49,8 @@ export interface Appointment {
 }
 
 export interface FirestoreAppointment extends Omit<Appointment, 'createdAt' | 'updatedAt'> {
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue | Date;
+  updatedAt: Timestamp | FieldValue | Date;
 }
 
 export interface NewAppointment {
@@ -104,8 +105,10 @@ export const getAppointments = async (detailerId: string): Promise<Appointment[]
         address: data.address,
         status: data.status,
         notes: data.notes,
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
         deletedAt: data.deletedAt,
         reminderSent: data.reminderSent || false,
         reminderSentAt: data.reminderSentAt,
@@ -163,8 +166,10 @@ export const getAppointmentsByStatus = async (
         address: data.address,
         status: data.status,
         notes: data.notes,
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
         deletedAt: data.deletedAt,
         reminderSent: data.reminderSent || false,
         reminderSentAt: data.reminderSentAt,
@@ -293,8 +298,10 @@ export const getAppointment = async (
         address: data.address,
         status: data.status,
         notes: data.notes,
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
         deletedAt: data.deletedAt,
         reminderSent: data.reminderSent || false,
         reminderSentAt: data.reminderSentAt,
@@ -366,8 +373,10 @@ export const getAppointmentsForDate = async (detailerId: string, date: string): 
         address: data.address,
         status: data.status,
         notes: data.notes,
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        createdAt: data.createdAt && typeof (data.createdAt as any).toDate === 'function' ? (data.createdAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updatedAt: data.updatedAt && typeof (data.updatedAt as any).toDate === 'function' ? (data.updatedAt as Timestamp).toDate().toISOString() : new Date().toISOString(),
         deletedAt: data.deletedAt,
         reminderSent: data.reminderSent || false,
         reminderSentAt: data.reminderSentAt,

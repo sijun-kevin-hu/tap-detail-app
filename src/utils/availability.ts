@@ -140,10 +140,6 @@ export function getAvailableTimeSlots({
       // Calculate appointment end time in minutes (including buffer)
       const apptEndMinutes = apptStartMinutes + apptDuration + totalApptBuffer;
       
-      // Check if the new slot overlaps with this appointment
-      // Only block slots that start during the appointment time
-      const slotEndMinutes = slotStartMinutes + serviceDuration;
-      
       // Slot overlaps if it starts during the appointment window
       // This means the slot start time is >= appointment start AND < appointment end
       const overlaps = slotStartMinutes >= apptStartMinutes && slotStartMinutes < apptEndMinutes;

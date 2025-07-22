@@ -21,9 +21,12 @@ export function useReminders() {
   // Load reminder configuration
   useEffect(() => {
     if (detailer?.uid) {
-      loadConfig();
-      loadHistory();
+      (async () => {
+        await loadConfig();
+        await loadHistory();
+      })();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detailer?.uid]);
 
   const loadConfig = async () => {

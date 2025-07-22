@@ -7,14 +7,13 @@ import { useSettings } from "@/hooks/useSettings";
 import ProfileSection from "@/components/settings/ProfileSection";
 import AddServiceForm from "@/components/settings/AddServiceForm";
 import ServiceCard from "@/components/settings/ServiceCard";
-import ReminderSettings from "@/components/settings/ReminderSettings";
 import AvailabilitySettings from '@/components/settings/AvailabilitySettings';
 
 // Helper function to format price
-const formatPrice = (price: number): string => {
-  if (price === 0) return '$0.00';
-  return `$${price.toFixed(2)}`;
-};
+// const formatPrice = (price: number): string => {
+//   if (price === 0) return '$0.00';
+//   return `$${price.toFixed(2)}`;
+// };
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -22,15 +21,12 @@ export default function SettingsPage() {
     loading,
     saving,
     profile,
-    originalProfile,
     profileModified,
     detailer,
     profileOpen,
     servicesOpen,
     services,
-    originalServices,
     modifiedServices,
-    draggedIndex,
     addOpen,
     newService,
     setProfileOpen,
@@ -99,7 +95,6 @@ export default function SettingsPage() {
           {profileOpen && (
             <ProfileSection
               profile={profile}
-              originalProfile={originalProfile}
               profileModified={profileModified}
               saving={saving}
               onProfileUpdate={handleProfileUpdate}
@@ -249,7 +244,6 @@ export default function SettingsPage() {
                 newService={newService}
                 setNewService={setNewService}
                 onSubmit={handleAddService}
-                onClose={() => setAddOpen(false)}
                 saving={saving}
               />
               
@@ -259,7 +253,6 @@ export default function SettingsPage() {
                   key={service.documentId}
                   service={service}
                   index={idx}
-                  draggedIndex={draggedIndex}
                   onServiceChange={handleServiceChange}
                   onServiceDelete={handleServiceDelete}
                   onDragStart={handleDragStart}

@@ -5,8 +5,7 @@ import {
   NewService, 
   ProfileSettings, 
   defaultNewService, 
-  defaultProfileSettings, 
-  ServiceCategory
+  defaultProfileSettings
 } from '@/lib/models/settings';
 import { Detailer } from '@/lib/models/detailer';
 import {
@@ -22,8 +21,7 @@ import { getDetailer } from '@/lib/firebase';
 import {
   updateDetailerProfileImage,
   addDetailerGalleryImage,
-  removeDetailerGalleryImage,
-  updateDetailerBio
+  removeDetailerGalleryImage
 } from '@/lib/firebase/firestore-detailers';
 
 export function useSettings() {
@@ -206,11 +204,13 @@ export function useSettings() {
         
         // Only update fields that have actually changed
         const changes: Partial<ServiceMenu> = {};
-        Object.keys(service).forEach(key => {
-          const typedKey = key as keyof ServiceMenu;
+        (Object.keys(service) as (keyof ServiceMenu)[]).forEach(typedKey => {
           const value = service[typedKey];
-          if (value !== undefined && value !== originalService[typedKey]) {
-            changes[typedKey] = value as any;
+          if (
+            value !== undefined &&
+            value !== originalService[typedKey]
+          ) {
+            (changes as Record<keyof ServiceMenu, unknown>)[typedKey] = value;
           }
         });
         
