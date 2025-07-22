@@ -58,15 +58,19 @@ export default function AppointmentsPage() {
 
   const handleStatusChange = async (appointmentId: string, newStatus: Appointment['status']) => {
     if (!detailer?.uid) return;
-    
     try {
       // Update appointment status using Firebase
-      const { updateAppointment } = await import('@/lib/firebase/firestore-appointments');
+      const { updateAppointment, getAppointment } = await import('@/lib/firebase/firestore-appointments');
+      const { syncEarningForAppointment } = await import('@/lib/firebase/firestore-earnings');
       await updateAppointment(detailer.uid, appointmentId, {
         status: newStatus,
         updatedAt: new Date().toISOString()
       });
-      
+      // Fetch updated appointment and sync earnings
+      const updated = await getAppointment(detailer.uid, appointmentId);
+      if (updated) {
+        await syncEarningForAppointment(detailer.uid, updated);
+      }
       // Refresh appointments
       fetchAppointments();
     } catch (error) {
@@ -175,7 +179,7 @@ export default function AppointmentsPage() {
               </label>
               <select
                 value={filters.statusFilter}
-                onChange={(e) => setFilters({ ...filters, statusFilter: e.target.value as any })}
+                onChange={(e) => setFilters({ ...filters, statusFilter: e.target.value as 'all' | 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'archived' })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="all">All Statuses</option>
@@ -194,7 +198,7 @@ export default function AppointmentsPage() {
               </label>
               <select
                 value={dateRangeType}
-                onChange={(e) => setDateRangeType(e.target.value as any)}
+                onChange={(e) => setDateRangeType(e.target.value as 'all' | '7' | '30' | 'next7' | 'next30' | 'custom')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="all">All Dates</option>

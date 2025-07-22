@@ -36,7 +36,7 @@ export {
 // Firestore client exports
 export {
   getClients,
-  getClient,
+  getClientById,
   addClient,
   updateClient,
   deleteClient,

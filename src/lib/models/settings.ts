@@ -91,7 +91,7 @@ export interface SettingsState {
 }
 
 export interface ServiceChangeHandler {
-  (index: number, field: keyof ServiceMenu, value: any): void;
+  (index: number, field: keyof ServiceMenu, value: string | number | boolean): void;
 }
 
 export interface ServiceDeleteHandler {

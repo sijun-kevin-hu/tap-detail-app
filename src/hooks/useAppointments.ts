@@ -19,7 +19,7 @@ export function useAppointments() {
   const [actionLoading, setActionLoading] = useState<'archive' | 'delete' | null>(null);
   const [editForm, setEditForm] = useState<Partial<Appointment> | null>(null);
   const [editLoading, setEditLoading] = useState(false);
-  const [dateRangeType, setDateRangeType] = useState<'7' | '30' | 'next7' | 'next30' | 'custom'>('next7');
+  const [dateRangeType, setDateRangeType] = useState<'all' | '7' | '30' | 'next7' | 'next30' | 'custom'>('all');
   const [customRange, setCustomRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
 
   const fetchAppointments = useCallback(async () => {

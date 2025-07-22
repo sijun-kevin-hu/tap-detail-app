@@ -7,7 +7,7 @@ interface ServiceCardProps {
   service: ServiceMenu;
   index: number;
   draggedIndex: number | null;
-  onServiceChange: (idx: number, field: string, value: any) => void;
+  onServiceChange: (idx: number, field: string, value: string | number | boolean) => void;
   onServiceDelete: (idx: number) => void;
   onDragStart: (idx: number) => void;
   onDragOver: (idx: number) => void;

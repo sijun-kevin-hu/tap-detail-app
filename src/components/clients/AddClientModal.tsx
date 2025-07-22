@@ -1,5 +1,6 @@
 import React from 'react';
 import { ClientFormData } from '@/lib/models/client';
+import { validateEmail, formatPhone } from '@/utils/formatters';
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -25,10 +26,40 @@ export default function AddClientModal({
   if (!isOpen) return null;
 
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
-    setFormData({ ...formData, [field]: value });
+    let formattedValue = value;
+    if (field === 'phone') {
+      formattedValue = formatPhone(value);
+    }
+    setFormData({ ...formData, [field]: formattedValue });
     if (formErrors.length > 0) {
       setFormErrors([]);
     }
+  };
+
+  const handleBlur = (field: keyof ClientFormData) => {
+    const errors: string[] = [];
+    if (field === 'phone' && formData.phone && formatPhone(formData.phone).replace(/\D/g, '').length !== 10) {
+      errors.push('Phone number must be 10 digits');
+    }
+    if (field === 'email' && formData.email && !validateEmail(formData.email)) {
+      errors.push('Invalid email address');
+    }
+    setFormErrors(errors);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const errors: string[] = [];
+    if (!formData.fullName.trim()) errors.push('Full name is required');
+    if (formatPhone(formData.phone).replace(/\D/g, '').length !== 10) errors.push('Valid phone number is required');
+    if (formData.email && !validateEmail(formData.email)) errors.push('Valid email is required');
+    if (errors.length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors([]);
+    onSubmit(e);
+    onClose(); // Exit popup after add
   };
 
   return (
@@ -50,7 +81,7 @@ export default function AddClientModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Error Messages */}
           {formErrors.length > 0 && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -84,9 +115,11 @@ export default function AddClientModal({
               type="tel"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
+              onBlur={() => handleBlur('phone')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Enter phone number"
               required
+              maxLength={14}
             />
           </div>
 
@@ -98,6 +131,7 @@ export default function AddClientModal({
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
+              onBlur={() => handleBlur('email')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Enter email address"
             />

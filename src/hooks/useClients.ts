@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { 
-  getClients, 
-  addClient, 
-  updateClient, 
-  deleteClient 
-} from '@/lib/firebase';
+import {
+  getClients,
+  addClient,
+  updateClient,
+  deleteClient,
+} from '@/lib/firebase/firestore-clients';
 import { Client, ClientFormData } from '@/lib/models/client';
 
 export function useClients() {

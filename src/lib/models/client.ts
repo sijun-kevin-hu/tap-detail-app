@@ -41,6 +41,6 @@ export interface ClientFormData {
 }
 
 export interface FirestoreClient extends Omit<Client, 'id' | 'createdAt' | 'updatedAt'> {
-  createdAt: any;
-  updatedAt?: any;
+  createdAt: Timestamp;
+  updatedAt?: Timestamp;
 } 

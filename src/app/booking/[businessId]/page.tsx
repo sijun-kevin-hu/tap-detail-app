@@ -418,7 +418,7 @@ export default function BookingPage() {
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Booking Submitted!</h2>
           <p className="text-gray-600 mb-6">
-            Thanks! Your request has been sent to {detailer?.businessName}. They'll confirm shortly.
+            Thanks! Your request has been sent to {detailer?.businessName}. They&apos;ll confirm shortly.
           </p>
           <button
             onClick={() => window.location.reload()}

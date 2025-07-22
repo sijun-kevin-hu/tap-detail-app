@@ -162,7 +162,7 @@ export default function Home() {
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 mb-3">Satisfaction Guaranteed</h3>
                             <p className="text-gray-600">
-                                We're committed to your satisfaction. If you're not happy, we'll make it right.
+                                We&apos;re committed to your satisfaction. If you&apos;re not happy, we&apos;ll make it right.
                             </p>
                         </div>
 

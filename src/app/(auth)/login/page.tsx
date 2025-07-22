@@ -30,9 +30,13 @@ export default function Login() {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             // Don't redirect here - let the useEffect handle it
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Login error:', error);
-            setError(error.message || 'Failed to login. Please try again.');
+            if (typeof error === 'object' && error && 'message' in error) {
+                setError((error as { message?: string }).message || 'Failed to login. Please try again.');
+            } else {
+                setError('Failed to login. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -152,7 +156,7 @@ export default function Login() {
                         {/* Sign Up Link */}
                         <div className="text-center pt-4">
                             <p className="text-caption">
-                                Don't have an account?{' '}
+                                Don&apos;t have an account?{' '}
                                 <Link 
                                     href="/signup" 
                                     className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-200 underline-offset-2 hover:underline"

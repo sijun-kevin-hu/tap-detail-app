@@ -11,7 +11,8 @@ import {
   where,
   serverTimestamp,
   DocumentData,
-  QueryDocumentSnapshot
+  QueryDocumentSnapshot,
+  Timestamp
 } from 'firebase/firestore';
 import { db } from './client-app';
 import { autoCreateClientFromAppointment } from './firestore-clients';
@@ -47,8 +48,8 @@ export interface Appointment {
 }
 
 export interface FirestoreAppointment extends Omit<Appointment, 'createdAt' | 'updatedAt'> {
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 export interface NewAppointment {

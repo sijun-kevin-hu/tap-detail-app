@@ -102,14 +102,19 @@ export default function Signup() {
             await createBaseServices(userCredential.user.uid);
 
             // Don't redirect here - let the useEffect handle it
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Signup error:', error);
-            if (error.code === 'auth/email-already-in-use') {
+            if (typeof error === 'object' && error && 'code' in error && 'message' in error) {
+                const err = error as { code?: string; message?: string };
+                if (err.code === 'auth/email-already-in-use') {
                 setError('An account with this email already exists. Please try logging in instead.');
-            } else if (error.code === 'auth/weak-password') {
+                } else if (err.code === 'auth/weak-password') {
                 setError('Password is too weak. Please choose a stronger password.');
+                } else {
+                    setError(err.message || 'Failed to create account. Please try again.');
+                }
             } else {
-                setError(error.message || 'Failed to create account. Please try again.');
+                setError('Failed to create account. Please try again.');
             }
         } finally {
             setLoading(false);

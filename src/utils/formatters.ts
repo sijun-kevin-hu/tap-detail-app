@@ -33,13 +33,16 @@ export const formatPhone = (phone: string) => {
 
 export const getStatusColor = (status: string) => {
   switch (status) {
-    case 'completed':
-      return 'bg-green-100 text-green-800';
-    case 'cancelled':
-    case 'archived':
-      return 'bg-red-100 text-red-800';
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800'; // yellow
+    case 'confirmed':
+      return 'bg-green-600 text-white'; // more visible green
     case 'in-progress':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-blue-500 text-white'; // blue for in progress
+    case 'completed':
+      return 'bg-green-100 text-green-800'; // green
+    case 'archived':
+      return 'bg-gray-200 text-gray-600'; // grey
     default:
       return 'bg-blue-100 text-blue-800';
   }
@@ -89,3 +92,6 @@ export const getMaxDate = (): string => {
   sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
   return sixMonthsFromNow.toISOString().split('T')[0];
 }; 
+
+export const validateEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); 

@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import { Switch } from "@headlessui/react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { ProfileSettings } from '@/lib/models/settings';
 
@@ -8,7 +7,7 @@ interface ProfileSectionProps {
   originalProfile: ProfileSettings;
   profileModified: boolean;
   saving: boolean;
-  onProfileUpdate: (field: keyof ProfileSettings, value: any) => void;
+  onProfileUpdate: (field: keyof ProfileSettings, value: string | string[] | null) => void;
   onSaveProfile: () => void;
   onCancelProfileChanges: () => void;
   onProfileImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

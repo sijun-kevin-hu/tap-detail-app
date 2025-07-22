@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Client, ClientFormData } from '@/lib/models/client';
-import { formatPhone } from '@/utils/formatters';
+import { formatPhone, validateEmail } from '@/utils/formatters';
 import { PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 
 interface ClientDetailsModalProps {
@@ -40,26 +40,40 @@ export default function ClientDetailsModal({
   if (!isOpen) return null;
 
   const handleSave = () => {
-    // Simple validation
-    if (!editData.fullName.trim()) {
-      setEditErrors(['Full name is required']);
+    // Validation
+    const errors: string[] = [];
+    if (!editData.fullName.trim()) errors.push('Full name is required');
+    if (formatPhone(editData.phone).replace(/\D/g, '').length !== 10) errors.push('Valid phone number is required');
+    if (editData.email && !validateEmail(editData.email)) errors.push('Valid email is required');
+    if (errors.length > 0) {
+      setEditErrors(errors);
       return;
     }
-    if (!editData.phone.trim()) {
-      setEditErrors(['Phone number is required']);
-      return;
-    }
-    
+    setEditErrors([]);
     onUpdate(client.id, editData);
     setIsEditing(false);
-    setEditErrors([]);
   };
 
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
-    setEditData({ ...editData, [field]: value });
+    let formattedValue = value;
+    if (field === 'phone') {
+      formattedValue = formatPhone(value);
+    }
+    setEditData({ ...editData, [field]: formattedValue });
     if (editErrors.length > 0) {
       setEditErrors([]);
     }
+  };
+
+  const handleBlur = (field: keyof ClientFormData) => {
+    const errors: string[] = [];
+    if (field === 'phone' && editData.phone && formatPhone(editData.phone).replace(/\D/g, '').length !== 10) {
+      errors.push('Phone number must be 10 digits');
+    }
+    if (field === 'email' && editData.email && !validateEmail(editData.email)) {
+      errors.push('Invalid email address');
+    }
+    setEditErrors(errors);
   };
 
   return (
@@ -120,6 +134,8 @@ export default function ClientDetailsModal({
                   type="tel"
                   value={editData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onBlur={() => handleBlur('phone')}
+                  maxLength={10}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="Enter phone number"
                   required
@@ -134,6 +150,7 @@ export default function ClientDetailsModal({
                   type="email"
                   value={editData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
+                  onBlur={() => handleBlur('email')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="Enter email address"
                 />

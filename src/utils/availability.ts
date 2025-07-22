@@ -74,7 +74,7 @@ export function getAvailableTimeSlots({
   const slots: TimeSlot[] = [];
   const detailerBuffer = availability.bufferMinutes || 0;
   const breaks = availability.breaks.filter(b => b.day === dayOfWeek);
-  
+
   // Helper to add minutes to a time string
   const addMinutes = (time: string, mins: number) => {
     if (!time || typeof time !== 'string') {

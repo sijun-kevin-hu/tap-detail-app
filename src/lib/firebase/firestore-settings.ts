@@ -11,7 +11,8 @@ import {
   writeBatch,
   serverTimestamp,
   DocumentData,
-  QueryDocumentSnapshot
+  QueryDocumentSnapshot,
+  Timestamp
 } from 'firebase/firestore';
 import { db } from './client-app';
 import { ServiceMenu, ProfileSettings, NewService } from '@/lib/models/settings';
@@ -22,12 +23,12 @@ export interface FirestoreService extends Omit<ServiceMenu, 'id' | 'documentId'>
   id: string; // Firestore document ID
   documentId: string; // Firestore document ID (same as id)
   sortIndex: number;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 export interface FirestoreProfile extends ProfileSettings {
-  updatedAt: any;
+  updatedAt: Timestamp;
 }
 
 // Firestore Structure:

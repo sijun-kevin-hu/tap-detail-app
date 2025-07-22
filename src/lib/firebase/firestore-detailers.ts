@@ -10,7 +10,8 @@ import {
   orderBy,
   serverTimestamp,
   DocumentData,
-  QueryDocumentSnapshot
+  QueryDocumentSnapshot,
+  Timestamp
 } from 'firebase/firestore';
 import { db } from './client-app';
 import { Detailer } from '@/lib/models/detailer';
@@ -26,8 +27,8 @@ import { AvailabilitySettings } from '@/lib/models/detailer';
 // Types for Firestore data
 export interface FirestoreDetailer extends Omit<Detailer, 'createdAt' | 'updatedAt'> {
   businessId: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 /**

@@ -8,6 +8,7 @@ import {
   defaultProfileSettings, 
   ServiceCategory
 } from '@/lib/models/settings';
+import { Detailer } from '@/lib/models/detailer';
 import {
   getServices,
   addService,
@@ -36,7 +37,7 @@ export function useSettings() {
   const [profile, setProfile] = useState<ProfileSettings>(defaultProfileSettings);
   const [originalProfile, setOriginalProfile] = useState<ProfileSettings>(defaultProfileSettings);
   const [profileModified, setProfileModified] = useState(false);
-  const [detailer, setDetailer] = useState<any>(null);
+  const [detailer, setDetailer] = useState<Detailer | null>(null);
 
   // Collapsible state
   const [profileOpen, setProfileOpen] = useState(true);
@@ -156,7 +157,7 @@ export function useSettings() {
   };
 
   // Service edit/delete
-  const handleServiceChange = (idx: number, field: string, value: any) => {
+  const handleServiceChange = (idx: number, field: string, value: string | number | boolean) => {
     const updatedServices = services.map((s, i) => (i === idx ? { ...s, [field]: value } : s));
     setServices(updatedServices);
     
@@ -204,10 +205,12 @@ export function useSettings() {
         const originalService = originalServices[serviceIndex];
         
         // Only update fields that have actually changed
-        const changes: any = {};
+        const changes: Partial<ServiceMenu> = {};
         Object.keys(service).forEach(key => {
-          if (service[key as keyof ServiceMenu] !== originalService[key as keyof ServiceMenu]) {
-            changes[key] = service[key as keyof ServiceMenu];
+          const typedKey = key as keyof ServiceMenu;
+          const value = service[typedKey];
+          if (value !== undefined && value !== originalService[typedKey]) {
+            changes[typedKey] = value as any;
           }
         });
         
@@ -328,7 +331,7 @@ export function useSettings() {
   };
 
   // Profile update handler
-  const handleProfileUpdate = (field: keyof ProfileSettings, value: any) => {
+  const handleProfileUpdate = (field: keyof ProfileSettings, value: string | number | boolean | string[] | null) => {
     const updatedProfile = { ...profile, [field]: value };
     setProfile(updatedProfile);
     
