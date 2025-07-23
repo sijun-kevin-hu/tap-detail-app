@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { ProfileSettings } from '@/lib/models/settings';
 import Image from 'next/image';
@@ -32,6 +32,34 @@ export default function ProfileSection({
 }: ProfileSectionProps) {
   const profileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // Location state for City and State
+  const [city, setCity] = useState(() => {
+    if (profile.location) {
+      const [c] = profile.location.split(',');
+      return c.trim();
+    }
+    return '';
+  });
+  const [state, setState] = useState(() => {
+    if (profile.location) {
+      const parts = profile.location.split(',');
+      return parts[1] ? parts[1].trim() : '';
+    }
+    return '';
+  });
+
+  // Update combined location on change
+  const handleLocationChange = (field: 'city' | 'state', value: string) => {
+    if (field === 'city') setCity(value);
+    if (field === 'state') setState(value);
+    const newLocation = `${field === 'city' ? value : city}${(field === 'city' ? value : city) && (field === 'state' ? value : state) ? ', ' : ''}${field === 'state' ? value : state}`;
+    onProfileUpdate('location' as keyof ProfileSettings, newLocation);
+  };
+
+  // Cap gallery images to 10
+  const galleryCount = profile.galleryImages.length + (pendingGalleryImages ? pendingGalleryImages.length : 0);
+  const canAddMoreGallery = galleryCount < 10;
 
   return (
     <div className="card p-4 space-y-6">
@@ -86,7 +114,31 @@ export default function ProfileSection({
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Service Gallery Images</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+        <div className="flex gap-2">
+          <input
+            className="input-modern flex-1/4 min-w-0"
+            value={city}
+            onChange={(e) => handleLocationChange('city', e.target.value)}
+            placeholder="City"
+            maxLength={40}
+          />
+          <input
+            className="input-modern flex-1 w-20"
+            value={state}
+            onChange={(e) => handleLocationChange('state', e.target.value)}
+            placeholder="State"
+            maxLength={20}
+          />
+        </div>
+        <p className="text-xs text-gray-400 mt-1">Format: City, State (e.g., Los Angeles, CA)</p>
+      </div>
+      
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">Service Gallery Images</label>
+          <span className="text-xs text-gray-400">{galleryCount}/10</span>
+        </div>
         <div className="flex gap-2 overflow-x-auto pb-2">
           {profile.galleryImages.map((img: string, idx: number) => (
             <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
@@ -121,15 +173,19 @@ export default function ProfileSection({
             className="hidden"
             ref={galleryInputRef}
             onChange={onGalleryImagesChange}
+            disabled={!canAddMoreGallery}
           />
           <button
             type="button"
-            className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center border border-dashed border-gray-300 text-gray-400 text-3xl flex-shrink-0"
-            onClick={() => galleryInputRef.current?.click()}
+            className={`w-20 h-20 rounded-xl flex items-center justify-center border flex-shrink-0 ${canAddMoreGallery ? 'bg-gray-100 border-dashed border-gray-300 text-gray-400 text-3xl' : 'bg-gray-200 border-gray-300 text-gray-300 cursor-not-allowed'}`}
+            onClick={() => canAddMoreGallery && galleryInputRef.current?.click()}
+            disabled={!canAddMoreGallery}
+            title={canAddMoreGallery ? 'Add Image' : 'Maximum 10 images allowed'}
           >
             <PlusIcon className="h-8 w-8" />
           </button>
         </div>
+        {!canAddMoreGallery && <p className="text-xs text-red-500 mt-1">Maximum 10 images allowed in the gallery.</p>}
       </div>
       
       {/* Save Profile Changes Button - Only show when there are modifications */}

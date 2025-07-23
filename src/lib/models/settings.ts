@@ -7,6 +7,7 @@ export interface ProfileSettings {
   bio: string;
   profileImage: string | null;
   galleryImages: string[];
+  location?: string;
 }
 
 // Extended detailer interface for settings

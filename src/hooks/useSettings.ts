@@ -103,7 +103,12 @@ export function useSettings() {
   const handleGalleryImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    setPendingGalleryImages(prev => [...prev, ...files]);
+    // Cap at 10 images total (existing + pending)
+    setPendingGalleryImages(prev => {
+      const total = profile.galleryImages.length + prev.length;
+      const allowed = Math.max(0, 10 - total);
+      return [...prev, ...files.slice(0, allowed)];
+    });
     setProfileModified(true);
   };
   
@@ -253,7 +258,7 @@ export function useSettings() {
           return uploadImage(file, storagePath);
         });
         const newUrls = await Promise.all(uploadPromises);
-        galleryImages = [...galleryImages, ...newUrls];
+        galleryImages = [...galleryImages, ...newUrls].slice(0, 10); // Cap at 10
       }
       // Handle removed images (from saved gallery)
       const removedImages = originalProfile.galleryImages.filter(img => !galleryImages.includes(img));
@@ -264,7 +269,8 @@ export function useSettings() {
       const updatedProfile = {
         ...profile,
         profileImage: profileImageUrl,
-        galleryImages,
+        galleryImages: galleryImages.slice(0, 10), // Cap at 10
+        location: profile.location ?? '',
       };
       await updateDetailerProfileImage(firebaseUser.uid, profileImageUrl || '');
       for (const imageUrl of galleryImages.filter(img => !originalProfile.galleryImages.includes(img))) {
