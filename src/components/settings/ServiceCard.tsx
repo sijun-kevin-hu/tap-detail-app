@@ -3,6 +3,7 @@ import { Switch } from "@headlessui/react";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { ServiceMenu, serviceCategories } from '@/lib/models/settings';
 import Image from 'next/image';
+import CurrencyInput from 'react-currency-input-field';
 
 interface ServiceCardProps {
   service: ServiceMenu;
@@ -91,17 +92,14 @@ export default function ServiceCard({
       <div className="space-y-4 sm:grid sm:grid-cols-2 sm:gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-2">Price ($)</label>
-          <input
+          <CurrencyInput
             className="input-modern text-sm w-full h-10"
-            type="number"
-            min={0}
-            step={0.01}
-            value={service.price || ''}
-            onChange={e => {
-              const value = parseFloat(e.target.value) || 0;
-              onServiceChange(index, "price", value);
-            }}
             placeholder="0.00"
+            decimalsLimit={2}
+            prefix={"$"}
+            value={service.price}
+            onValueChange={value => onServiceChange(index, "price", value || '')}
+            required
           />
         </div>
         <div>

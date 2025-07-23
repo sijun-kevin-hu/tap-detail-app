@@ -29,7 +29,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
         time: '',
         address: '',
         notes: '',
-        price: 0
+        price: ''
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -78,7 +78,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
             setFormData(prev => ({
                 ...prev,
                 service: value,
-                price: selectedService?.price || 0
+                price: selectedService?.price?.toString() || ''
             }));
         }
     };
@@ -162,7 +162,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
             setError('Please enter a valid email address');
             return false;
         }
-        if (formData.price <= 0) {
+        if (parseFloat(formData.price) <= 0) {
             setError('Please select a valid service');
             return false;
         }
@@ -206,7 +206,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                 time: formData.time,
                 address: formData.address,
                 notes: formData.notes,
-                price: formData.price,
+                price: parseFloat(formData.price), // Parse price to float
                 estimatedDuration: selectedService?.duration || 60
             });
 
@@ -233,7 +233,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
             time: '',
             address: '',
             notes: '',
-            price: 0
+            price: ''
         });
         setCurrentStep(1);
         setError('');
@@ -456,7 +456,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                     </div>
                                     
                                     {/* Price Display */}
-                                    {formData.price > 0 && (
+                                    {parseFloat(formData.price) > 0 && (
                                         <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-sm font-medium text-indigo-900">Service Price:</span>

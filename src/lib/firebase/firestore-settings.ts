@@ -27,7 +27,7 @@ export interface FirestoreService {
   description: string;
   duration: number;
   durationUnit: string;
-  price: number;
+  price: string;
   category: string;
   image: string;
   active: boolean;
@@ -70,7 +70,7 @@ export const getServices = async (detailerId: string): Promise<ServiceMenu[]> =>
         description: data.description || '',
         duration: data.duration || 60,
         durationUnit: data.durationUnit || 'min',
-        price: data.price || 0,
+        price: data.price?.toString() || '',
         category: data.category || 'Exterior',
 
         image: data.image || '',
@@ -275,7 +275,7 @@ export const convertFirestoreToService = (doc: QueryDocumentSnapshot<DocumentDat
     description: data.description || '',
     duration: data.duration || 60,
     durationUnit: data.durationUnit || 'min',
-    price: data.price || 0,
+    price: data.price?.toString() || '',
     category: data.category || 'Exterior',
 
     image: data.image || '',

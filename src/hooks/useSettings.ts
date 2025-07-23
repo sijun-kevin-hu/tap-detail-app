@@ -264,6 +264,17 @@ export function useSettings() {
       const removedImages = originalProfile.galleryImages.filter(img => !galleryImages.includes(img));
       for (const imageUrl of removedImages) {
         await removeDetailerGalleryImage(firebaseUser.uid, imageUrl);
+        // Also delete from Firebase Storage
+        try {
+          // Extract storage path from download URL
+          const matches = decodeURIComponent(imageUrl).match(/o\/(.+)\?/);
+          const storagePath = matches ? matches[1] : null;
+          if (storagePath) {
+            await deleteImage(storagePath);
+          }
+        } catch (err) {
+          console.error('Failed to delete image from storage:', err);
+        }
       }
       // Save to Firestore
       const updatedProfile = {
@@ -326,7 +337,7 @@ export function useSettings() {
         description: "",
         duration: 60,
         durationUnit: "min",
-        price: 0,
+        price: "",
         category: "Exterior",
         image: "",
         active: true,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getActiveDetailers } from '@/lib/firebase';
+import Image from 'next/image';
 import Link from 'next/link';
 import NavBar from '@/components/NavBar';
 
@@ -21,7 +22,6 @@ export default function BookPage() {
     const [detailers, setDetailers] = useState<Detailer[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedService, setSelectedService] = useState('');
 
     useEffect(() => {
         fetchDetailers();
@@ -45,17 +45,6 @@ export default function BookPage() {
 
     // Track if user has searched
     const hasSearched = searchTerm.trim().length > 0;
-
-    const services = [
-        'Basic Wash',
-        'Standard Detail',
-        'Premium Detail',
-        'Ultimate Detail',
-        'Interior Only',
-        'Exterior Only',
-        'Paint Correction',
-        'Ceramic Coating'
-    ];
 
     return (
         <div className="min-h-screen bg-blue-50 flex flex-col">
@@ -111,7 +100,7 @@ export default function BookPage() {
                         {filteredDetailers.map((detailer) => (
                             <li key={detailer.uid} className="border border-gray-100 rounded-2xl bg-white shadow-sm p-6 flex flex-col gap-2 items-center">
                                 {detailer.profileImage ? (
-                                    <img
+                                    <Image
                                         src={detailer.profileImage}
                                         alt={`${detailer.firstName} ${detailer.lastName} profile`}
                                         className="w-16 h-16 rounded-full object-cover mb-2 border border-gray-200"

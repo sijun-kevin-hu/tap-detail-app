@@ -38,7 +38,7 @@ export interface ServiceMenu {
   description: string;
   duration: number;
   durationUnit: 'min' | 'hr';
-  price: number;
+  price: string; // was: number
   category: ServiceCategory;
   image: string;
   active: boolean;
@@ -57,7 +57,7 @@ export interface NewService {
   description: string;
   duration: number;
   durationUnit: 'min' | 'hr';
-  price: number;
+  price: string; // was: number
   category: ServiceCategory;
   image: string;
   active: boolean;
@@ -72,7 +72,7 @@ export interface ServiceFormData {
   description: string;
   duration: number;
   durationUnit: 'min' | 'hr';
-  price: number;
+  price: string; // was: number
   category: ServiceCategory;
   image: string;
   active: boolean;
@@ -116,7 +116,7 @@ export const defaultNewService: NewService = {
   description: '',
   duration: 60,
   durationUnit: 'min',
-  price: 0,
+  price: '0',
   category: 'Exterior',
   image: '',
   active: true,

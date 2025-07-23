@@ -89,7 +89,7 @@ export default function ProfileSection({
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
             {pendingProfileImage ? (
-              <img src={URL.createObjectURL(pendingProfileImage)} alt="Profile Preview" className="object-cover w-full h-full" width={80} height={80} />
+              <Image src={URL.createObjectURL(pendingProfileImage)} alt="Profile Preview" className="object-cover w-full h-full" width={80} height={80} />
             ) : profile.profileImage ? (
               <Image src={profile.profileImage} alt="Profile" className="object-cover w-full h-full" width={80} height={80} />
             ) : (
@@ -155,7 +155,7 @@ export default function ProfileSection({
           ))}
           {pendingGalleryImages && pendingGalleryImages.map((file, idx) => (
             <div key={`pending-${idx}`} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
-              <img src={URL.createObjectURL(file)} alt="Pending Gallery Preview" className="object-cover w-full h-full" width={80} height={80} />
+              <Image src={URL.createObjectURL(file)} alt="Pending Gallery Preview" className="object-cover w-full h-full" width={80} height={80} />
               <button
                 type="button"
                 className="absolute top-1 right-1 bg-white/80 rounded-full p-1"

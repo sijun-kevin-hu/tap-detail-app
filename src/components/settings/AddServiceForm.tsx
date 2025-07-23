@@ -2,6 +2,7 @@ import React from 'react';
 import { Switch } from "@headlessui/react";
 import { NewService, serviceCategories, ServiceCategory } from '@/lib/models/settings';
 import Image from 'next/image';
+import CurrencyInput from 'react-currency-input-field';
 
 interface AddServiceFormProps {
   isOpen: boolean;
@@ -77,17 +78,13 @@ export default function AddServiceForm({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Price ($) *</label>
-            <input
+            <CurrencyInput
               className="input-modern w-full h-12 text-base"
-              type="number"
-              min={0}
-              step={0.01}
-              value={newService.price || ''}
-              onChange={e => {
-                const value = parseFloat(e.target.value) || 0;
-                setNewService({ ...newService, price: value });
-              }}
               placeholder="0.00"
+              decimalsLimit={2}
+              prefix={"$"}
+              value={newService.price}
+              onValueChange={value => setNewService({ ...newService, price: value || '' })}
               required
             />
           </div>

@@ -80,7 +80,7 @@ export interface AppointmentFormData {
     time: string;
     address: string;
     notes: string;
-    price: number;
+    price: string; // was: number
     assignedDetailerId?: string;
     reminderSent?: boolean;
 }

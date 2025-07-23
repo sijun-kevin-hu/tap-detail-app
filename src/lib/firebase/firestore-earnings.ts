@@ -91,7 +91,7 @@ export async function syncEarningForAppointment(detailerId: string, appointment:
       date: appointment.date,
       clientName: appointment.clientName,
       service: appointment.service,
-      price: appointment.price,
+      price: parseFloat(appointment.price.toString()),
     });
   } else if (!shouldHaveEarning && earning) {
     await deleteEarning(detailerId, earning.id);

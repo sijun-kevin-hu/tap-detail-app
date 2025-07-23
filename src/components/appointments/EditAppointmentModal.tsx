@@ -69,7 +69,7 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
             setFormData(prev => ({
                 ...prev,
                 service: value,
-                price: selectedService?.price || 0
+                price: selectedService?.price?.toString() || ''
             }));
         }
     };
@@ -89,7 +89,7 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
             setError('Please enter a valid email address');
             return false;
         }
-        if (formData.price <= 0) {
+        if (formData.price === '' || parseFloat(formData.price) <= 0) {
             setError('Please select a valid service');
             return false;
         }
@@ -310,11 +310,11 @@ export default function EditAppointmentModal({ isOpen, onClose, onSave, initialD
                             </div>
                         </div>
                         {/* Price Display */}
-                        {formData.price > 0 && (
+                        {formData.price !== '' && parseFloat(formData.price) > 0 && (
                             <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-medium text-indigo-900">Service Price:</span>
-                                    <span className="text-lg font-bold text-indigo-600">${formData.price}</span>
+                                    <span className="text-lg font-bold text-indigo-600">${parseFloat(formData.price).toFixed(2)}</span>
                                 </div>
                             </div>
                         )}

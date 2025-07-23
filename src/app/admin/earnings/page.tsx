@@ -4,9 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from '@/lib/auth-context';
 import { getEarnings, addEarning } from '@/lib/firebase/firestore-earnings';
 import { formatDate } from '@/utils/formatters';
-import { NewEarning, Earning } from '@/lib/models/earning';
+import { Earning } from '@/lib/models/earning';
 import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import CurrencyInput from 'react-currency-input-field';
 
 function getMonthStart() {
   const now = new Date();
@@ -27,18 +28,19 @@ function getMonthName() {
   return new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
 }
 
-const defaultNewEarning: NewEarning = {
+// Change defaultNewEarning and NewEarning usage for price to string
+const defaultNewEarning = {
   date: new Date().toISOString().split("T")[0],
   clientName: "",
   service: "",
-  price: 0,
+  price: "",
 };
 
 export default function EarningsPage() {
   const { detailer } = useAuth();
   const [earnings, setEarnings] = useState<Earning[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newEarning, setNewEarning] = useState<NewEarning>(defaultNewEarning);
+  const [newEarning, setNewEarning] = useState(defaultNewEarning);
   const [addError, setAddError] = useState("");
   const [adding, setAdding] = useState(false);
 
@@ -87,12 +89,9 @@ export default function EarningsPage() {
   const handleAddEarning = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError("");
-    if (!newEarning.clientName.trim() || !newEarning.service.trim() || newEarning.price === undefined || !newEarning.date) {
+    const priceNum = parseFloat(newEarning.price);
+    if (!newEarning.clientName.trim() || !newEarning.service.trim() || isNaN(priceNum) || priceNum <= 0 || !newEarning.date) {
       setAddError("All fields are required");
-      return;
-    }
-    if (typeof newEarning.price !== 'number' || isNaN(newEarning.price) || newEarning.price <= 0) {
-      setAddError("Price must be a positive number");
       return;
     }
     setAdding(true);
@@ -100,7 +99,7 @@ export default function EarningsPage() {
       await addEarning(detailer.uid, {
         clientName: newEarning.clientName,
         service: newEarning.service,
-        price: newEarning.price,
+        price: priceNum,
         date: newEarning.date,
       });
       setShowAddModal(false);
@@ -208,34 +207,48 @@ export default function EarningsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  Client Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   className="input-modern w-full"
                   value={newEarning.clientName}
                   onChange={e => setNewEarning({ ...newEarning, clientName: e.target.value })}
                   required
+                  autoComplete="off"
+                  inputMode="text"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Service</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  Service <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   className="input-modern w-full"
                   value={newEarning.service}
                   onChange={e => setNewEarning({ ...newEarning, service: e.target.value })}
                   required
+                  autoComplete="off"
+                  inputMode="text"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
-                <input
-                  type="number"
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                  Price <span className="text-red-500">*</span>
+                </label>
+                <CurrencyInput
+                  id="price"
+                  name="price"
                   className="input-modern w-full"
+                  placeholder="0.00"
+                  decimalsLimit={2}
+                  prefix={"$"}
                   value={newEarning.price}
-                  onChange={e => setNewEarning({ ...newEarning, price: Number(e.target.value) })}
-                  min={1}
-                  step={0.01}
+                  onValueChange={(value) => {
+                    setNewEarning({ ...newEarning, price: value || '' });
+                  }}
                   required
                 />
               </div>

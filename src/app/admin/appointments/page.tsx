@@ -292,7 +292,10 @@ export default function AppointmentsPage() {
               setEditForm(null);
             }}
             onSave={handleEditSave}
-            initialData={editForm as AppointmentFormData}
+            initialData={{
+              ...editForm,
+              price: editForm.price?.toString() ?? ''
+            } as AppointmentFormData}
             loading={editLoading}
             detailerId={detailer?.uid || ''}
           />

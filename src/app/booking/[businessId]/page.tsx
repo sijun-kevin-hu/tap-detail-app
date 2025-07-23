@@ -231,7 +231,7 @@ export default function BookingPage() {
         date: selectedDateTime.date,
         time: selectedDateTime.time,
         address: '', // Will be filled by detailer
-        price: selectedService!.price,
+        price: parseFloat(selectedService!.price),
         notes: formData.notes.trim(),
         estimatedDuration: selectedService!.duration // Include service duration
       };
