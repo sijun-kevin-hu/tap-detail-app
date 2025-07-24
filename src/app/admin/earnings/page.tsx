@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useAuth } from '@/lib/auth-context';
-import { getEarnings, addEarning } from '@/lib/firebase/firestore-earnings';
+import { getEarnings, addEarning, deleteEarning } from '@/lib/firebase/firestore-earnings';
 import { formatDate } from '@/utils/formatters';
 import { Earning } from '@/lib/models/earning';
 import Link from 'next/link';
@@ -43,11 +43,25 @@ export default function EarningsPage() {
   const [newEarning, setNewEarning] = useState(defaultNewEarning);
   const [addError, setAddError] = useState("");
   const [adding, setAdding] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Earning | null>(null);
+  const [viewMode, setViewMode] = useState<'month' | 'all'>('month');
+  const [filterStart, setFilterStart] = useState<string | null>(null);
+  const [filterEnd, setFilterEnd] = useState<string | null>(null);
 
   async function fetchEarnings() {
     if (!detailer?.uid) return;
-    const from = getMonthStart().toISOString().split("T")[0];
-    const to = getMonthEnd().toISOString().split("T")[0];
+    let from: string;
+    let to: string;
+    if (viewMode === 'all' && detailer.createdAt) {
+      from = filterStart || detailer.createdAt.split('T')[0];
+      to = filterEnd || new Date().toISOString().split('T')[0];
+    } else {
+      from = getMonthStart().toISOString().split('T')[0];
+      to = getMonthEnd().toISOString().split('T')[0];
+    }
     const data = await getEarnings(detailer.uid, from, to);
     setEarnings(data);
   }
@@ -55,7 +69,7 @@ export default function EarningsPage() {
   useEffect(() => {
     if (detailer?.uid) fetchEarnings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [detailer?.uid]);
+  }, [detailer?.uid, viewMode, filterStart, filterEnd]);
 
   if (!detailer?.uid) {
     return <div className="text-center py-12 text-gray-500">Loading...</div>;
@@ -112,13 +126,53 @@ export default function EarningsPage() {
     }
   };
 
+  // Delete earning handler
+  const handleDeleteEarning = async (earning: Earning) => {
+    setPendingDelete(earning);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteEarning = async () => {
+    if (!pendingDelete || !detailer?.uid) return;
+    setDeletingId(pendingDelete.id);
+    setDeleteError("");
+    try {
+      await deleteEarning(detailer.uid, pendingDelete.id);
+      setShowDeleteConfirm(false);
+      setPendingDelete(null);
+      fetchEarnings();
+    } catch {
+      setDeleteError("Failed to delete earning");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-2 sm:px-4 py-6">
       <div className="flex items-center mb-4">
         <Link href="/admin" className="mr-3 text-gray-500 hover:text-indigo-600 text-lg font-medium">&larr; Back</Link>
         <h1 className="text-2xl font-bold">Earnings</h1>
       </div>
-      <div className="text-sm text-gray-500 mb-4">Earnings for {getMonthName()}</div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        <div className="text-sm text-gray-500">
+          Earnings for {viewMode === 'month' ? getMonthName() : 'All Time'}
+        </div>
+        <div className="flex gap-2 mt-1 sm:mt-0">
+          <button
+            className={`px-3 py-1 rounded-full text-xs font-medium border transition ${viewMode === 'month' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-100'}`}
+            onClick={() => setViewMode('month')}
+          >
+            This Month
+          </button>
+          <button
+            className={`px-3 py-1 rounded-full text-xs font-medium border transition ${viewMode === 'all' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-100'}`}
+            onClick={() => setViewMode('all')}
+          >
+            All Time
+          </button>
+        </div>
+      </div>
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-xl p-4 shadow text-center">
@@ -134,6 +188,55 @@ export default function EarningsPage() {
           <div className="text-2xl font-bold">${avgEarnings.toFixed(2)}</div>
         </div>
       </div>
+
+      {/* All Time Stats */}
+      {viewMode === 'all' && (
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+            <div className="flex-1 flex gap-2 items-center">
+              <label className="text-xs text-gray-500 font-medium">From</label>
+              <input
+                type="date"
+                className="input-modern w-32"
+                value={filterStart || detailer.createdAt.split('T')[0]}
+                min={detailer.createdAt.split('T')[0]}
+                max={filterEnd || new Date().toISOString().split('T')[0]}
+                onChange={e => setFilterStart(e.target.value)}
+              />
+              <label className="text-xs text-gray-500 font-medium ml-2">To</label>
+              <input
+                type="date"
+                className="input-modern w-32"
+                value={filterEnd || new Date().toISOString().split('T')[0]}
+                min={filterStart || detailer.createdAt.split('T')[0]}
+                max={new Date().toISOString().split('T')[0]}
+                onChange={e => setFilterEnd(e.target.value)}
+              />
+              <button
+                className="ml-2 px-3 py-1 rounded text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-300"
+                onClick={() => { setFilterStart(null); setFilterEnd(null); }}
+                type="button"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="bg-indigo-50 rounded-xl p-4 shadow text-center">
+              <div className="text-xs text-indigo-700 mb-1">All Time Earnings</div>
+              <div className="text-2xl font-bold text-indigo-700">${totalEarnings.toFixed(2)}</div>
+            </div>
+            <div className="bg-indigo-50 rounded-xl p-4 shadow text-center">
+              <div className="text-xs text-indigo-700 mb-1">All Time Jobs</div>
+              <div className="text-2xl font-bold text-indigo-700">{totalJobs}</div>
+            </div>
+            <div className="bg-indigo-50 rounded-xl p-4 shadow text-center">
+              <div className="text-xs text-indigo-700 mb-1">All Time Avg/Job</div>
+              <div className="text-2xl font-bold text-indigo-700">${avgEarnings.toFixed(2)}</div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Add Earnings Button */}
       <div className="flex justify-end mb-4">
@@ -179,8 +282,17 @@ export default function EarningsPage() {
                   <td className="py-2 px-2">{formatDate(job.date)}</td>
                   <td className="py-2 px-2">{job.clientName}</td>
                   <td className="py-2 px-2">{job.service}</td>
-                  <td className="py-2 px-2 text-right">
+                  <td className="py-2 px-2 text-right flex items-center gap-2 justify-end">
                     ${job.price.toFixed(2)}
+                    <button
+                      className="ml-2 text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 rounded p-1 transition"
+                      title="Remove earning"
+                      aria-label="Remove earning"
+                      onClick={() => handleDeleteEarning(job)}
+                      disabled={deletingId === job.id}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -271,6 +383,38 @@ export default function EarningsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && pendingDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-2">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-auto p-6">
+            <h2 className="text-lg font-bold mb-4 text-center">Remove Earning</h2>
+            <div className="text-gray-700 mb-4 text-center">
+              Are you sure you want to remove this earning?<br/>
+              <span className="block mt-2 text-sm text-gray-500">{formatDate(pendingDelete.date)} — {pendingDelete.clientName} — ${pendingDelete.price.toFixed(2)}</span>
+            </div>
+            {deleteError && <div className="text-red-600 text-sm mb-2 text-center">{deleteError}</div>}
+            <div className="flex gap-2 mt-4">
+              <button
+                type="button"
+                className="btn-secondary flex-1"
+                onClick={() => { setShowDeleteConfirm(false); setPendingDelete(null); }}
+                disabled={deletingId === pendingDelete.id}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-danger flex-1"
+                onClick={confirmDeleteEarning}
+                disabled={deletingId === pendingDelete.id}
+              >
+                {deletingId === pendingDelete.id ? "Removing..." : "Remove"}
+              </button>
+            </div>
           </div>
         </div>
       )}
