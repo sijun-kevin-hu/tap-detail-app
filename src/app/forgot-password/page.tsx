@@ -14,11 +14,20 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError("");
     try {
-      await fetch('/api/send-password-reset', {
+      const res = await fetch('/api/send-password-reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
+      if (!res.ok) {
+        const data = await res.json();
+        if (data?.error && data.error.includes('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+          setError('Too many requests. Please wait a while before trying again.');
+          return;
+        }
+        setError(data?.error || 'Failed to send reset email. Please check your email and try again.');
+        return;
+      }
       setSuccess(true);
     } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       setError(
