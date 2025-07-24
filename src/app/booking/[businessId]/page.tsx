@@ -2,18 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getDetailerByBusinessId } from '@/lib/firebase';
-import { getServices } from '@/lib/firebase';
-import { createAppointment } from '@/lib/firebase';
+import { getDetailerByBusinessId } from '@/lib/firebase/firestore-detailers';
+import { getServices } from '@/lib/firebase/firestore-settings';
 import { Detailer } from '@/lib/models/detailer';
 import { ServiceMenu } from '@/lib/models/settings';
-import { NewAppointment } from '@/lib/firebase/firestore-appointments';
 import QRCodeModal from '@/components/QRCodeModal';
 import Toast from '@/components/Toast';
 import { useAuth } from '@/lib/auth-context';
 import UnifiedDateTimePicker from '@/components/booking/UnifiedDateTimePicker';
 import Image from 'next/image';
-import { appointmentConfirmationEmail } from './emailTemplate';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
@@ -219,7 +216,7 @@ export default function BookingPage() {
       setSubmitting(true);
       setError(null);
       
-      const appointmentData: NewAppointment = {
+      const appointmentData: any = {
         service: selectedService!.name,
         clientName: formData.clientName.trim(),
         clientEmail: formData.clientEmail.trim(),
@@ -236,43 +233,22 @@ export default function BookingPage() {
         estimatedDuration: selectedService!.duration // Include service duration
       };
       
-      await createAppointment(detailer!.uid, appointmentData);
-      // Send confirmation email if client email is provided
-      if (formData.clientEmail.trim()) {
-        try {
-          const bookingUrl = `${window.location.origin}/booking/${businessId}`;
-          const detailerName = detailer?.businessName || 'your detailer';
-          const detailerPhone = detailer?.phone || 'N/A';
-          const date = selectedDateTime.date;
-          const time = selectedDateTime.time;
-          const subject = 'Your Car Detailing Appointment is Confirmed!';
-          const text = `Thank you for booking with ${detailerName} on Tap Detail!\n\nYour appointment is confirmed for ${date} at ${time}.\n\nDetailer: ${detailerName}\nPhone: ${detailerPhone}\n\nYou can view or manage your booking here: ${bookingUrl}\n\nWe look forward to serving you!`;
-          const html = appointmentConfirmationEmail({
-            clientName: formData.clientName,
-            detailerName,
-            detailerPhone,
-            date,
-            time,
-            bookingUrl,
-          });
-          await fetch('/api/send-email', {
+      const response = await fetch('/api/appointments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: formData.clientEmail.trim(),
-              subject,
-              text,
-              html,
-            }),
+        body: JSON.stringify({ detailerId: detailer!.uid, appointmentData }),
           });
-        } catch (err) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      const result = await response.json();
+      if (!result.success) {
+        setError(result.error || 'Failed to submit booking. Please try again.');
+        if (result.error?.includes('Failed to send appointment confirmation email')) {
           setToastMessage('Appointment booked, but failed to send confirmation email.');
           setShowToast(true);
         }
+        return;
       }
       setBookingSuccess(true);
-      
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error creating appointment:', err);
       setError('Failed to submit booking. Please try again.');
     } finally {
@@ -656,12 +632,6 @@ export default function BookingPage() {
                     <option value="Van">Van</option>
                     <option value="Coupe">Coupe</option>
                     <option value="Convertible">Convertible</option>
-                    <option value="Wagon">Wagon</option>
-                    <option value="Hatchback">Hatchback</option>
-                    <option value="Sports Car">Sports Car</option>
-                    <option value="Luxury Car">Luxury Car</option>
-                    <option value="Electric Vehicle">Electric Vehicle</option>
-                    <option value="Hybrid">Hybrid</option>
                     <option value="Motorcycle">Motorcycle</option>
                     <option value="RV">RV</option>
                     <option value="Boat">Boat</option>

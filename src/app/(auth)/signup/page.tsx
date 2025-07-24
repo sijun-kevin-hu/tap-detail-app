@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { createUserWithEmailAndPassword, sendEmailVerification, signOut} from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -101,8 +101,13 @@ export default function Signup() {
             // Create base services for the new detailer
             await createBaseServices(userCredential.user.uid);
 
-            // Send email verification
-            await sendEmailVerification(userCredential.user);
+            // Send custom verification email via API route
+            await fetch('/api/send-verification-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email, uid: userCredential.user.uid }),
+            });
+
             alert('Email verification sent. Please check your email to verify your account.');
             await signOut(auth);
             

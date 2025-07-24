@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
@@ -53,11 +53,15 @@ export default function Login() {
         const user = auth.currentUser;
         if (user && !user.emailVerified) {
           try {
-            await sendEmailVerification(user);
-            alert("Verification email resent!");
+            await fetch('/api/send-verification-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: user.email, uid: user.uid }),
+            });
+            alert('Verification email resent!');
           } catch (err) {
-            console.error("Error resending email:", err);
-            alert("Could not resend email. Try again later.");
+            console.error('Error resending email:', err);
+            alert('Could not resend email. Try again later.');
           }
         } else {
           alert("You're either not logged in or already verified.");

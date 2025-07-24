@@ -44,16 +44,9 @@ export {
   autoCreateClientFromAppointment
 } from './firestore-clients';
 
-// Firestore appointment exports
+// Firestore appointment exports (client-safe only)
 export {
   getAppointments,
   getAppointmentsByStatus,
-  createAppointment,
-  updateAppointment,
-  deleteAppointment,
-  getAppointment,
-  updateAppointmentStatus,
-  type Appointment,
-  type NewAppointment,
-  type FirestoreAppointment
+  getAppointmentsForDate
 } from './firestore-appointments'; 

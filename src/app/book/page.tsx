@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { getActiveDetailers } from '@/lib/firebase';
+import { getActiveDetailers } from '@/lib/firebase/firestore-detailers';
 import Image from 'next/image';
 import Link from 'next/link';
 import NavBar from '@/components/NavBar';

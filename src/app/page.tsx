@@ -23,11 +23,11 @@ export default function Home() {
             <section className="flex-1 flex flex-col justify-center items-center px-4 py-12 sm:py-20 text-center relative overflow-hidden">
                 <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
                     <svg width="100%" height="100%" className="absolute left-0 top-0 opacity-10" style={{zIndex:0}}><circle cx="80" cy="80" r="80" fill="#6366F1" /></svg>
-                </div>
+                            </div>
                 <HeroIllustration />
                 <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-4 leading-tight relative z-10">
                     Ditch the Notebook.<br className="hidden sm:inline" /> Run Your Detailing Business Simply.
-                </h1>
+                            </h1>
                 <p className="text-base sm:text-lg text-indigo-700 font-semibold mb-2 relative z-10">Perfect for solo detailers & small teams (1-3 people)</p>
                 <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl mx-auto relative z-10">
                     Tap Detail is the easiest way for owner-operators and small teams to track jobs, clients, and appointments—no complicated software, no learning curve. Just what you need, right on your phone.
@@ -56,12 +56,12 @@ export default function Home() {
                             <svg className="h-8 w-8 text-purple-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 018 0v2m-4-4a4 4 0 00-8 0v2a4 4 0 008 0v-2z" /></svg>
                             <h3 className="font-semibold text-lg mb-1">Simple Client List</h3>
                             <p className="text-gray-600 text-sm">See all your clients and their job history at a glance. No spreadsheets needed.</p>
-                        </div>
+                            </div>
                         <div className="bg-gradient-to-br from-yellow-100 to-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow-lg">
                             <svg className="h-8 w-8 text-yellow-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17a4 4 0 004-4V5a4 4 0 00-8 0v8a4 4 0 004 4z" /></svg>
                             <h3 className="font-semibold text-lg mb-1">All-in-One Dashboard</h3>
                             <p className="text-gray-600 text-sm">Track jobs, earnings, and appointments—no clutter, just what matters.</p>
-                        </div>
+                            </div>
                         <div className="bg-gradient-to-br from-blue-100 to-indigo-50 rounded-xl p-6 flex flex-col items-center text-center shadow-lg sm:col-span-2">
                             <svg className="h-8 w-8 text-blue-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3m10 0h3a1 1 0 001-1V7a1 1 0 00-1-1h-3m-10 0H4a1 1 0 00-1 1z" /></svg>
                             <h3 className="font-semibold text-lg mb-1">Mobile & Effortless</h3>
@@ -138,14 +138,14 @@ export default function Home() {
             {/* Footer */}
             <footer className="bg-white border-t border-gray-200 py-6 mt-auto">
                 <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center">
-                    <div className="flex items-center mb-4 sm:mb-0">
-                        <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
+                        <div className="flex items-center mb-4 sm:mb-0">
+                            <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <span className="text-lg font-semibold text-gray-900">Tap Detail</span>
                         </div>
-                        <span className="text-lg font-semibold text-gray-900">Tap Detail</span>
-                    </div>
                     <div className="text-sm text-gray-600">© 2024 Tap Detail. All rights reserved.</div>
                 </div>
             </footer>

@@ -17,57 +17,12 @@ import {
 } from 'firebase/firestore';
 import { db } from './client-app';
 import { autoCreateClientFromAppointment } from './firestore-clients';
+import { Appointment } from '@/lib/models/appointment';
 
 // Types for appointment data
-export interface Appointment {
-  id: string;
-  detailerId: string;
-  assignedDetailerId?: string;
-  clientName: string;
-  clientEmail: string;
-  clientPhone: string;
-  carType: string;
-  carMake?: string;
-  carModel?: string;
-  carYear?: string;
-  service: string;
-  price: number;
-  date: string;
-  time: string;
-  address: string;
-  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'archived';
-  notes?: string;
-  createdAt: string;
-  updatedAt?: string;
-  deletedAt?: string;
-  reminderSent?: boolean;
-  reminderSentAt?: string;
-  estimatedDuration?: number;
-  actualDuration?: number;
-  paymentStatus?: 'pending' | 'paid' | 'refunded';
-  paymentMethod?: string;
-}
-
 export interface FirestoreAppointment extends Omit<Appointment, 'createdAt' | 'updatedAt'> {
   createdAt: Timestamp | FieldValue | Date;
   updatedAt: Timestamp | FieldValue | Date;
-}
-
-export interface NewAppointment {
-  service: string;
-  clientName: string;
-  clientEmail: string;
-  clientPhone: string;
-  carType: string;
-  carMake?: string;
-  carModel?: string;
-  carYear?: string;
-  date: string;
-  time: string;
-  address: string;
-  price: number;
-  notes?: string;
-  estimatedDuration?: number; // Add estimated duration from service
 }
 
 // Firestore Structure:
@@ -184,41 +139,6 @@ export const getAppointmentsByStatus = async (
   } catch (error) {
     console.error('Error fetching appointments by status:', error);
     throw new Error('Failed to fetch appointments by status');
-  }
-};
-
-/**
- * Create a new appointment
- * @param appointmentData - The appointment data to create
- * @returns Promise<string> - The new appointment document ID
- */
-export const createAppointment = async (detailerId: string, appointmentData: NewAppointment): Promise<string> => {
-  try {
-    const appointmentsRef = collection(db, 'detailers', detailerId, 'appointments');
-    
-    const newAppointment: FirestoreAppointment = {
-      ...appointmentData,
-      id: '', // Will be set by Firestore
-      detailerId: detailerId,
-      status: 'pending',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    };
-    
-    const docRef = doc(appointmentsRef);
-    await setDoc(docRef, newAppointment);
-    
-    // Auto-create client if they don't exist
-    await autoCreateClientFromAppointment(detailerId, {
-      clientName: appointmentData.clientName,
-      clientPhone: appointmentData.clientPhone,
-      clientEmail: appointmentData.clientEmail,
-    });
-    
-    return docRef.id;
-  } catch (error) {
-    console.error('Error creating appointment:', error);
-    throw new Error('Failed to create appointment');
   }
 };
 
@@ -390,5 +310,32 @@ export const getAppointmentsForDate = async (detailerId: string, date: string): 
   } catch (error) {
     console.error('Error fetching appointments for date:', error);
     throw new Error('Failed to fetch appointments for date');
+  }
+}; 
+
+// Only include Firestore logic and client-safe code here
+export const saveAppointmentToDB = async (detailerId: string, appointmentData: Omit<Appointment, 'id' | 'detailerId' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+  try {
+    const appointmentsRef = collection(db, 'detailers', detailerId, 'appointments');
+    const newAppointment: any = {
+      ...appointmentData,
+      id: '', // Will be set by Firestore
+      detailerId: detailerId,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    const docRef = doc(appointmentsRef);
+    await setDoc(docRef, newAppointment);
+    // Auto-create client if they don't exist
+    await autoCreateClientFromAppointment(detailerId, {
+      clientName: appointmentData.clientName,
+      clientPhone: appointmentData.clientPhone,
+      clientEmail: appointmentData.clientEmail,
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    throw new Error('Failed to create appointment');
   }
 }; 

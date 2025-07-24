@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase/client-app";
 import Link from "next/link";
 
@@ -16,8 +15,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError("");
     try {
-      await sendPasswordResetEmail(auth, email, {
-        url: `${window.location.origin}/login`,
+      await fetch('/api/send-password-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       });
       setSuccess(true);
     } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
