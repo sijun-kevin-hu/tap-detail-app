@@ -146,7 +146,7 @@ export default function Home() {
                             </div>
                             <span className="text-lg font-semibold text-gray-900">Tap Detail</span>
                         </div>
-                    <div className="text-sm text-gray-600">© 2024 Tap Detail. All rights reserved.</div>
+                    <div className="text-sm text-gray-600">© 2025 Tap Detail. All rights reserved.</div>
                 </div>
             </footer>
         </div>
