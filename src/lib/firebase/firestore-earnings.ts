@@ -84,7 +84,8 @@ export async function syncEarningForAppointment(detailerId: string, appointment:
   status: string;
 }) {
   const earning = await findEarningByAppointmentId(detailerId, appointment.id);
-  const shouldHaveEarning = ["completed", "archived"].includes(appointment.status) && appointment.price != null;
+  // Only generate earning if appointment is completed
+  const shouldHaveEarning = appointment.status === "completed" && appointment.price != null;
   if (shouldHaveEarning && !earning) {
     await addEarning(detailerId, {
       appointmentId: appointment.id,

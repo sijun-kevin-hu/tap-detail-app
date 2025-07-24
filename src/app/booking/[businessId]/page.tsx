@@ -15,7 +15,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { Appointment } from '@/lib/models/appointment';
 
 interface BookingForm {
   clientName: string;
@@ -26,6 +25,7 @@ interface BookingForm {
   carModel?: string;
   carYear?: string;
   notes: string;
+  address: string; // Add address field
 }
 
 interface SelectedDateTime {
@@ -56,7 +56,8 @@ export default function BookingPage() {
     carMake: '',
     carModel: '',
     carYear: '',
-    notes: ''
+    notes: '',
+    address: '', // Add address field
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -178,6 +179,11 @@ export default function BookingPage() {
       setShowToast(true);
       return false;
     }
+    if (!formData.address.trim()) {
+      setToastMessage('Please enter the service location');
+      setShowToast(true);
+      return false;
+    }
     
     // Validate date format and is in the future
     const selectedDate = new Date(`${selectedDateTime.date}T${selectedDateTime.time}`);
@@ -228,7 +234,7 @@ export default function BookingPage() {
         carYear: formData.carYear || '',
         date: selectedDateTime.date,
         time: selectedDateTime.time,
-        address: '', // Will be filled by detailer
+        address: formData.address.trim(), // Store as address
         price: parseFloat(selectedService!.price),
         notes: formData.notes.trim(),
         estimatedDuration: selectedService!.duration // Include service duration
@@ -678,6 +684,19 @@ export default function BookingPage() {
                   </div>
                 </div>
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Service Location *
+              </label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => handleFormChange('address', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter the service address or location"
+                required
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

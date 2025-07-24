@@ -8,13 +8,15 @@ interface StatusDropdownProps {
   onStatusChange: (status: AppointmentStatus) => void;
   disabled?: boolean;
   className?: string;
+  allowedTransitions?: AppointmentStatus[];
 }
 
 export default function StatusDropdown({
   currentStatus,
   onStatusChange,
   disabled = false,
-  className = ''
+  className = '',
+  allowedTransitions
 }: StatusDropdownProps) {
   const getStatusLabel = (status: AppointmentStatus) => {
     switch (status) {
@@ -26,6 +28,8 @@ export default function StatusDropdown({
       default: return status;
     }
   };
+
+  const options = allowedTransitions || APPOINTMENT_STATUSES;
 
   return (
     <div className={`relative ${className}`}>
@@ -41,7 +45,7 @@ export default function StatusDropdown({
           ${getStatusColor(currentStatus)}
         `}
       >
-        {APPOINTMENT_STATUSES.map((status) => (
+        {options.map((status) => (
           <option key={status} value={status}>
             {getStatusLabel(status)}
           </option>

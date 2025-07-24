@@ -12,9 +12,10 @@ interface AddAppointmentModalProps {
     onClose: () => void;
     onSuccess: () => void;
     detailerId: string;
+    isManual?: boolean;
 }
 
-export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detailerId }: AddAppointmentModalProps) {
+export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detailerId, isManual = false }: AddAppointmentModalProps) {
     const [formData, setFormData] = useState({
         clientName: '',
         clientEmail: '',
@@ -213,7 +214,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
             const response = await fetch('/api/appointments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ detailerId, appointmentData }),
+                body: JSON.stringify({ detailerId, appointmentData, isManual }),
             });
             const result = await response.json();
             if (!result.success) {

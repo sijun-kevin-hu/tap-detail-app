@@ -10,6 +10,10 @@ import AddAppointmentModal from '@/components/appointments/AddAppointmentModal';
 import EditAppointmentModal from '@/components/appointments/EditAppointmentModal';
 import { Appointment } from '@/lib/models';
 import { AppointmentFormData } from '@/lib/models/appointment';
+// Remove server-side imports from the client file
+// import { sendAppointmentConfirmedEmail } from '@/lib/services/emailService';
+// import { getDoc, doc as firestoreDoc } from 'firebase/firestore';
+// import { db } from '@/lib/firebase/client-app';
 
 export default function AppointmentsPage() {
   const router = useRouter();
@@ -67,6 +71,18 @@ export default function AppointmentsPage() {
       const updated = await getAppointment(detailer.uid, appointmentId);
       if (updated) {
         await syncEarningForAppointment(detailer.uid, updated);
+        // Send confirmation email if status changed to confirmed and clientEmail exists
+        if (newStatus === 'confirmed' && updated.clientEmail) {
+          // Call new API route to send confirmation email
+          await fetch('/api/send-confirmation-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              detailerId: detailer.uid,
+              appointment: updated
+            })
+          });
+        }
       }
       // Refresh appointments
       fetchAppointments();
@@ -281,6 +297,7 @@ export default function AppointmentsPage() {
             fetchAppointments();
           }}
           detailerId={detailer?.uid || ''}
+          isManual={true}
         />
 
         {/* Edit Appointment Modal */}

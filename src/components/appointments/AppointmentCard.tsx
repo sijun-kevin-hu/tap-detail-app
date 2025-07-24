@@ -27,6 +27,7 @@ export default function AppointmentCard({
 }: AppointmentCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteAction, setDeleteAction] = useState<'archive' | 'delete'>('archive');
+  const [statusLoading, setStatusLoading] = useState(false); // Add loading state
 
   const handleDeleteClick = () => {
     setDeleteAction('archive');
@@ -37,6 +38,18 @@ export default function AppointmentCard({
     onDelete(appointment.id, deleteAction);
     setShowDeleteModal(false);
   };
+
+  // Allow changing between confirmed, in-progress, and completed freely
+  function getAllowedTransitions(currentStatus: Appointment['status']): Appointment['status'][] {
+    switch (currentStatus) {
+      case 'confirmed':
+      case 'in-progress':
+      case 'completed':
+        return ['confirmed', 'in-progress', 'completed'];
+      default:
+        return [currentStatus];
+    }
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
@@ -52,12 +65,52 @@ export default function AppointmentCard({
           )}
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <StatusDropdown
-            currentStatus={appointment.status}
-            onStatusChange={(status) => onStatusChange(appointment.id, status)}
-            disabled={false}
-            className="w-full sm:w-auto min-w-[140px]"
-          />
+          {/* Pending: indicator + Accept/Decline */}
+          {appointment.status === 'pending' ? (
+            <div className="flex flex-col gap-2 w-full sm:w-auto min-w-[180px]">
+              <div className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-lg text-center mb-1">
+                Pending your approval to schedule
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="btn-primary flex-1"
+                  onClick={async () => {
+                    if (statusLoading) return;
+                    setStatusLoading(true);
+                    await onStatusChange(appointment.id, 'confirmed');
+                    setStatusLoading(false);
+                  }}
+                  disabled={statusLoading}
+                >
+                  {statusLoading ? 'Processing...' : 'Accept'}
+                </button>
+                <button
+                  className="btn-secondary flex-1"
+                  onClick={async () => {
+                    if (statusLoading) return;
+                    setStatusLoading(true);
+                    await onStatusChange(appointment.id, 'archived');
+                    setStatusLoading(false);
+                  }}
+                  disabled={statusLoading}
+                >
+                  {statusLoading ? 'Processing...' : 'Decline'}
+                </button>
+              </div>
+            </div>
+          ) : appointment.status === 'archived' ? (
+            <div className="bg-gray-200 text-gray-600 text-xs font-semibold px-3 py-1 rounded-lg text-center min-w-[140px]">
+              Archived
+            </div>
+          ) : (
+            <StatusDropdown
+              currentStatus={appointment.status}
+              onStatusChange={(status) => onStatusChange(appointment.id, status)}
+              disabled={false}
+              className="w-full sm:w-auto min-w-[140px]"
+              allowedTransitions={getAllowedTransitions(appointment.status)}
+            />
+          )}
           <div className="flex gap-1 justify-center sm:justify-start">
             <button
               onClick={onEdit}
@@ -145,6 +198,7 @@ export default function AppointmentCard({
                 <div>
                   <div className="font-medium text-gray-900">Archive</div>
                   <div className="text-sm text-gray-500">Move to archived appointments</div>
+                  <div className="text-xs text-red-600 font-semibold mt-1">This action cannot be undone.</div>
                 </div>
               </label>
               
@@ -160,6 +214,7 @@ export default function AppointmentCard({
                 <div>
                   <div className="font-medium text-gray-900">Permanently Delete</div>
                   <div className="text-sm text-gray-500">Remove from database (cannot be undone)</div>
+                  <div className="text-xs text-red-600 font-semibold mt-1">This action cannot be undone.</div>
                 </div>
               </label>
             </div>
