@@ -317,7 +317,7 @@ export const getAppointmentsForDate = async (detailerId: string, date: string): 
 export const saveAppointmentToDB = async (detailerId: string, appointmentData: Omit<Appointment, 'id' | 'detailerId' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> => {
   try {
     const appointmentsRef = collection(db, 'detailers', detailerId, 'appointments');
-    const newAppointment: any = {
+    const newAppointment: Appointment = {
       ...appointmentData,
       id: '', // Will be set by Firestore
       detailerId: detailerId,

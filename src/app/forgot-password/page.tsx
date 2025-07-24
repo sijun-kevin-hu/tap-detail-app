@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { auth } from "@/lib/firebase/client-app";
 import Link from "next/link";
 
 export default function ForgotPasswordPage() {

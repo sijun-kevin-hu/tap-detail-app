@@ -5,7 +5,6 @@ import { CAR_TYPES } from '@/lib/models';
 import { formatPhone, validateAppointmentDate, validateAppointmentTime } from '@/utils/formatters';
 import UnifiedDateTimePicker from '../booking/UnifiedDateTimePicker';
 import { getServices } from '@/lib/firebase/firestore-settings';
-import { createAppointment } from '@/lib/firebase/firestore-appointments';
 import { ServiceMenu } from '@/lib/models/settings';
 
 interface AddAppointmentModalProps {
@@ -193,7 +192,8 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
             // Get the selected service to include duration
             const selectedService = services.find(s => s.name === formData.service);
             
-            await createAppointment(detailerId, {
+            // Use API route instead of createAppointment
+            const appointmentData = {
                 clientName: formData.clientName,
                 clientEmail: formData.clientEmail,
                 clientPhone: formData.clientPhone,
@@ -208,7 +208,17 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                 notes: formData.notes,
                 price: parseFloat(formData.price), // Parse price to float
                 estimatedDuration: selectedService?.duration || 60
+            };
+
+            const response = await fetch('/api/appointments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ detailerId, appointmentData }),
             });
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to create appointment.');
+            }
 
             handleSuccess();
         } catch (error: unknown) {

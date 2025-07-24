@@ -1,6 +1,6 @@
-import { Appointment } from '@/lib/firebase/firestore-appointments';
 import { AvailabilitySettings } from '@/lib/models/detailer';
 import { ServiceMenu } from '@/lib/models/settings';
+import { Appointment } from '@/lib/models/appointment';
 
 export interface TimeSlot {
   start: string; // ISO string

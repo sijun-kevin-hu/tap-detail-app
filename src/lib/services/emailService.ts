@@ -36,7 +36,7 @@ export async function sendAppointmentConfirmationEmail(
       location,
       bookingUrl,
     });
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: 'Tap Detail <noreply@tapdetail.com>',
       to,
       subject,

@@ -6,7 +6,7 @@ import PasswordResetEmail from '@/lib/templates/PasswordResetEmail';
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM_EMAIL = 'Tap Detail <noreply@tapdetail.com>';
 
-export async function sendCustomEmailVerification(userEmail: string, userId: string) {
+export async function sendCustomEmailVerification(userEmail: string) {
   const actionCodeSettings = {
     url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/login`,
     handleCodeInApp: false,

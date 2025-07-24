@@ -4,12 +4,9 @@ import { sendCustomEmailVerification } from '@/lib/services/authEmailService';
 export async function POST(req: NextRequest) {
   try {
     const { email, uid } = await req.json();
-    console.log('Sending verification email to:', email, 'uid:', uid);
-    await sendCustomEmailVerification(email, uid);
-    console.log('Verification email sent (no error thrown)');
+    await sendCustomEmailVerification(email);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Verification email error:', error);
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     return NextResponse.json({ success: false, error: error?.message || 'Unknown error' }, { status: 500 });
   }
 } 

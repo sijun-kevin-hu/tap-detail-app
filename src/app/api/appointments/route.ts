@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       }
     }
     return NextResponse.json({ success: true, id });
-  } catch (error: any) {
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     return NextResponse.json({ success: false, error: error?.message || 'Unknown error' }, { status: 500 });
   }
 } 

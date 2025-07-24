@@ -15,6 +15,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { Appointment } from '@/lib/models/appointment';
 
 interface BookingForm {
   clientName: string;
@@ -216,7 +217,7 @@ export default function BookingPage() {
       setSubmitting(true);
       setError(null);
       
-      const appointmentData: any = {
+      const appointmentData = {
         service: selectedService!.name,
         clientName: formData.clientName.trim(),
         clientEmail: formData.clientEmail.trim(),
@@ -248,7 +249,7 @@ export default function BookingPage() {
         return;
       }
       setBookingSuccess(true);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error creating appointment:', err);
       setError('Failed to submit booking. Please try again.');
     } finally {

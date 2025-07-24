@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     const { email } = await req.json();
     await sendCustomPasswordReset(email);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     return NextResponse.json({ success: false, error: error?.message || 'Unknown error' }, { status: 500 });
   }
 } 
