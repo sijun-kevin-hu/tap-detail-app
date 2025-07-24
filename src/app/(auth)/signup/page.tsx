@@ -34,10 +34,20 @@ export default function Signup() {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        if (name === 'phone') {
+            // Only allow digits, max 10
+            const digits = value.replace(/\D/g, '').slice(0, 10);
+            // Format as (XXX) XXX-XXXX
+            let formatted = digits;
+            if (digits.length > 3 && digits.length <= 6) {
+                formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+            } else if (digits.length > 6) {
+                formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+            }
+            setFormData(prev => ({ ...prev, [name]: formatted }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const validateForm = () => {
@@ -58,6 +68,17 @@ export default function Signup() {
 
         if (!formData.email.includes('@')) {
             setError('Please enter a valid email address');
+            return false;
+        }
+
+        if (!formData.phone) {
+            setError('Please fill in all fields');
+            return false;
+        }
+        // Validate phone: must be 10 digits
+        const digits = formData.phone.replace(/\D/g, '');
+        if (digits.length !== 10) {
+            setError('Please enter a valid 10-digit US phone number');
             return false;
         }
 
@@ -280,7 +301,7 @@ export default function Signup() {
                                     value={formData.phone}
                                     onChange={handleInputChange}
                                     className="input-modern"
-                                    placeholder="Enter phone number"
+                                    placeholder="(555) 123-4567"
                                 />
                             </div>
 
