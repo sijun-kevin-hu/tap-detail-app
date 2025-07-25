@@ -6,6 +6,7 @@ import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
+import CarLogo from '@/components/CarLogo';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -98,10 +99,8 @@ export default function Login() {
 
                 {/* Logo and Header */}
                 <div className="text-center mb-8">
-                    <div className="mx-auto h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg mb-6">
-                        <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
+                    <div className="mx-auto w-24 h-24 bg-gradient-to-br from-blue-200 via-indigo-100 to-blue-50 rounded-full flex items-center justify-center shadow-xl mb-6 p-3">
+                        <CarLogo className="w-20 h-16" />
                     </div>
                     <h1 className="text-heading text-gray-900 mb-2">
                         Welcome Back
