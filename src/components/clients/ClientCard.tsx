@@ -45,7 +45,7 @@ export default function ClientCard({ client, onClick, formatDate }: ClientCardPr
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-3 text-center">
+      <div className="grid grid-cols-2 gap-3 text-center">
         <div className="bg-gray-50 rounded-lg p-2">
           <div className="text-lg font-semibold text-gray-900">
             {client.totalAppointments || 0}
@@ -57,12 +57,6 @@ export default function ClientCard({ client, onClick, formatDate }: ClientCardPr
             {client.currentAppointments?.length || 0}
           </div>
           <div className="text-xs text-gray-500">Upcoming</div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-2">
-          <div className="text-lg font-semibold text-gray-900">
-            ${client.totalSpent?.toFixed(0) || 0}
-          </div>
-          <div className="text-xs text-gray-500">Total Spent</div>
         </div>
       </div>
 

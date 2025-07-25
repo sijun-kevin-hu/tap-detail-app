@@ -6,7 +6,9 @@ import {
   updateClient,
   deleteClient,
 } from '@/lib/firebase/firestore-clients';
+import { getAppointments } from '@/lib/firebase/firestore-appointments';
 import { Client, ClientFormData } from '@/lib/models/client';
+import { Appointment } from '@/lib/models/appointment';
 
 export function useClients() {
   const { firebaseUser } = useAuth();
@@ -29,10 +31,10 @@ export function useClients() {
   });
   const [formErrors, setFormErrors] = useState<string[]>([]);
 
-  // Load clients
+  // Load clients, appointments, and earnings
   useEffect(() => {
     if (firebaseUser?.uid) {
-      (async () => { await loadClients(); })();
+      (async () => { await loadClientsAndStats(); })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseUser?.uid]);
@@ -51,15 +53,58 @@ export function useClients() {
     }
   }, [clients, searchTerm]);
 
-  const loadClients = async () => {
+  // Helper: match appointment to client
+  const isAppointmentForClient = (client: Client, appt: Appointment) => {
+    // Use phone as the unique identifier if present, otherwise fallback to email
+    if (client.phone && appt.clientPhone) {
+      return client.phone === appt.clientPhone;
+    } else if (client.email && appt.clientEmail) {
+      return client.email === appt.clientEmail;
+    }
+    return false;
+  };
+
+  // Main loader
+  const loadClientsAndStats = async () => {
     if (!firebaseUser?.uid) return;
-    
     try {
       setLoading(true);
-      const clientsData = await getClients(firebaseUser.uid);
-      setClients(clientsData);
+      // Fetch all in parallel
+      const [clientsData, appointments] = await Promise.all([
+        getClients(firebaseUser.uid),
+        getAppointments(firebaseUser.uid),
+      ]);
+      // Enrich clients
+      const enrichedClients = clientsData.map(client => {
+        // Appointments for this client
+        const clientAppointments = appointments.filter(appt => isAppointmentForClient(client, appt));
+        const totalAppointments = clientAppointments.length;
+        // Map to AppointmentSummary[] for currentAppointments
+        const currentAppointments = clientAppointments
+          .filter(appt => ['pending', 'confirmed', 'in-progress'].includes(appt.status))
+          .map(appt => ({
+            id: appt.id,
+            service: appt.service,
+            date: appt.date,
+            time: appt.time,
+            price: appt.price,
+            status: appt.status as 'scheduled' | 'in-progress' | 'completed' | 'cancelled' | 'archived',
+            address: appt.address,
+          }));
+        // Last service date
+        const lastServiceDate = clientAppointments.length > 0
+          ? clientAppointments.reduce((latest, appt) => appt.date > latest ? appt.date : latest, '')
+          : undefined;
+        return {
+          ...client,
+          totalAppointments,
+          currentAppointments,
+          lastServiceDate,
+        };
+      });
+      setClients(enrichedClients);
     } catch (error) {
-      console.error('Error loading clients:', error);
+      console.error('Error loading clients or stats:', error);
       setToastMessage('Failed to load clients');
       setShowToast(true);
     } finally {
@@ -84,7 +129,7 @@ export function useClients() {
       setToastMessage('Client added successfully!');
       setShowToast(true);
       resetForm();
-      loadClients(); // Reload clients
+      loadClientsAndStats(); // Reload clients
     } catch (error) {
       console.error('Error adding client:', error);
       setToastMessage('Failed to add client');
@@ -102,7 +147,7 @@ export function useClients() {
       await updateClient(firebaseUser.uid, clientId, updatedData);
       setToastMessage('Client updated successfully!');
       setShowToast(true);
-      loadClients(); // Reload clients
+      loadClientsAndStats(); // Reload clients
     } catch (error) {
       console.error('Error updating client:', error);
       setToastMessage('Failed to update client');
@@ -122,7 +167,7 @@ export function useClients() {
       await deleteClient(firebaseUser.uid, clientId);
       setToastMessage('Client deleted successfully!');
       setShowToast(true);
-      loadClients(); // Reload clients
+      loadClientsAndStats(); // Reload clients
     } catch (error) {
       console.error('Error deleting client:', error);
       setToastMessage('Failed to delete client');
@@ -173,6 +218,6 @@ export function useClients() {
     handleUpdateClient,
     handleDeleteClient,
     resetForm,
-    loadClients
+    loadClientsAndStats
   };
 } 
