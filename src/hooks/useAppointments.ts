@@ -31,7 +31,7 @@ export function useAppointments() {
     try {
       setLoading(true);
       const { appointments, lastDoc: newLastDoc } = await getAppointments(detailer.uid, { limitNum: PAGE_SIZE, startAfterDoc: reset ? undefined : lastDoc });
-      setAppointments(prev => reset ? appointments : [...prev, ...appointments]);
+      setAppointments(appointments); // Always replace with latest from Firestore
       setLastDoc(newLastDoc);
       setHasMore(!!newLastDoc && appointments.length === PAGE_SIZE);
     } catch (error) {
@@ -39,7 +39,7 @@ export function useAppointments() {
     } finally {
       setLoading(false);
     }
-  }, [detailer?.uid, lastDoc]);
+  }, [detailer?.uid]); // Only depend on detailer?.uid
 
   useEffect(() => {
     if (detailer?.uid) {
