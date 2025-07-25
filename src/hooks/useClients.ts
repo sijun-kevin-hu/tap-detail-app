@@ -6,7 +6,7 @@ import {
   updateClient,
   deleteClient,
 } from '@/lib/firebase/firestore-clients';
-import { getAppointments } from '@/lib/firebase/firestore-appointments';
+import { getAllAppointments } from '@/lib/firebase/firestore-appointments';
 import { Client, ClientFormData } from '@/lib/models/client';
 import { Appointment } from '@/lib/models/appointment';
 
@@ -72,7 +72,7 @@ export function useClients() {
       // Fetch all in parallel
       const [clientsData, appointments] = await Promise.all([
         getClients(firebaseUser.uid),
-        getAppointments(firebaseUser.uid),
+        getAllAppointments(firebaseUser.uid),
       ]);
       // Enrich clients
       const enrichedClients = clientsData.map(client => {

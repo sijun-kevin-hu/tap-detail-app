@@ -3,6 +3,7 @@ import { useAuth } from '@/lib/auth-context';
 import { getAppointments, updateAppointment, deleteAppointment } from '@/lib/firebase/firestore-appointments';
 import { Appointment, AppointmentFilters } from '@/lib/models';
 import { formatDate, formatTime, getStatusColor } from '@/utils/formatters';
+import { QueryDocumentSnapshot } from 'firebase/firestore';
 
 export function useAppointments() {
   const { detailer } = useAuth();
@@ -21,24 +22,28 @@ export function useAppointments() {
   const [editLoading, setEditLoading] = useState(false);
   const [dateRangeType, setDateRangeType] = useState<'all' | '7' | '30' | 'next7' | 'next30' | 'custom'>('all');
   const [customRange, setCustomRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
+  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 50;
 
-  const fetchAppointments = useCallback(async () => {
+  const fetchAppointments = useCallback(async (reset = false) => {
     if (!detailer?.uid) return;
-    
     try {
       setLoading(true);
-      const appointmentsList = await getAppointments(detailer.uid);
-      setAppointments(appointmentsList || []);
+      const { appointments, lastDoc: newLastDoc } = await getAppointments(detailer.uid, { limitNum: PAGE_SIZE, startAfterDoc: reset ? undefined : lastDoc });
+      setAppointments(prev => reset ? appointments : [...prev, ...appointments]);
+      setLastDoc(newLastDoc);
+      setHasMore(!!newLastDoc && appointments.length === PAGE_SIZE);
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
       setLoading(false);
     }
-  }, [detailer?.uid]);
+  }, [detailer?.uid, lastDoc]);
 
   useEffect(() => {
     if (detailer?.uid) {
-      fetchAppointments();
+      fetchAppointments(true);
     }
   }, [detailer?.uid, fetchAppointments]);
 
@@ -195,6 +200,8 @@ export function useAppointments() {
     handlePermanentDelete,
     openEditModal,
     handleEditSave,
+    loadMoreAppointments: () => hasMore && fetchAppointments(),
+    hasMore,
     
     // Utilities
     getStatusColor,
