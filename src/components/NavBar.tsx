@@ -11,9 +11,6 @@ export default function NavBar() {
                     <Logo />
                     {/* Desktop Nav */}
                     <div className="hidden md:flex items-center space-x-4">
-                        <Link href="/book" className="text-gray-700 hover:text-gray-900 font-medium transition duration-200">
-                            Find Detailers
-                        </Link>
                         <Link href="/login" className="text-gray-700 hover:text-gray-900 font-medium transition duration-200">
                             Login
                         </Link>
@@ -43,9 +40,6 @@ export default function NavBar() {
             {menuOpen && (
                 <div className="md:hidden bg-white border-t border-gray-100 shadow-lg absolute w-full left-0 top-16 z-20 animate-fade-in">
                     <div className="flex flex-col py-2 px-4 gap-2">
-                        <Link href="/book" className="py-2 px-2 rounded text-gray-700 hover:bg-indigo-50 transition" onClick={() => setMenuOpen(false)}>
-                            Find Detailers
-                        </Link>
                         <Link href="/login" className="py-2 px-2 rounded text-gray-700 hover:bg-indigo-50 transition" onClick={() => setMenuOpen(false)}>
                             Login
                         </Link>
