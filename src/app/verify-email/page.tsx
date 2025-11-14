@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { applyActionCode } from 'firebase/auth';
 import Link from 'next/link';
@@ -30,6 +30,14 @@ const resolveRedirectTarget = (continueUrl: string | null) => {
 };
 
 export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
+  );
+}
+
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<VerificationState>('verifying');
   const [error, setError] = useState('');
@@ -146,6 +154,22 @@ export default function VerifyEmailPage() {
               </Link>
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VerifyEmailFallback() {
+  return (
+    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="card p-8 text-center space-y-6">
+          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-200 via-indigo-100 to-blue-50 rounded-full flex items-center justify-center shadow-lg">
+            <CarLogo className="w-14 h-10" />
+          </div>
+          <h1 className="text-heading text-gray-900">Loading…</h1>
+          <p className="text-caption text-gray-600">Hang tight while we prepare your verification.</p>
         </div>
       </div>
     </div>
