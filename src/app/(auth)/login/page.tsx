@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { FirebaseError } from 'firebase/app';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
@@ -39,8 +40,21 @@ export default function Login() {
             // Don't redirect here - let the useEffect handle it
         } catch (error: unknown) {
             console.error('Login error:', error);
-            if (typeof error === 'object' && error && 'message' in error) {
-                setError((error as { message?: string }).message || 'Failed to login. Please try again.');
+            if (error instanceof FirebaseError) {
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                    case 'auth/invalid-login-credentials':
+                    case 'auth/invalid-email':
+                        setError('Incorrect email or password. Double-check your credentials and try again.');
+                        break;
+                    case 'auth/too-many-requests':
+                        setError('Too many login attempts. Please wait a moment before trying again.');
+                        break;
+                    default:
+                        setError('Failed to login. Please try again.');
+                }
             } else {
                 setError('Failed to login. Please try again.');
             }
