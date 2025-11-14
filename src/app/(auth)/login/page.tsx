@@ -32,7 +32,7 @@ export default function Login() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             if (!userCredential.user.emailVerified) {
-                setError('Your email isn\'t verified. Check your inbox or resend verification below.');
+                setError('Your email isn\'t verified. Check your inbox (or junk folder if it\'s hiding) or resend verification below.');
                 setShowResendVerification(true);
                 return;
             }
@@ -59,7 +59,7 @@ export default function Login() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email: user.email, uid: user.uid }),
             });
-            alert('Verification email resent!');
+            alert('Verification email resent. If it stays missing, a quick junk-folder peek usually finds it.');
           } catch (err) {
             console.error('Error resending email:', err);
             alert('Could not resend email. Try again later.');

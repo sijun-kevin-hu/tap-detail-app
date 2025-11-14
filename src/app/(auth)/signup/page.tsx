@@ -129,7 +129,7 @@ export default function Signup() {
                 body: JSON.stringify({ email: formData.email, uid: userCredential.user.uid }),
             });
 
-            alert('Email verification sent. Please check your email to verify your account.');
+            alert('Email verification sent. Please check your email (and junk folder if it\'s shy) to verify your account.');
             await signOut(auth);
             
             // Redirect to login page after successful signup
