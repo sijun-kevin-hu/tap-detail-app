@@ -397,14 +397,7 @@ export default function BookingPage() {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <button
-              onClick={handleBackButton}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
+
             <h1 className="text-lg font-semibold text-gray-900">Book Service</h1>
             <div className="flex gap-2">
               <button
@@ -544,8 +537,8 @@ export default function BookingPage() {
                 key={service.documentId}
                 onClick={() => handleServiceSelect(service)}
                 className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedService?.documentId === service.documentId
-                    ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-indigo-500 bg-indigo-50'
+                  : 'border-gray-200 hover:border-gray-300'
                   }`}
               >
                 <div className="flex justify-between items-start mb-2">

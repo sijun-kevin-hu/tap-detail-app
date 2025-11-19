@@ -134,7 +134,8 @@ export default function AdminDashboard() {
             ),
             title: "View Booking Page",
             bgColor: "bg-teal-100",
-            iconColor: "text-teal-600"
+            iconColor: "text-teal-600",
+            target: "_blank"
         },
         {
             href: "/admin/settings",
@@ -255,6 +256,7 @@ export default function AdminDashboard() {
                                         title={action.title}
                                         bgColor={action.bgColor}
                                         iconColor={action.iconColor}
+                                        target={action.target}
                                     />
                                 ))}
                             </div>
