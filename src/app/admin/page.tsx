@@ -1,73 +1,93 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import QuickActionCard from '@/components/dashboard/QuickActionCard';
 import StatCard from '@/components/dashboard/StatCard';
+import AppointmentCard from '@/components/dashboard/AppointmentCard';
+import QuickActionRow from '@/components/dashboard/QuickActionRow';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import { getEarnings } from '@/lib/firebase/firestore-earnings';
 
 function getTodayDateStr() {
-  const d = new Date();
-  return d.toISOString().split('T')[0];
+    const d = new Date();
+    return d.toISOString().split('T')[0];
 }
 function getWeekStartDateStr() {
-  const d = new Date();
-  const day = d.getDay(); // 0 (Sun) - 6 (Sat)
-  const weekStart = new Date(d);
-  weekStart.setDate(d.getDate() - day); // Go back to previous Sunday
-  return weekStart.toISOString().split('T')[0];
+    const d = new Date();
+    const day = d.getDay(); // 0 (Sun) - 6 (Sat)
+    const weekStart = new Date(d);
+    weekStart.setDate(d.getDate() - day); // Go back to previous Sunday
+    return weekStart.toISOString().split('T')[0];
 }
 function getWeekEndDateStr() {
-  const d = new Date();
-  const day = d.getDay();
-  const weekEnd = new Date(d);
-  weekEnd.setDate(d.getDate() + (6 - day)); // Go forward to next Saturday
-  return weekEnd.toISOString().split('T')[0];
+    const d = new Date();
+    const day = d.getDay();
+    const weekEnd = new Date(d);
+    weekEnd.setDate(d.getDate() + (6 - day)); // Go forward to next Saturday
+    return weekEnd.toISOString().split('T')[0];
 }
 
 export default function AdminDashboard() {
     const { detailer } = useAuth();
     const detailerId = detailer?.uid;
     const [statsData, setStatsData] = useState({
-      todaysAppointments: 0,
-      weeksAppointments: 0,
-      weeksEarnings: 0,
-      clients: 0,
+        todaysAppointments: 0,
+        weeksAppointments: 0,
+        weeksEarnings: 0,
+        clients: 0,
     });
+    const [todaysAppointmentsList, setTodaysAppointmentsList] = useState<Array<{
+        id: string;
+        startTime?: string;
+        vehicleYear?: string;
+        vehicleMake?: string;
+        vehicleModel?: string;
+        clientName?: string;
+        price?: number;
+        status?: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+        serviceType?: string;
+        [key: string]: unknown;
+    }>>([]);
 
     useEffect(() => {
-      async function fetchStats() {
-        if (!detailerId) return;
-        // Appointments
-        const apptCol = collection(db, 'detailers', detailerId, 'appointments');
-        const todayQ = query(apptCol, where('date', '==', getTodayDateStr()));
-        const weekQ = query(apptCol, where('date', '>=', getWeekStartDateStr()), where('date', '<=', getWeekEndDateStr()));
-        const [todaySnap, weekSnap] = await Promise.all([getDocs(todayQ), getDocs(weekQ)]);
-        // Earnings
-        const earnings = await getEarnings(detailerId, getWeekStartDateStr(), getWeekEndDateStr());
-        // Clients
-        const clientsCol = collection(db, 'detailers', detailerId, 'clients');
-        const clientsSnap = await getDocs(clientsCol);
-        setStatsData({
-          todaysAppointments: todaySnap.size,
-          weeksAppointments: weekSnap.size,
-          weeksEarnings: earnings.reduce((sum, e) => sum + (e.price || 0), 0),
-          clients: clientsSnap.size,
-        });
-      }
-      fetchStats();
+        async function fetchStats() {
+            if (!detailerId) return;
+            // Appointments
+            const apptCol = collection(db, 'detailers', detailerId, 'appointments');
+            const todayQ = query(apptCol, where('date', '==', getTodayDateStr()));
+            const weekQ = query(apptCol, where('date', '>=', getWeekStartDateStr()), where('date', '<=', getWeekEndDateStr()));
+
+            const [todaySnap, weekSnap] = await Promise.all([getDocs(todayQ), getDocs(weekQ)]);
+
+            // Get today's appointments data for the list
+            const todayDocs = todaySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setTodaysAppointmentsList(todayDocs);
+
+            // Earnings
+            const earnings = await getEarnings(detailerId, getWeekStartDateStr(), getWeekEndDateStr());
+            // Clients
+            const clientsCol = collection(db, 'detailers', detailerId, 'clients');
+            const clientsSnap = await getDocs(clientsCol);
+            setStatsData({
+                todaysAppointments: todaySnap.size,
+                weeksAppointments: weekSnap.size,
+                weeksEarnings: earnings.reduce((sum, e) => sum + (e.price || 0), 0),
+                clients: clientsSnap.size,
+            });
+        }
+        fetchStats();
     }, [detailerId]);
 
     if (!detailerId) {
-      return (
-        <ProtectedRoute requiredRole="detailer">
-          <div className="min-h-screen gradient-bg flex items-center justify-center text-gray-500">Loading...</div>
-        </ProtectedRoute>
-      );
+        return (
+            <ProtectedRoute requiredRole="detailer">
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500">Loading...</div>
+            </ProtectedRoute>
+        );
     }
 
     const quickActions = [
@@ -75,14 +95,23 @@ export default function AdminDashboard() {
             href: "/admin/appointments",
             icon: (
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
             ),
-            title: "Appointments",
-            description: "View & manage",
+            title: "New Appointment",
             bgColor: "bg-indigo-100",
-            iconColor: "text-indigo-600",
-            hoverBgColor: "bg-indigo-200"
+            iconColor: "text-indigo-600"
+        },
+        {
+            href: "/admin/clients",
+            icon: (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+            ),
+            title: "Add Client",
+            bgColor: "bg-purple-100",
+            iconColor: "text-purple-600"
         },
         {
             href: "/admin/earnings",
@@ -91,24 +120,21 @@ export default function AdminDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
             ),
-            title: "Earnings",
-            description: "Track revenue",
+            title: "View Earnings",
             bgColor: "bg-green-100",
-            iconColor: "text-green-600",
-            hoverBgColor: "bg-green-200"
+            iconColor: "text-green-600"
         },
         {
-            href: "/admin/clients",
+            href: detailer?.businessId ? `/booking/${detailer.businessId}` : "#",
             icon: (
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
             ),
-            title: "Clients",
-            description: "Manage relationships",
-            bgColor: "bg-purple-100",
-            iconColor: "text-purple-600",
-            hoverBgColor: "bg-purple-200"
+            title: "View Booking Page",
+            bgColor: "bg-teal-100",
+            iconColor: "text-teal-600"
         },
         {
             href: "/admin/settings",
@@ -119,10 +145,8 @@ export default function AdminDashboard() {
                 </svg>
             ),
             title: "Settings",
-            description: "Configure account",
             bgColor: "bg-orange-100",
-            iconColor: "text-orange-600",
-            hoverBgColor: "bg-orange-200"
+            iconColor: "text-orange-600"
         }
     ];
 
@@ -130,35 +154,24 @@ export default function AdminDashboard() {
         {
             icon: (
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
             ),
-            label: "Today's Appointments",
-            value: statsData.todaysAppointments,
-            bgColor: "bg-blue-100",
-            iconColor: "text-blue-600"
-        },
-        {
-            icon: (
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-            ),
-            label: "This Week's Appointments",
-            value: statsData.weeksAppointments,
+            label: "Revenue (This Week)",
+            value: `$${statsData.weeksEarnings.toFixed(2)}`,
             bgColor: "bg-green-100",
             iconColor: "text-green-600"
         },
         {
             icon: (
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             ),
-            label: "Earnings this week",
-            value: `$${statsData.weeksEarnings.toFixed(2)}`,
-            bgColor: "bg-yellow-100",
-            iconColor: "text-yellow-600"
+            label: "Jobs Completed",
+            value: statsData.weeksAppointments, // Using weeks appointments as a proxy for completed jobs for now
+            bgColor: "bg-blue-100",
+            iconColor: "text-blue-600"
         },
         {
             icon: (
@@ -166,7 +179,7 @@ export default function AdminDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
             ),
-            label: "Clients",
+            label: "Active Clients",
             value: statsData.clients,
             bgColor: "bg-purple-100",
             iconColor: "text-purple-600"
@@ -175,54 +188,76 @@ export default function AdminDashboard() {
 
     return (
         <ProtectedRoute requiredRole="detailer">
-            <div className="min-h-screen gradient-bg">
+            <div className="min-h-screen bg-gray-50">
                 <DashboardHeader />
 
                 {/* Main Content */}
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                    {/* Welcome Section */}
-                    <div className="mb-6 sm:mb-8">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                            Welcome back, {detailer?.firstName}! 👋
-                        </h2>
-                        <p className="text-gray-600 text-sm sm:text-base">
-                            Manage your appointments and grow your detailing business
-                        </p>
+
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        {stats.map((stat, index) => (
+                            <StatCard
+                                key={index}
+                                icon={stat.icon}
+                                label={stat.label}
+                                value={stat.value}
+                                bgColor={stat.bgColor}
+                                iconColor={stat.iconColor}
+                            />
+                        ))}
                     </div>
 
-                    {/* Quick Actions - Mobile Optimized */}
-                    <div className="mb-6 sm:mb-8">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-                            {quickActions.map((action, index) => (
-                                <QuickActionCard
-                                    key={index}
-                                    href={action.href}
-                                    icon={action.icon}
-                                    title={action.title}
-                                    description={action.description}
-                                    bgColor={action.bgColor}
-                                    iconColor={action.iconColor}
-                                    hoverBgColor={action.hoverBgColor}
-                                />
-                            ))}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Main Content Area - Recent Appointments */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Today&apos;s Schedule</h3>
+                                <Link href="/admin/appointments" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                    View All
+                                </Link>
+                            </div>
+
+                            {todaysAppointmentsList.length === 0 ? (
+                                <div className="bg-white rounded-xl p-8 text-center border border-gray-200 shadow-sm">
+                                    <p className="text-gray-500">No appointments scheduled for today.</p>
+                                    <button
+                                        onClick={() => window.location.href = '/admin/appointments'}
+                                        className="mt-4 text-indigo-600 font-medium hover:text-indigo-800"
+                                    >
+                                        + Add Appointment
+                                    </button>
+                                </div>
+                            ) : (
+                                todaysAppointmentsList.map((appt) => (
+                                    <AppointmentCard
+                                        key={appt.id}
+                                        time={appt.startTime || '00:00 AM'} // Assuming startTime exists or default
+                                        vehicle={`${appt.vehicleYear || ''} ${appt.vehicleMake || ''} ${appt.vehicleModel || ''}`}
+                                        clientName={appt.clientName || 'Unknown Client'}
+                                        price={appt.price || 0}
+                                        status={appt.status || 'pending'}
+                                        serviceType={appt.serviceType}
+                                    />
+                                ))
+                            )}
                         </div>
-                    </div>
 
-                    {/* Stats Grid - Mobile Optimized */}
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Overview</h3>
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-                            {stats.map((stat, index) => (
-                                <StatCard
-                                    key={index}
-                                    icon={stat.icon}
-                                    label={stat.label}
-                                    value={stat.value}
-                                    bgColor={stat.bgColor}
-                                    iconColor={stat.iconColor}
-                                />
-                            ))}
+                        {/* Sidebar - Quick Actions */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Quick Actions</h3>
+                            <div className="grid grid-cols-1 gap-3">
+                                {quickActions.map((action, index) => (
+                                    <QuickActionRow
+                                        key={index}
+                                        href={action.href}
+                                        icon={action.icon}
+                                        title={action.title}
+                                        bgColor={action.bgColor}
+                                        iconColor={action.iconColor}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
 

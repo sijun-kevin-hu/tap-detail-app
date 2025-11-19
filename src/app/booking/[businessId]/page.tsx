@@ -40,7 +40,7 @@ export default function BookingPage() {
   const businessId = params.businessId as string;
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  
+
   const [detailer, setDetailer] = useState<Detailer | null>(null);
   const [services, setServices] = useState<ServiceMenu[]>([]);
   const [selectedService, setSelectedService] = useState<ServiceMenu | null>(null);
@@ -78,7 +78,7 @@ export default function BookingPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Fetch detailer profile by business ID
       const detailerData = await getDetailerByBusinessId(businessId);
       if (!detailerData) {
@@ -86,11 +86,11 @@ export default function BookingPage() {
         return;
       }
       setDetailer(detailerData);
-      
+
       // Fetch services using detailer's UID
       const servicesData = await getServices(detailerData.uid);
       setServices(servicesData.filter(service => service.active));
-      
+
     } catch (err) {
       console.error('Error fetching detailer data:', err);
       setError('Failed to load detailer information');
@@ -105,12 +105,12 @@ export default function BookingPage() {
 
   const handleFormChange = (field: keyof BookingForm, value: string) => {
     let formattedValue = value;
-    
+
     // Format phone number as user types
     if (field === 'clientPhone') {
       // Remove all non-digits
       const digits = value.replace(/\D/g, '');
-      
+
       // Format as (XXX) XXX-XXXX
       if (digits.length <= 3) {
         formattedValue = digits;
@@ -119,14 +119,14 @@ export default function BookingPage() {
       } else {
         formattedValue = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
       }
-      
+
       // Validate phone number length
       if (digits.length > 0 && digits.length < 10) {
         setToastMessage('Please enter a complete phone number');
         setShowToast(true);
       }
     }
-    
+
     // Validate email format if provided
     if (field === 'clientEmail' && value.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -135,7 +135,7 @@ export default function BookingPage() {
         setShowToast(true);
       }
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [field]: formattedValue
@@ -184,24 +184,24 @@ export default function BookingPage() {
       setShowToast(true);
       return false;
     }
-    
+
     // Validate date format and is in the future
     const selectedDate = new Date(`${selectedDateTime.date}T${selectedDateTime.time}`);
     const now = new Date();
-    
+
     // Check if date is valid
     if (isNaN(selectedDate.getTime())) {
       setToastMessage('Please select a valid date and time');
       setShowToast(true);
       return false;
     }
-    
+
     if (selectedDate <= now) {
       setToastMessage('Please select a future date and time');
       setShowToast(true);
       return false;
     }
-    
+
     // Check if date is within 6 months
     const sixMonthsFromNow = new Date();
     sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
@@ -210,19 +210,19 @@ export default function BookingPage() {
       setShowToast(true);
       return false;
     }
-    
+
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     try {
       setSubmitting(true);
       setError(null);
-      
+
       const appointmentData = {
         service: selectedService!.name,
         clientName: formData.clientName.trim(),
@@ -239,12 +239,12 @@ export default function BookingPage() {
         notes: formData.notes.trim(),
         estimatedDuration: selectedService!.duration // Include service duration
       };
-      
+
       const response = await fetch('/api/appointments', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ detailerId: detailer!.uid, appointmentData }),
-          });
+      });
       const result = await response.json();
       if (!result.success) {
         setError(result.error || 'Failed to submit booking. Please try again.');
@@ -278,7 +278,7 @@ export default function BookingPage() {
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
+
         try {
           document.execCommand('copy');
         } catch (err) {
@@ -287,7 +287,7 @@ export default function BookingPage() {
           setShowToast(true);
           return;
         }
-        
+
         document.body.removeChild(textArea);
       }
       setToastMessage('Link copied to clipboard!');
@@ -462,7 +462,13 @@ export default function BookingPage() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">{detailer.businessName}</h2>
                 {detailer.location && (
-                  <p className="text-sm text-gray-600">{detailer.location}</p>
+                  <div className="flex items-center mt-1">
+                    <svg className="h-4 w-4 mr-1.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p className="text-sm text-gray-600 font-medium">{detailer.location}</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -537,11 +543,10 @@ export default function BookingPage() {
               <div
                 key={service.documentId}
                 onClick={() => handleServiceSelect(service)}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedService?.documentId === service.documentId
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedService?.documentId === service.documentId
                     ? 'border-indigo-500 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold text-gray-900">{service.name}</h4>
@@ -617,7 +622,7 @@ export default function BookingPage() {
                 maxLength={14}
               />
             </div>
-            
+
             {/* Vehicle Information */}
             <div className="border-t border-gray-200 pt-4">
               <h4 className="text-sm font-medium text-gray-900 mb-3">Vehicle Information</h4>
@@ -718,10 +723,10 @@ export default function BookingPage() {
               {submitting ? 'Submitting...' : 'Book Appointment'}
             </button>
           </form>
-                 </div>
-       </div>
-       
-             {/* QR Code Modal */}
+        </div>
+      </div>
+
+      {/* QR Code Modal */}
       <QRCodeModal
         isOpen={showQRModal}
         onClose={() => setShowQRModal(false)}
@@ -735,6 +740,6 @@ export default function BookingPage() {
         show={showToast}
         onClose={() => setShowToast(false)}
       />
-     </div>
-   );
- }
+    </div>
+  );
+}

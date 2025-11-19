@@ -39,7 +39,7 @@ export function useAppointments() {
     } finally {
       setLoading(false);
     }
-  }, [detailer?.uid]); // Only depend on detailer?.uid
+  }, [detailer?.uid, lastDoc]);
 
   useEffect(() => {
     if (detailer?.uid) {
@@ -50,9 +50,9 @@ export function useAppointments() {
   // Filter appointments
   const filteredAppointments = appointments.filter(appointment => {
     const matchesSearch = appointment.clientName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-                        appointment.clientEmail.toLowerCase().includes(filters.searchTerm.toLowerCase());
+      appointment.clientEmail.toLowerCase().includes(filters.searchTerm.toLowerCase());
     const matchesStatus = filters.statusFilter === 'all' || appointment.status === filters.statusFilter;
-    
+
     let matchesDate = true;
     const now = new Date();
     let startDate: Date | null = null;
@@ -183,7 +183,7 @@ export function useAppointments() {
     editLoading,
     dateRangeType,
     customRange,
-    
+
     // Actions
     setFilters,
     setShowAddModal,
@@ -202,7 +202,7 @@ export function useAppointments() {
     handleEditSave,
     loadMoreAppointments: () => hasMore && fetchAppointments(),
     hasMore,
-    
+
     // Utilities
     getStatusColor,
     formatDate,

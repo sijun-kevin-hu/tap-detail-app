@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, PlusIcon, EyeIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/hooks/useSettings";
 import ProfileSection from "@/components/settings/ProfileSection";
 import AddServiceForm from "@/components/settings/AddServiceForm";
 import ServiceCard from "@/components/settings/ServiceCard";
 import AvailabilitySettings from '@/components/settings/AvailabilitySettings';
-import Link from "next/link";
 
 // Helper function to format price
 // const formatPrice = (price: number): string => {
@@ -243,7 +242,7 @@ export default function SettingsPage() {
                 <PlusIcon className="h-5 w-5" />
                 Add New Service
               </button>
-              
+
               {/* Add New Service Form */}
               <AddServiceForm
                 isOpen={addOpen}
@@ -253,7 +252,7 @@ export default function SettingsPage() {
                 saving={saving}
                 handleServiceImage={handleServiceImage}
               />
-              
+
               {/* Service Cards */}
               {services.map((service, idx) => (
                 <ServiceCard
@@ -271,17 +270,11 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* Preview Booking Page Button */}
-        {detailer?.businessId && (
-          <Link href={`/booking/${detailer.businessId}`} className="btn-primary w-full flex items-center justify-center gap-2 mt-8 py-3 rounded-xl">
-            <EyeIcon className="h-5 w-5" />
-            View My Booking Page
-          </Link>
-        )}
+        {/* Preview Booking Page Button - Moved to Dashboard Quick Actions */}
       </div>
     </div>
   );
-} 
+}
 
 
 

@@ -2,153 +2,240 @@
 
 import Link from 'next/link';
 import NavBar from '@/components/NavBar';
-import Logo from '../components/Logo';
-import CarLogo from '../components/CarLogo';
+import Logo from '@/components/Logo';
+import AppPreview from '@/components/AppPreview';
 
 export default function Home() {
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
+        <div className="min-h-screen flex flex-col bg-white">
             <NavBar />
+
             {/* Hero Section */}
-            <section className="flex-1 flex flex-col justify-center items-center px-4 py-12 sm:py-20 text-center relative overflow-hidden">
-                <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
-                    {/* Modern auto detailing background, mobile-friendly */}
-                    <svg width="100%" height="100%" className="absolute left-0 top-0 opacity-20" style={{zIndex:0}} preserveAspectRatio="none" viewBox="0 0 375 300">
-                        <defs>
-                            <radialGradient id="bubbleGradient" cx="50%" cy="40%" r="80%">
-                                <stop offset="0%" stopColor="#E0F2FE" stopOpacity="0.7" />
-                                <stop offset="100%" stopColor="#2563EB" stopOpacity="0.1" />
-                            </radialGradient>
-                        </defs>
-                        {/* Bubbles */}
-                        <circle cx="60" cy="60" r="28" fill="#E0F2FE" fillOpacity="0.5" />
-                        <circle cx="320" cy="80" r="18" fill="#BAE6FD" fillOpacity="0.4" />
-                        <circle cx="100" cy="200" r="14" fill="#E0F2FE" fillOpacity="0.35" />
-                        <circle cx="250" cy="220" r="22" fill="#BAE6FD" fillOpacity="0.3" />
-                        <circle cx="300" cy="160" r="10" fill="#E0F2FE" fillOpacity="0.25" />
-                        {/* Shine lines */}
-                        <rect x="60" y="40" width="3" height="30" rx="1.5" fill="#FACC15" fillOpacity="0.15" />
-                        <rect x="290" y="120" width="2" height="18" rx="1" fill="#FACC15" fillOpacity="0.10" />
-                        {/* Tire marks subtle */}
-                        <ellipse cx="180" cy="260" rx="90" ry="18" fill="#1E293B" fillOpacity="0.04" />
-                    </svg>
+            <section className="relative pt-20 pb-32 overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/50 via-white to-white -z-10" />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                    <div className="text-center max-w-4xl mx-auto">
+                        <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-inset ring-indigo-600/20 bg-indigo-50 mb-8">
+                            <span className="flex h-2 w-2 rounded-full bg-indigo-600 mr-2"></span>
+                            Perfect for Mobile Detailers
+                        </div>
+                        <h1 className="text-display text-gray-900 mb-6 tracking-tight text-balance">
+                            Run Your Detailing Business <br className="hidden sm:block" />
+                            <span className="text-indigo-600">From Your Pocket</span>
+                        </h1>
+                        <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed text-balance">
+                            The simplest way to track jobs, manage clients, and get paid.
+                            Built specifically for owner-operators who want to ditch the notebook.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <Link href="/signup" className="btn-primary text-lg px-8 py-4 w-full sm:w-auto shadow-xl shadow-indigo-200">
+                                Start Free Trial
+                            </Link>
+                            <Link href="#features" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
+                                See How It Works
+                            </Link>
+                        </div>
+                        <p className="mt-6 text-sm text-gray-500">
+                            No credit card required · Free forever plan available
+                        </p>
+                    </div>
+
+                    {/* Hero Image / Dashboard Preview */}
+                    <div className="mt-16 relative mx-auto max-w-5xl">
+                        <div className="rounded-2xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-3xl lg:p-4">
+                            <AppPreview />
+                        </div>
+                    </div>
                 </div>
-                <CarLogo className="w-40 h-28 mb-6 mx-auto" />
-                <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-4 leading-tight relative z-10">
-                    Ditch the Notebook.<br className="hidden sm:inline" /> Run Your Detailing Business Simply.
-                            </h1>
-                <p className="text-base sm:text-lg text-indigo-700 font-semibold mb-2 relative z-10">Perfect for solo detailers & small teams (1-3 people)</p>
-                <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl mx-auto relative z-10">
-                    Tap Detail is the easiest way for owner-operators and small teams to track jobs, clients, and appointments—no complicated software, no learning curve. Just what you need, right on your phone.
-                </p>
-                <Link href="/signup" className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-8 py-3 text-lg shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition relative z-10">
-                    Try It Free
-                </Link>
             </section>
 
-            {/* Features Section */}
-            <section className="bg-white py-12 sm:py-16 w-full">
-                <div className="max-w-3xl mx-auto px-4">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Perfect for Solo Detailers & Small Teams</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="bg-gradient-to-br from-blue-100 to-indigo-50 rounded-xl p-6 flex flex-col items-center text-center shadow-lg">
-                            <svg className="h-8 w-8 text-indigo-600 mb-3" fill="none" viewBox="0 0 32 32"><rect x="6" y="16" width="20" height="7" rx="3" fill="#2563EB" /><circle cx="10" cy="25" r="2" fill="#1E293B" /><circle cx="22" cy="25" r="2" fill="#1E293B" /></svg>
-                            <h3 className="font-semibold text-lg mb-1">No More Pen & Paper</h3>
-                            <p className="text-gray-600 text-sm">Replace your notebook with a simple, digital job and client tracker—always in your pocket.</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-green-100 to-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow-lg">
-                            <svg className="h-8 w-8 text-green-600 mb-3" fill="none" viewBox="0 0 32 32"><rect x="12" y="10" width="8" height="12" rx="3" fill="#4ADE80" /><rect x="14" y="6" width="4" height="4" rx="1" fill="#A7F3D0" /><rect x="13" y="22" width="6" height="4" rx="2" fill="#6EE7B7" /></svg>
-                            <h3 className="font-semibold text-lg mb-1">Stay on Top of Your Schedule</h3>
-                            <p className="text-gray-600 text-sm">See all your upcoming jobs and appointments at a glance. (Automatic reminders coming soon!)</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-purple-100 to-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow-lg">
-                            <svg className="h-8 w-8 text-purple-600 mb-3" fill="none" viewBox="0 0 32 32"><ellipse cx="16" cy="20" rx="8" ry="4" fill="#A78BFA" /><circle cx="12" cy="20" r="1" fill="#C4B5FD" /><circle cx="20" cy="20" r="1" fill="#C4B5FD" /></svg>
-                            <h3 className="font-semibold text-lg mb-1">Simple Client List</h3>
-                            <p className="text-gray-600 text-sm">See all your clients and their job history at a glance. No spreadsheets needed.</p>
+            {/* Social Proof */}
+            <section className="py-10 border-y border-gray-100 bg-gray-50/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-6">
+                        Trusted by professional detailers
+                    </p>
+                    <div className="grid grid-cols-2 gap-8 md:grid-cols-4 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                        {/* Placeholders for partner/client logos */}
+                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">MACK&apos;S DETAILING</div>
+                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">PRESTIGE AUTO</div>
+                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">SHINE MASTER</div>
+                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">ELITE MOBILE</div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Features Grid */}
+            <section id="features" className="py-24 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center max-w-3xl mx-auto mb-16">
+                        <h2 className="text-indigo-600 font-semibold tracking-wide uppercase text-sm mb-3">Features</h2>
+                        <p className="text-heading text-gray-900 mb-4">
+                            Everything you need to grow, nothing you don&apos;t.
+                        </p>
+                        <p className="text-lg text-gray-600">
+                            We stripped away the complex features you&apos;ll never use. Tap Detail is designed for speed and simplicity.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Feature 1 */}
+                        <div className="card p-8 hover:shadow-lg transition-shadow duration-300">
+                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6 text-blue-600">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
                             </div>
-                        <div className="bg-gradient-to-br from-yellow-100 to-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow-lg">
-                            <svg className="h-8 w-8 text-yellow-500 mb-3" fill="none" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8" fill="#FDE68A" /><circle cx="24" cy="12" r="3" fill="#FEF9C3" /><circle cx="10" cy="22" r="2" fill="#FEF9C3" /></svg>
-                            <h3 className="font-semibold text-lg mb-1">All-in-One Dashboard</h3>
-                            <p className="text-gray-600 text-sm">Track jobs, earnings, and appointments—no clutter, just what matters.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Job Tracking</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Log jobs in seconds. Track services, prices, and notes for every vehicle. Never forget what you did for a client.
+                            </p>
+                        </div>
+
+                        {/* Feature 2 */}
+                        <div className="card p-8 hover:shadow-lg transition-shadow duration-300">
+                            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6 text-green-600">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
-                        <div className="bg-gradient-to-br from-blue-100 to-indigo-50 rounded-xl p-6 flex flex-col items-center text-center shadow-lg sm:col-span-2">
-                            <svg className="h-8 w-8 text-blue-500 mb-3" fill="none" viewBox="0 0 32 32"><path d="M16 6C16 6 8 18 16 26C24 18 16 6 16 6Z" fill="#60A5FA" /><circle cx="16" cy="22" r="3" fill="#DBEAFE" /></svg>
-                            <h3 className="font-semibold text-lg mb-1">Mobile & Effortless</h3>
-                            <p className="text-gray-600 text-sm">Works on any phone. Get started in minutes—no setup headaches.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Schedule & Reminders</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                See your day at a glance. Automated text reminders reduce no-shows and keep your schedule full.
+                            </p>
+                        </div>
+
+                        {/* Feature 3 */}
+                        <div className="card p-8 hover:shadow-lg transition-shadow duration-300">
+                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6 text-purple-600">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Client CRM</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                A digital rolodex of all your customers. Search by name, phone, or vehicle. Build long-term relationships.
+                            </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Getting Started Steps */}
-            <section className="py-10 w-full bg-indigo-50/60">
-                <div className="max-w-2xl mx-auto px-4 text-center">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Getting Started is Easy</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                        <div className="bg-white rounded-xl p-6 shadow-md flex flex-col items-center">
-                            <svg className="h-8 w-8 text-indigo-500 mb-2" fill="none" viewBox="0 0 32 32"><rect x="12" y="10" width="8" height="12" rx="3" fill="#6366F1" /><circle cx="16" cy="24" r="2" fill="#A5B4FC" /></svg>
-                            <div className="font-semibold text-gray-800 mb-1">1. Sign Up</div>
-                            <div className="text-gray-500 text-sm">Create your free account in seconds.</div>
+            {/* Comparison Section */}
+            <section className="py-24 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div>
+                            <h2 className="text-heading text-gray-900 mb-6">
+                                Stop losing money to disorganization
+                            </h2>
+                            <p className="text-lg text-gray-600 mb-8">
+                                Pen and paper works until it doesn&apos;t. Coffee spills, lost notebooks, and forgotten appointments cost you money.
+                            </p>
+
+                            <div className="space-y-4">
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-red-100 text-red-600 mt-1">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-4">
+                                        <h4 className="text-lg font-medium text-gray-900">The Old Way</h4>
+                                        <p className="text-gray-500">Messy notebooks, missed calls, forgotten details.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 text-green-600 mt-1">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-4">
+                                        <h4 className="text-lg font-medium text-gray-900">The Tap Detail Way</h4>
+                                        <p className="text-gray-500">Organized, professional, and always in your pocket.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="bg-white rounded-xl p-6 shadow-md flex flex-col items-center">
-                            <svg className="h-8 w-8 text-green-500 mb-2" fill="none" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="4" fill="#4ADE80" /><path d="M12 16l4 4 4-8" stroke="#065F46" strokeWidth="2" fill="none" /></svg>
-                            <div className="font-semibold text-gray-800 mb-1">2. Add Your First Job</div>
-                            <div className="text-gray-500 text-sm">Start tracking jobs and clients right away.</div>
-                        </div>
-                        <div className="bg-white rounded-xl p-6 shadow-md flex flex-col items-center">
-                            <svg className="h-8 w-8 text-yellow-500 mb-2" fill="none" viewBox="0 0 32 32"><polygon points="16,8 18,14 24,14 19,18 21,24 16,20 11,24 13,18 8,14 14,14" fill="#FDE68A" /></svg>
-                            <div className="font-semibold text-gray-800 mb-1">3. Stay Organized</div>
-                            <div className="text-gray-500 text-sm">See your schedule and clients at a glance—anywhere, anytime.</div>
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl transform rotate-3 opacity-10"></div>
+                            <div className="relative bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                                            <div>
+                                                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                                                <div className="h-3 w-20 bg-gray-100 rounded mt-1"></div>
+                                            </div>
+                                        </div>
+                                        <div className="h-8 w-20 bg-green-100 rounded-full"></div>
+                                    </div>
+                                    <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                                            <div>
+                                                <div className="h-4 w-28 bg-gray-200 rounded"></div>
+                                                <div className="h-3 w-24 bg-gray-100 rounded mt-1"></div>
+                                            </div>
+                                        </div>
+                                        <div className="h-8 w-20 bg-blue-100 rounded-full"></div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="h-10 w-10 rounded-full bg-gray-200"></div>
+                                            <div>
+                                                <div className="h-4 w-36 bg-gray-200 rounded"></div>
+                                                <div className="h-3 w-16 bg-gray-100 rounded mt-1"></div>
+                                            </div>
+                                        </div>
+                                        <div className="h-8 w-20 bg-yellow-100 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Before & After Section */}
-            <section className="py-10 w-full bg-blue-100/60">
-                <div className="max-w-2xl mx-auto px-4 text-center">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Why Switch from Pen & Paper?</h2>
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                        <div className="flex-1 bg-white rounded-xl p-4 shadow-md mb-4 sm:mb-0">
-                            <div className="font-semibold text-gray-700 mb-2">Before</div>
-                            <ul className="text-gray-500 text-sm list-disc list-inside text-left mx-auto max-w-xs">
-                                <li>Lost notes & missed jobs</li>
-                                <li>Forgotten appointments</li>
-                                <li>Messy client info</li>
-                                <li>No reminders</li>
-                            </ul>
-                        </div>
-                        <div className="flex-1 bg-white rounded-xl p-4 shadow-md">
-                            <div className="font-semibold text-indigo-700 mb-2">After</div>
-                            <ul className="text-gray-700 text-sm list-disc list-inside text-left mx-auto max-w-xs">
-                                <li>Everything organized in one app</li>
-                                <li>See your schedule at a glance</li>
-                                <li>Easy client/job lookup</li>
-                                <li>Never miss a job again</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Final CTA Section */}
-            <section className="py-12 sm:py-16 w-full">
-                <div className="max-w-xl mx-auto px-4 text-center">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-                        Ready to leave pen & paper behind?
+            {/* CTA Section */}
+            <section className="py-24 bg-white">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 className="text-display text-gray-900 mb-6">
+                        Ready to level up your business?
                     </h2>
-                    <p className="text-gray-600 mb-6">Join other solo detailers and small teams using Tap Detail to keep their business organized and stress-free.</p>
-                    <Link href="/signup" className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-8 py-3 text-lg shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-                        Try It Free
-                    </Link>
+                    <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+                        Join hundreds of mobile detailers who trust Tap Detail to run their business.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link href="/signup" className="btn-primary text-lg px-10 py-4 shadow-xl shadow-indigo-200">
+                            Get Started for Free
+                        </Link>
+                    </div>
+                    <p className="mt-6 text-sm text-gray-500">
+                        No credit card required · Cancel anytime
+                    </p>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 py-6 mt-auto">
-                <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center">
+            <footer className="bg-gray-50 border-t border-gray-200 py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+                    <div className="mb-4 md:mb-0">
                         <Logo />
-                    <div className="text-sm text-gray-600">© 2025 Tap Detail. All rights reserved.</div>
+                        <p className="mt-2 text-sm text-gray-500">
+                            Simple CRM for Mobile Detailers
+                        </p>
+                    </div>
+                    <div className="flex space-x-6 text-sm text-gray-500">
+                        <Link href="#" className="hover:text-gray-900">Privacy</Link>
+                        <Link href="#" className="hover:text-gray-900">Terms</Link>
+                        <Link href="#" className="hover:text-gray-900">Contact</Link>
+                    </div>
+                    <div className="mt-4 md:mt-0 text-sm text-gray-400">
+                        © 2025 Tap Detail. All rights reserved.
+                    </div>
                 </div>
             </footer>
         </div>
