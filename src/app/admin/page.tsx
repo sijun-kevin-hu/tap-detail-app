@@ -8,6 +8,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatCard from '@/components/dashboard/StatCard';
 import AppointmentCard from '@/components/dashboard/AppointmentCard';
 import QuickActionRow from '@/components/dashboard/QuickActionRow';
+import FeedbackModal from '@/components/dashboard/FeedbackModal';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import { getEarnings } from '@/lib/firebase/firestore-earnings';
@@ -34,6 +35,7 @@ function getWeekEndDateStr() {
 export default function AdminDashboard() {
     const { detailer } = useAuth();
     const detailerId = detailer?.uid;
+    const [feedbackOpen, setFeedbackOpen] = useState(false);
     const [statsData, setStatsData] = useState({
         todaysAppointments: 0,
         weeksAppointments: 0,
@@ -188,6 +190,7 @@ export default function AdminDashboard() {
     ];
 
     return (
+        <>
         <ProtectedRoute requiredRole="detailer">
             <div className="min-h-screen bg-gray-50">
                 <DashboardHeader />
@@ -259,6 +262,20 @@ export default function AdminDashboard() {
                                         target={action.target}
                                     />
                                 ))}
+                                {/* Feedback button */}
+                                <button
+                                    onClick={() => setFeedbackOpen(true)}
+                                    className="bg-white p-3 rounded-lg border border-gray-200 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow duration-200 w-full text-left"
+                                >
+                                    <div className="bg-rose-100 p-2 rounded-lg text-rose-600">
+                                        <div className="w-5 h-5">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <span className="font-medium text-gray-700">Report Issue / Request Feature</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -277,5 +294,14 @@ export default function AdminDashboard() {
                 </main>
             </div>
         </ProtectedRoute>
+
+        <FeedbackModal
+            isOpen={feedbackOpen}
+            onClose={() => setFeedbackOpen(false)}
+            detailerName={detailer ? `${detailer.firstName || ''} ${detailer.lastName || ''}`.trim() : undefined}
+            detailerEmail={detailer?.email}
+            businessName={detailer?.businessName}
+        />
+        </>
     );
-} 
+}
