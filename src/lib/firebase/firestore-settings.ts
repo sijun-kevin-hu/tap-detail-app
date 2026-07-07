@@ -220,6 +220,7 @@ export const getProfile = async (detailerId: string): Promise<ProfileSettings> =
         bio: detailer.bio || '',
         profileImage: detailer.profileImage || null,
         galleryImages: detailer.galleryImages || [],
+        location: detailer.location || '',
       };
     } else {
       // Return default profile if none exists
@@ -228,6 +229,7 @@ export const getProfile = async (detailerId: string): Promise<ProfileSettings> =
         bio: '',
         profileImage: null,
         galleryImages: [],
+        location: '',
       };
     }
   } catch (error) {

@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "tap-detail",
+    "production": "tap-detail",
+    "dev": "tap-detail-dev"
+  }
+}

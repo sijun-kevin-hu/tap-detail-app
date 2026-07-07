@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /detailers/{detailerId} {
+      // Allow anyone to read detailer profiles
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == detailerId;
+
+      // Appointments subcollection
+      match /appointments/{appointmentId} {
+        allow read: if true;
+        allow create: if true; // Allow unauthenticated client to create
+        allow update, delete: if request.auth != null && request.auth.uid == detailerId;
+      }
+
+      // Services subcollection
+      match /services/{serviceId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == detailerId;
+      }
+
+      // Availability subcollection
+      match /availability/{availabilityId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == detailerId;
+      }
+
+      // Earnings subcollection
+      match /earnings/{earningId} {
+        allow read, write: if request.auth != null && request.auth.uid == detailerId;
+      }
+
+      // Clients subcollection
+      match /clients/{clientId} {
+        // Anyone can create (auto-generated on appointment booking).
+        // Only the owning detailer can read, update, or delete.
+        allow create: if true;
+        allow read, update, delete: if request.auth != null && request.auth.uid == detailerId;
+      }
+    }
+  }
+}
