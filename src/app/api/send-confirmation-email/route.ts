@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendAppointmentConfirmedEmail } from '@/lib/services/emailService';
 import { getDoc, doc as firestoreDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client-app';
+import { db } from '@/lib/firebase/client';
 
 export async function POST(req: NextRequest) {
   try {

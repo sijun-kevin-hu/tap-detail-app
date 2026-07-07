@@ -1,4 +1,4 @@
-import { db } from './client-app';
+import { db } from './client';
 import {
   collection,
   doc,
@@ -211,3 +211,7 @@ export const autoCreateClientFromAppointment = async (
     return null;
   }
 }; 
+export async function countClients(detailerId: string): Promise<number> {
+  const snapshot = await getDocs(getClientsCollection(detailerId));
+  return snapshot.size;
+}

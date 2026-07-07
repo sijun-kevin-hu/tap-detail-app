@@ -1,4 +1,4 @@
-import { adminAuth } from '@/lib/firebase/admin-app';
+import { adminAuth } from '@/lib/firebase/admin';
 import { Resend } from 'resend';
 import VerificationEmail from '@/lib/templates/VerificationEmail';
 import PasswordResetEmail from '@/lib/templates/PasswordResetEmail';

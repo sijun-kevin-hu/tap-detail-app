@@ -3,7 +3,7 @@ import { saveAppointmentToDB } from '@/lib/firebase/firestore-appointments';
 import { sendAppointmentRequestReceivedEmail } from '@/lib/services/emailService';
 import { sendDetailerNewAppointmentNotification } from '@/lib/services/emailService';
 import { getDoc, doc as firestoreDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client-app';
+import { db } from '@/lib/firebase/client';
 
 export async function POST(req: NextRequest) {
   try {

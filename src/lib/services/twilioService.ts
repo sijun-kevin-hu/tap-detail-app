@@ -6,7 +6,7 @@
 // 3. Test the SMS functionality with real Twilio API calls
 
 import { TwilioConfig, TwilioMessageResponse } from '@/lib/models/reminder';
-import { formatPhone } from '@/utils/formatters';
+import { formatPhone } from '@/lib/utils';
 
 /**
  * Send SMS using Twilio API

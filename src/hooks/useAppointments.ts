@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/firebase/auth';
 import { getAppointments, updateAppointment, deleteAppointment } from '@/lib/firebase/firestore-appointments';
 import { Appointment, AppointmentFilters } from '@/lib/models';
-import { formatDate, formatTime, getStatusColor } from '@/utils/formatters';
+import { formatDate, formatTime, getStatusColor } from '@/lib/utils';
 import { QueryDocumentSnapshot } from 'firebase/firestore';
 
 export function useAppointments() {

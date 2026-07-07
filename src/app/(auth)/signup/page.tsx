@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase/client-app';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase/client';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth, signUpDetailer } from '@/lib/firebase/auth';
 import Link from 'next/link';
 import { DetailerFormData } from '@/lib/models';
-import { createDetailer, createBaseServices } from '@/lib/firebase/firestore-detailers';
 
 export default function Signup() {
     const [formData, setFormData] = useState<DetailerFormData>({
@@ -94,40 +93,7 @@ export default function Signup() {
         setLoading(true);
 
         try {
-            // Create detailer with Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                formData.email,
-                formData.password
-            );
-
-            // Create detailer document in Firestore using new function
-            await createDetailer({
-                uid: userCredential.user.uid,
-                businessId: formData.businessId,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                phone: formData.phone,
-                businessName: formData.businessName,
-                role: 'detailer',
-                isActive: true,
-                bio: '',
-                profileImage: null,
-                galleryImages: [],
-                location: '',
-                services: []
-            });
-
-            // Create base services for the new detailer
-            await createBaseServices(userCredential.user.uid);
-
-            // Send custom verification email via API route
-            await fetch('/api/send-verification-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: formData.email, uid: userCredential.user.uid }),
-            });
+            await signUpDetailer(formData);
 
             alert('Email verification sent. Please check your email (and junk folder if it\'s shy) to verify your account.');
             await signOut(auth);
