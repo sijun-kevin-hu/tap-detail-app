@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(firebase --version)"
+      "Bash(firebase --version)",
+      "Bash(npx eslint *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

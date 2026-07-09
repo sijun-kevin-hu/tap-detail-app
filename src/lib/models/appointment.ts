@@ -59,6 +59,8 @@ export interface Appointment {
     // Reminder system
     reminderSent?: boolean;
     reminderSentAt?: string;
+    smsConsent?: boolean;
+    smsConsentAt?: string;
     
     // Optional fields
     estimatedDuration?: number;
@@ -83,6 +85,8 @@ export interface AppointmentFormData {
     price: string; // was: number
     assignedDetailerId?: string;
     reminderSent?: boolean;
+    smsConsent?: boolean;
+    smsConsentAt?: string;
 }
 
 export interface AppointmentFilters {

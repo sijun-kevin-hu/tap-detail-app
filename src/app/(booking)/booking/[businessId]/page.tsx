@@ -42,6 +42,7 @@ export default function BookingPage() {
     carYear: '',
     notes: '',
     address: '', // Add address field
+    smsConsent: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -87,6 +88,13 @@ export default function BookingPage() {
     setFormData(prev => ({
       ...prev,
       [field]: formattedValue
+    }));
+  };
+
+  const handleConsentChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      smsConsent: checked
     }));
   };
 
@@ -185,7 +193,9 @@ export default function BookingPage() {
         address: formData.address.trim(), // Store as address
         price: parseFloat(selectedService!.price),
         notes: formData.notes.trim(),
-        estimatedDuration: selectedService!.duration // Include service duration
+        estimatedDuration: selectedService!.duration, // Include service duration
+        smsConsent: formData.smsConsent,
+        smsConsentAt: formData.smsConsent ? new Date().toISOString() : undefined,
       };
 
       const response = await fetch('/api/appointments', {
@@ -387,6 +397,7 @@ export default function BookingPage() {
         <BookingForm
           formData={formData}
           onChange={handleFormChange}
+          onConsentChange={handleConsentChange}
           onSubmit={handleSubmit}
           submitting={submitting}
         />
