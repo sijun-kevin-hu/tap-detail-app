@@ -14,7 +14,7 @@ import {
   Timestamp,
   FieldValue
 } from 'firebase/firestore';
-import { db } from './client-app';
+import { db } from './client';
 import { Detailer } from '@/lib/models/detailer';
 import { ProfileSettings } from '@/lib/models/settings';
 import { addService } from './firestore-settings';

@@ -1,4 +1,4 @@
-import { db } from './client-app';
+import { db } from './client';
 import {
   collection,
   doc,

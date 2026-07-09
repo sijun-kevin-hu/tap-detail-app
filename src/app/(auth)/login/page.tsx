@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { FirebaseError } from 'firebase/app';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase/client-app';
+import { auth } from '@/lib/firebase/client';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/firebase/auth';
 import Link from 'next/link';
-import CarLogo from '@/components/CarLogo';
+import CarLogo from '@/components/ui/CarLogo';
 
 export default function Login() {
     const [email, setEmail] = useState('');

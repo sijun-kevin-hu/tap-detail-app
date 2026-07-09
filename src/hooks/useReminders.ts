@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/firebase/auth';
 import { 
   processReminders, 
   sendManualReminder, 

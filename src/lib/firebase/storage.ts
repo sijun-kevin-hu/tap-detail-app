@@ -1,4 +1,4 @@
-import { storage } from './client-app';
+import { storage } from './client';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 /**

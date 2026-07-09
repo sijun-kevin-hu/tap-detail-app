@@ -10,7 +10,7 @@ import {
   orderBy,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db } from './client-app';
+import { db } from './client';
 import { ReminderConfig, ReminderLog } from '@/lib/models/reminder';
 
 /**

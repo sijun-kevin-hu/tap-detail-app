@@ -1,9 +1,9 @@
 "use client";
 
 import Link from 'next/link';
-import NavBar from '@/components/NavBar';
-import Logo from '@/components/Logo';
-import AppPreview from '@/components/AppPreview';
+import NavBar from '@/components/features/marketing/NavBar';
+import Logo from '@/components/ui/Logo';
+import AppPreview from './_components/AppPreview';
 
 export default function Home() {
     return (
