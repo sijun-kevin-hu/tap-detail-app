@@ -68,10 +68,13 @@ export default function Login() {
         const user = auth.currentUser;
         if (user && !user.emailVerified) {
           try {
+            const idToken = await user.getIdToken();
             await fetch('/api/send-verification-email', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: user.email, uid: user.uid }),
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${idToken}`,
+              },
             });
             alert('Verification email resent. If it stays missing, a quick junk-folder peek usually finds it.');
           } catch (err) {

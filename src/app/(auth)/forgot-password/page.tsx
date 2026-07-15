@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { FirebaseError } from "firebase/app";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -14,26 +17,29 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch('/api/send-password-reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        if (data?.error && data.error.includes('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+      // Ask Firebase Auth to send the reset email directly from the client.
+      // Google rate-limits this per address/IP, so it can't be used to spam
+      // an arbitrary inbox the way our old unauthenticated API route could.
+      await sendPasswordResetEmail(auth, email);
+      setSuccess(true);
+    } catch (err: unknown) {
+      if (err instanceof FirebaseError) {
+        // Don't reveal whether an account exists: treat "no such user" as
+        // success so this form can't be used to enumerate registered emails.
+        if (err.code === 'auth/user-not-found') {
+          setSuccess(true);
+          return;
+        }
+        if (err.code === 'auth/too-many-requests') {
           setError('Too many requests. Please wait a while before trying again.');
           return;
         }
-        setError(data?.error || 'Failed to send reset email. Please check your email and try again.');
-        return;
+        if (err.code === 'auth/invalid-email') {
+          setError('That doesn\'t look like a valid email address.');
+          return;
+        }
       }
-      setSuccess(true);
-    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      setError(
-        err?.message ||
-          "Failed to send reset email. Please check your email and try again."
-      );
+      setError('Failed to send reset email. Please check your email and try again.');
     } finally {
       setLoading(false);
     }

@@ -40,11 +40,16 @@ export const signUpDetailer = async (formData: DetailerFormData): Promise<void> 
     // Create base services for the new detailer
     await createBaseServices(userCredential.user.uid);
 
-    // Send custom verification email via API route
+    // Send custom verification email via API route.
+    // createUserWithEmailAndPassword signs the user in, so we can mint an ID
+    // token proving to the server that this caller owns the account.
+    const idToken = await userCredential.user.getIdToken();
     await fetch('/api/send-verification-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, uid: userCredential.user.uid }),
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+        },
     });
 };
 
