@@ -18,6 +18,9 @@ function getDefaultBusinessHours(): { [day: string]: { start: string; end: strin
 
 export default function AvailabilitySettings({ detailerId }: AvailabilitySettingsProps) {
   const [availability, setAvailability] = useState<AvailabilitySettings | null>(null);
+  // Raw text of the blocked-dates input; parsing it on every keystroke would
+  // strip trailing commas/spaces before the user finishes typing the next date.
+  const [blockedDatesInput, setBlockedDatesInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -43,6 +46,7 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
             timezone: DEFAULT_TIMEZONE,
           }
         );
+        setBlockedDatesInput((data?.blockedDates || []).join(', '));
       } catch {
         setToastMessage('Failed to load availability settings');
         setShowToast(true);
@@ -108,9 +112,13 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
     setAvailability({ ...availability, bufferMinutes: value });
   };
 
-  const handleBlockedDatesChange = (dates: string[]) => {
+  const handleBlockedDatesChange = (value: string) => {
     if (!availability) return;
-    setAvailability({ ...availability, blockedDates: dates });
+    setBlockedDatesInput(value);
+    setAvailability({
+      ...availability,
+      blockedDates: value.split(',').map(d => d.trim()).filter(Boolean),
+    });
   };
 
   const handleTimezoneChange = (value: string) => {
@@ -272,8 +280,8 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
         <label className="block text-sm font-medium text-gray-700 mb-2">Blocked Dates (vacation/holidays)</label>
         <input
           type="text"
-          value={availability.blockedDates.join(', ')}
-          onChange={e => handleBlockedDatesChange(e.target.value.split(',').map(d => d.trim()).filter(Boolean))}
+          value={blockedDatesInput}
+          onChange={e => handleBlockedDatesChange(e.target.value)}
           className="input-modern w-full text-base px-3 py-3"
           style={{ minHeight: 48 }}
           placeholder="YYYY-MM-DD, YYYY-MM-DD, ..."
