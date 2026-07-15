@@ -1,5 +1,7 @@
 import type { AvailabilitySettings } from '@/lib/models/detailer';
 import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import { getDetailerAvailability, updateDetailerAvailability } from '@/lib/firebase/firestore-detailers';
 import Toast from '@/components/ui/Toast';
 
@@ -16,11 +18,26 @@ function getDefaultBusinessHours(): { [day: string]: { start: string; end: strin
   return Object.fromEntries(WEEKDAYS.map(d => [d, { ...DEFAULT_HOURS }])) as { [day: string]: { start: string; end: string } };
 }
 
+// Format a Date as local YYYY-MM-DD (toISOString would shift the day across timezones)
+function toDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatBlockedDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export default function AvailabilitySettings({ detailerId }: AvailabilitySettingsProps) {
   const [availability, setAvailability] = useState<AvailabilitySettings | null>(null);
-  // Raw text of the blocked-dates input; parsing it on every keystroke would
-  // strip trailing commas/spaces before the user finishes typing the next date.
-  const [blockedDatesInput, setBlockedDatesInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -46,7 +63,6 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
             timezone: DEFAULT_TIMEZONE,
           }
         );
-        setBlockedDatesInput((data?.blockedDates || []).join(', '));
       } catch {
         setToastMessage('Failed to load availability settings');
         setShowToast(true);
@@ -112,12 +128,20 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
     setAvailability({ ...availability, bufferMinutes: value });
   };
 
-  const handleBlockedDatesChange = (value: string) => {
+  const handleBlockedDateToggle = (date: Date) => {
     if (!availability) return;
-    setBlockedDatesInput(value);
+    const dateStr = toDateString(date);
+    const blockedDates = availability.blockedDates.includes(dateStr)
+      ? availability.blockedDates.filter(d => d !== dateStr)
+      : [...availability.blockedDates, dateStr].sort();
+    setAvailability({ ...availability, blockedDates });
+  };
+
+  const handleRemoveBlockedDate = (dateStr: string) => {
+    if (!availability) return;
     setAvailability({
       ...availability,
-      blockedDates: value.split(',').map(d => d.trim()).filter(Boolean),
+      blockedDates: availability.blockedDates.filter(d => d !== dateStr),
     });
   };
 
@@ -278,15 +302,45 @@ export default function AvailabilitySettings({ detailerId }: AvailabilitySetting
       {/* Blocked Dates */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">Blocked Dates (vacation/holidays)</label>
-        <input
-          type="text"
-          value={blockedDatesInput}
-          onChange={e => handleBlockedDatesChange(e.target.value)}
-          className="input-modern w-full text-base px-3 py-3"
-          style={{ minHeight: 48 }}
-          placeholder="YYYY-MM-DD, YYYY-MM-DD, ..."
-        />
-        <span className="text-xs text-gray-500">(Calendar picker can be added for better UX)</span>
+        <div className="blocked-dates-calendar rounded-xl border border-gray-200 shadow-sm bg-white overflow-x-visible w-full max-w-md">
+          <Calendar
+            onClickDay={handleBlockedDateToggle}
+            value={null}
+            minDate={new Date()}
+            tileClassName={({ date, view }) =>
+              view === 'month' && availability.blockedDates.includes(toDateString(date))
+                ? 'blocked-date-tile'
+                : null
+            }
+            className="w-full"
+            navigationLabel={({ date }) => `${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`}
+            nextLabel=">"
+            prevLabel="<"
+            next2Label=">>"
+            prev2Label="<<"
+          />
+        </div>
+        <span className="text-xs text-gray-500">Tap a date to block it; tap again to unblock.</span>
+        {availability.blockedDates.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {availability.blockedDates.map(dateStr => (
+              <span
+                key={dateStr}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700"
+              >
+                {formatBlockedDate(dateStr)}
+                <button
+                  type="button"
+                  aria-label={`Unblock ${dateStr}`}
+                  className="text-red-400 hover:text-red-600 font-bold"
+                  onClick={() => handleRemoveBlockedDate(dateStr)}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Timezone */}

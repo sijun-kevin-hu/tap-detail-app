@@ -325,3 +325,22 @@ textarea:focus-visible {
   text-wrap: balance;
 }
 
+
+/* Blocked-dates calendar (admin availability settings) */
+.blocked-dates-calendar .react-calendar {
+  border: none;
+  border-radius: 0.75rem;
+  font-family: inherit;
+  width: 100%;
+}
+
+.blocked-dates-calendar .react-calendar__tile.blocked-date-tile {
+  background: #dc2626 !important;
+  color: #fff !important;
+  border-radius: 0.5rem;
+}
+
+.blocked-dates-calendar .react-calendar__tile.blocked-date-tile:enabled:hover,
+.blocked-dates-calendar .react-calendar__tile.blocked-date-tile:enabled:focus {
+  background: #b91c1c !important;
+}
