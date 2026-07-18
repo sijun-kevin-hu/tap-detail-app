@@ -138,6 +138,11 @@ export default function BookingPage() {
       setShowToast(true);
       return false;
     }
+    if (formData.clientEmail.trim() && !formData.emailConsent) {
+      setToastMessage('Please agree to receive emails at the address provided');
+      setShowToast(true);
+      return false;
+    }
     if (!formData.carType) {
       setToastMessage('Please select your car type');
       setShowToast(true);

@@ -183,7 +183,7 @@ export default function BookingForm({ formData, onChange, onConsentChange, onEma
               className="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
             />
             <label htmlFor="emailConsent" className="text-sm text-gray-600">
-              I agree to receive appointment confirmation and reminder emails at the address provided.
+              I agree to receive appointment confirmation and reminder emails at the address provided. <span className="text-red-500">*</span>
             </label>
           </div>
         )}

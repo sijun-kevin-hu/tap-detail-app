@@ -66,6 +66,10 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                     setError('Please enter a valid email address');
                     return false;
                 }
+                if (formData.clientEmail && !formData.emailConsent) {
+                    setError('Please confirm the client agrees to receive emails');
+                    return false;
+                }
                 if (!formData.carType) {
                     setError('Please select the car type');
                     return false;
@@ -122,6 +126,10 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
         }
         if (formData.clientEmail && !formData.clientEmail.includes('@')) {
             setError('Please enter a valid email address');
+            return false;
+        }
+        if (formData.clientEmail && !formData.emailConsent) {
+            setError('Please confirm the client agrees to receive emails');
             return false;
         }
         if (parseFloat(formData.price) <= 0) {
@@ -329,7 +337,7 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                                     className="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                                                 />
                                                 <label htmlFor="emailConsent" className="text-sm text-gray-600">
-                                                    The client agrees to receive appointment confirmation and reminder emails at the address provided.
+                                                    The client agrees to receive appointment confirmation and reminder emails at the address provided. <span className="text-red-500">*</span>
                                                 </label>
                                             </div>
                                         )}
