@@ -357,56 +357,6 @@ export const getAppointmentsForDate = async (detailerId: string, date: string): 
   }
 }; 
 
-// Raw appointment doc shape used by the admin dashboard's "Today's Schedule" list.
-// These docs are read as-is (not mapped through mapAppointmentDoc) because the
-// dashboard renders whatever fields exist on the stored document.
-export interface DashboardAppointmentDoc {
-  id: string;
-  startTime?: string;
-  vehicleYear?: string;
-  vehicleMake?: string;
-  vehicleModel?: string;
-  clientName?: string;
-  price?: number;
-  status?: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  serviceType?: string;
-  [key: string]: unknown;
-}
-
-/**
- * Get raw appointment docs for a specific date (unmapped doc data)
- * @param detailerId - The detailer's unique identifier
- * @param date - Date string (YYYY-MM-DD)
- * @returns Promise<DashboardAppointmentDoc[]>
- */
-export const getRawAppointmentsForDate = async (
-  detailerId: string,
-  date: string
-): Promise<DashboardAppointmentDoc[]> => {
-  const appointmentsRef = collection(db, 'detailers', detailerId, 'appointments');
-  const q = query(appointmentsRef, where('date', '==', date));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-/**
- * Count appointments in an inclusive date range
- * @param detailerId - The detailer's unique identifier
- * @param startDate - Range start date string (YYYY-MM-DD)
- * @param endDate - Range end date string (YYYY-MM-DD)
- * @returns Promise<number>
- */
-export const countAppointmentsInDateRange = async (
-  detailerId: string,
-  startDate: string,
-  endDate: string
-): Promise<number> => {
-  const appointmentsRef = collection(db, 'detailers', detailerId, 'appointments');
-  const q = query(appointmentsRef, where('date', '>=', startDate), where('date', '<=', endDate));
-  const snapshot = await getDocs(q);
-  return snapshot.size;
-};
-
 // Only include Firestore logic and client-safe code here
 export const saveAppointmentToDB = async (detailerId: string, appointmentData: Omit<Appointment, 'id' | 'detailerId' | 'status' | 'createdAt' | 'updatedAt'>, status: Appointment['status'] = 'pending'): Promise<string> => {
   try {

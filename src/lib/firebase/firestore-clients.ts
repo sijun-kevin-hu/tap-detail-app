@@ -10,7 +10,8 @@ import {
   serverTimestamp,
   query,
   where,
-  Timestamp
+  Timestamp,
+  getCountFromServer
 } from 'firebase/firestore';
 import { Client, NewClient, FirestoreClient } from '@/lib/models/client';
 
@@ -212,6 +213,7 @@ export const autoCreateClientFromAppointment = async (
   }
 }; 
 export async function countClients(detailerId: string): Promise<number> {
-  const snapshot = await getDocs(getClientsCollection(detailerId));
-  return snapshot.size;
+  // Aggregation query: counts server-side without downloading every client doc.
+  const snapshot = await getCountFromServer(getClientsCollection(detailerId));
+  return snapshot.data().count;
 }

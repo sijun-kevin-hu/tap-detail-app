@@ -1,72 +1,88 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import {
-    getRawAppointmentsForDate,
-    countAppointmentsInDateRange,
-    DashboardAppointmentDoc,
-} from '@/lib/firebase/firestore-appointments';
+import { getAppointmentsForDate } from '@/lib/firebase/firestore-appointments';
 import { countClients } from '@/lib/firebase/firestore-clients';
 import { getEarnings } from '@/lib/firebase/firestore-earnings';
+import { Appointment } from '@/lib/models/appointment';
+
+// Format a Date as YYYY-MM-DD in the user's local timezone. Appointment dates
+// are stored as local date strings, so using toISOString() here would shift
+// "today" to tomorrow for anyone west of UTC in the evening.
+function toLocalDateStr(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
 
 function getTodayDateStr() {
-    const d = new Date();
-    return d.toISOString().split('T')[0];
+    return toLocalDateStr(new Date());
 }
 function getWeekStartDateStr() {
     const d = new Date();
-    const day = d.getDay(); // 0 (Sun) - 6 (Sat)
-    const weekStart = new Date(d);
-    weekStart.setDate(d.getDate() - day); // Go back to previous Sunday
-    return weekStart.toISOString().split('T')[0];
+    d.setDate(d.getDate() - d.getDay()); // Back to previous Sunday
+    return toLocalDateStr(d);
 }
 function getWeekEndDateStr() {
     const d = new Date();
-    const day = d.getDay();
-    const weekEnd = new Date(d);
-    weekEnd.setDate(d.getDate() + (6 - day)); // Go forward to next Saturday
-    return weekEnd.toISOString().split('T')[0];
+    d.setDate(d.getDate() + (6 - d.getDay())); // Forward to next Saturday
+    return toLocalDateStr(d);
 }
 
 export interface DashboardStatsData {
-    todaysAppointments: number;
-    weeksAppointments: number;
     weeksEarnings: number;
+    jobsCompleted: number;
     clients: number;
 }
 
 export function useDashboardStats(detailerId: string | undefined) {
     const [statsData, setStatsData] = useState<DashboardStatsData>({
-        todaysAppointments: 0,
-        weeksAppointments: 0,
         weeksEarnings: 0,
+        jobsCompleted: 0,
         clients: 0,
     });
-    const [todaysAppointmentsList, setTodaysAppointmentsList] = useState<DashboardAppointmentDoc[]>([]);
+    const [todaysAppointmentsList, setTodaysAppointmentsList] = useState<Appointment[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        async function fetchStats() {
-            if (!detailerId) return;
-            // Appointments
-            const [todayDocs, weeksAppointments] = await Promise.all([
-                getRawAppointmentsForDate(detailerId, getTodayDateStr()),
-                countAppointmentsInDateRange(detailerId, getWeekStartDateStr(), getWeekEndDateStr()),
-            ]);
-            setTodaysAppointmentsList(todayDocs);
+        if (!detailerId) return;
+        let cancelled = false;
 
-            // Earnings
-            const earnings = await getEarnings(detailerId, getWeekStartDateStr(), getWeekEndDateStr());
-            // Clients
-            const clients = await countClients(detailerId);
-            setStatsData({
-                todaysAppointments: todayDocs.length,
-                weeksAppointments,
-                weeksEarnings: earnings.reduce((sum, e) => sum + (e.price || 0), 0),
-                clients,
-            });
+        async function fetchStats() {
+            try {
+                const [todaysAppointments, earnings, clients] = await Promise.all([
+                    // Only active statuses (pending/confirmed/in-progress) are returned,
+                    // so archived and completed jobs don't clutter today's schedule.
+                    getAppointmentsForDate(detailerId!, getTodayDateStr()),
+                    getEarnings(detailerId!, getWeekStartDateStr(), getWeekEndDateStr()),
+                    countClients(detailerId!),
+                ]);
+                if (cancelled) return;
+
+                setTodaysAppointmentsList(
+                    [...todaysAppointments].sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+                );
+                setStatsData({
+                    weeksEarnings: earnings.reduce((sum, e) => sum + (e.price || 0), 0),
+                    // An earning doc exists exactly when its appointment is completed,
+                    // so the week's earnings double as the completed-jobs count.
+                    jobsCompleted: earnings.length,
+                    clients,
+                });
+                setError(null);
+            } catch (err) {
+                console.error('Error loading dashboard stats:', err);
+                if (!cancelled) setError('Failed to load dashboard data.');
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
         }
+
         fetchStats();
+        return () => { cancelled = true; };
     }, [detailerId]);
 
-    return { statsData, todaysAppointmentsList };
+    return { statsData, todaysAppointmentsList, loading, error };
 }
