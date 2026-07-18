@@ -27,7 +27,9 @@ const emptyFormData = {
     time: '',
     address: '',
     notes: '',
-    price: ''
+    price: '',
+    smsConsent: false,
+    emailConsent: false
 };
 
 export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detailerId, isManual = false }: AddAppointmentModalProps) {
@@ -168,7 +170,11 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                 address: formData.address,
                 notes: formData.notes,
                 price: parseFloat(formData.price), // Parse price to float
-                estimatedDuration: selectedService?.duration || 60
+                estimatedDuration: selectedService?.duration || 60,
+                smsConsent: formData.smsConsent,
+                smsConsentAt: formData.smsConsent ? new Date().toISOString() : undefined,
+                emailConsent: formData.emailConsent,
+                emailConsentAt: formData.emailConsent ? new Date().toISOString() : undefined
             };
 
             const response = await fetch('/api/appointments', {
@@ -280,6 +286,9 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                             className="input-modern"
                                             placeholder="Enter email address (optional)"
                                         />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            If filled in, a confirmation email will be sent to the client. This will also be used to track clients and for upcoming SMS reminders.
+                                        </p>
                                     </div>
                                     <div>
                                         <label htmlFor="clientPhone" className="block text-sm font-medium text-gray-700 mb-2">
@@ -295,7 +304,37 @@ export default function AddAppointmentModal({ isOpen, onClose, onSuccess, detail
                                             placeholder="Enter phone number"
                                         />
                                     </div>
-                                    
+
+                                    {/* Consent */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-start gap-2">
+                                            <input
+                                                id="smsConsent"
+                                                type="checkbox"
+                                                checked={formData.smsConsent}
+                                                onChange={(e) => setFormData(f => ({ ...f, smsConsent: e.target.checked }))}
+                                                className="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                            />
+                                            <label htmlFor="smsConsent" className="text-sm text-gray-600">
+                                                The client agrees to receive SMS appointment reminders and confirmations. Message & data rates may apply. Reply STOP to opt out.
+                                            </label>
+                                        </div>
+                                        {formData.clientEmail.trim() && (
+                                            <div className="flex items-start gap-2">
+                                                <input
+                                                    id="emailConsent"
+                                                    type="checkbox"
+                                                    checked={formData.emailConsent}
+                                                    onChange={(e) => setFormData(f => ({ ...f, emailConsent: e.target.checked }))}
+                                                    className="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                                />
+                                                <label htmlFor="emailConsent" className="text-sm text-gray-600">
+                                                    The client agrees to receive appointment confirmation and reminder emails at the address provided.
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {/* Vehicle Information */}
                                     <div className="border-t border-gray-200 pt-4 mt-4">
                                         <h4 className="text-sm font-medium text-gray-900 mb-3">Vehicle Information</h4>

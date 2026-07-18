@@ -43,6 +43,7 @@ export default function BookingPage() {
     notes: '',
     address: '', // Add address field
     smsConsent: false,
+    emailConsent: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -95,6 +96,13 @@ export default function BookingPage() {
     setFormData(prev => ({
       ...prev,
       smsConsent: checked
+    }));
+  };
+
+  const handleEmailConsentChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      emailConsent: checked
     }));
   };
 
@@ -196,6 +204,8 @@ export default function BookingPage() {
         estimatedDuration: selectedService!.duration, // Include service duration
         smsConsent: formData.smsConsent,
         smsConsentAt: formData.smsConsent ? new Date().toISOString() : undefined,
+        emailConsent: formData.emailConsent,
+        emailConsentAt: formData.emailConsent ? new Date().toISOString() : undefined,
       };
 
       const response = await fetch('/api/appointments', {
@@ -400,6 +410,7 @@ export default function BookingPage() {
           formData={formData}
           onChange={handleFormChange}
           onConsentChange={handleConsentChange}
+          onEmailConsentChange={handleEmailConsentChange}
           onSubmit={handleSubmit}
           submitting={submitting}
         />

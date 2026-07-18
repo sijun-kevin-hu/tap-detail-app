@@ -61,7 +61,9 @@ export interface Appointment {
     reminderSentAt?: string;
     smsConsent?: boolean;
     smsConsentAt?: string;
-    
+    emailConsent?: boolean;
+    emailConsentAt?: string;
+
     // Optional fields
     estimatedDuration?: number;
     actualDuration?: number;
@@ -87,6 +89,8 @@ export interface AppointmentFormData {
     reminderSent?: boolean;
     smsConsent?: boolean;
     smsConsentAt?: string;
+    emailConsent?: boolean;
+    emailConsentAt?: string;
 }
 
 export interface AppointmentFilters {

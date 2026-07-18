@@ -11,17 +11,19 @@ export interface BookingFormValues {
   notes: string;
   address: string; // Add address field
   smsConsent: boolean;
+  emailConsent: boolean;
 }
 
 interface BookingFormProps {
   formData: BookingFormValues;
   onChange: (field: keyof BookingFormValues, value: string) => void;
   onConsentChange: (checked: boolean) => void;
+  onEmailConsentChange: (checked: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   submitting: boolean;
 }
 
-export default function BookingForm({ formData, onChange, onConsentChange, onSubmit, submitting }: BookingFormProps) {
+export default function BookingForm({ formData, onChange, onConsentChange, onEmailConsentChange, onSubmit, submitting }: BookingFormProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Information</h3>
@@ -171,6 +173,20 @@ export default function BookingForm({ formData, onChange, onConsentChange, onSub
             I agree to receive SMS appointment reminders and confirmations. Message & data rates may apply. Reply STOP to opt out.
           </label>
         </div>
+        {formData.clientEmail.trim() && (
+          <div className="flex items-start gap-2">
+            <input
+              id="emailConsent"
+              type="checkbox"
+              checked={formData.emailConsent}
+              onChange={(e) => onEmailConsentChange(e.target.checked)}
+              className="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+            />
+            <label htmlFor="emailConsent" className="text-sm text-gray-600">
+              I agree to receive appointment confirmation and reminder emails at the address provided.
+            </label>
+          </div>
+        )}
         <button
           type="submit"
           disabled={submitting}

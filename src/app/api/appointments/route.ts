@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { saveAppointmentToDB } from '@/lib/firebase/firestore-appointments';
 import { sendAppointmentRequestReceivedEmail } from '@/lib/services/emailService';
 import { sendDetailerNewAppointmentNotification } from '@/lib/services/emailService';
+import { sendAppointmentConfirmedEmail } from '@/lib/services/emailService';
 import { getDoc, doc as firestoreDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 
 export async function POST(req: NextRequest) {
   try {
     const { detailerId, appointmentData, isManual } = await req.json();
+    // Appointments the detailer creates manually are confirmed right away;
+    // client-submitted booking requests start out pending.
+    const status = isManual ? 'confirmed' : 'pending';
     // Save appointment to Firestore
-    const id = await saveAppointmentToDB(detailerId, appointmentData);
+    const id = await saveAppointmentToDB(detailerId, appointmentData, status);
 
     // Fetch detailer info for email
     let detailerName = 'Your Detailer';
@@ -24,10 +28,29 @@ export async function POST(req: NextRequest) {
     } catch {}
     const bookingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/booking/${detailerId}`;
 
-    // Only send emails if not manual
-    if (!isManual) {
-      // Send request received email if clientEmail is present
-      if (appointmentData.clientEmail) {
+    // Whether we're allowed to email the client (they provided an address and consented).
+    const canEmailClient = Boolean(appointmentData.clientEmail && appointmentData.emailConsent);
+
+    if (isManual) {
+      // Detailer created and auto-confirmed the appointment: send the client the
+      // confirmation email directly (if they gave an email and consented).
+      if (canEmailClient) {
+        try {
+          await sendAppointmentConfirmedEmail(appointmentData.clientEmail, {
+            ...appointmentData,
+            detailerName,
+            detailerPhone,
+            detailerEmail,
+            bookingUrl,
+          });
+        } catch (emailErr) {
+          console.error('Failed to send appointment confirmed email:', emailErr);
+          // Do not throw, just log
+        }
+      }
+    } else {
+      // Send request received email if the client provided an email and consented
+      if (canEmailClient) {
         try {
           await sendAppointmentRequestReceivedEmail(appointmentData.clientEmail, {
             ...appointmentData,

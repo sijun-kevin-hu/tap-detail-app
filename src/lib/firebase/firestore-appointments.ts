@@ -56,6 +56,10 @@ function mapAppointmentDoc(doc: QueryDocumentSnapshot<DocumentData>) {
     deletedAt: data.deletedAt,
     reminderSent: data.reminderSent || false,
     reminderSentAt: data.reminderSentAt,
+    smsConsent: data.smsConsent,
+    smsConsentAt: data.smsConsentAt,
+    emailConsent: data.emailConsent,
+    emailConsentAt: data.emailConsentAt,
     estimatedDuration: data.estimatedDuration,
     actualDuration: data.actualDuration,
     paymentStatus: data.paymentStatus,
@@ -404,14 +408,14 @@ export const countAppointmentsInDateRange = async (
 };
 
 // Only include Firestore logic and client-safe code here
-export const saveAppointmentToDB = async (detailerId: string, appointmentData: Omit<Appointment, 'id' | 'detailerId' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const saveAppointmentToDB = async (detailerId: string, appointmentData: Omit<Appointment, 'id' | 'detailerId' | 'status' | 'createdAt' | 'updatedAt'>, status: Appointment['status'] = 'pending'): Promise<string> => {
   try {
     const appointmentsRef = collection(db, 'detailers', detailerId, 'appointments');
     const newAppointment: Appointment = {
       ...appointmentData,
       id: '', // Will be set by Firestore
       detailerId: detailerId,
-      status: 'pending',
+      status,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
