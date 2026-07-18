@@ -71,7 +71,7 @@ export default function SettingsPage() {
         {/* Header with Back Button */}
         <div className="flex items-center justify-between mb-6">
           <button
-            onClick={() => router.push('/admin')}
+            onClick={() => router.replace('/admin')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-100"
             aria-label="Go back to dashboard"
           >

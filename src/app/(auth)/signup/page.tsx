@@ -24,10 +24,11 @@ export default function Signup() {
     const router = useRouter();
     const { detailer, loading: authLoading } = useAuth();
 
-    // Redirect if already authenticated
+    // Redirect if already authenticated. Use replace (not push) so pressing
+    // back from /admin doesn't get trapped bouncing off this redirect.
     useEffect(() => {
         if (!authLoading && detailer) {
-            router.push('/admin');
+            router.replace('/admin');
         }
     }, [detailer, authLoading, router]);
 
@@ -98,8 +99,9 @@ export default function Signup() {
             alert('Email verification sent. Please check your email (and junk folder if it\'s shy) to verify your account.');
             await signOut(auth);
             
-            // Redirect to login page after successful signup
-            router.push('/login');
+            // Redirect to login page after successful signup. Replace so the
+            // back button doesn't return to the completed signup form.
+            router.replace('/login');
         } catch (error: unknown) {
             console.error('Signup error:', error);
             if (typeof error === 'object' && error && 'code' in error && 'message' in error) {

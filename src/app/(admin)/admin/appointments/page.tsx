@@ -142,7 +142,7 @@ export default function AppointmentsPage() {
           <div className="flex flex-col gap-4">
             {/* Back Button */}
             <button
-              onClick={() => router.push('/admin')}
+              onClick={() => router.replace('/admin')}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-100 w-fit"
               aria-label="Go back to dashboard"
             >

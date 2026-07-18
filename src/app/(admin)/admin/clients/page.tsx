@@ -85,7 +85,7 @@ export default function ClientsPage() {
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => router.push('/admin')}
+              onClick={() => router.replace('/admin')}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
             >
               <ArrowLeftIcon className="h-6 w-6" />

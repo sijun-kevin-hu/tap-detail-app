@@ -12,7 +12,8 @@ export default function DashboardHeader() {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      router.push('/login');
+      // Replace so back can't return into the (now signed-out) admin area.
+      router.replace('/login');
     } catch (error) {
       console.error('Error signing out:', error);
     }

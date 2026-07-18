@@ -282,13 +282,15 @@ export default function BookingPage() {
   };
 
   const handleBackButton = () => {
+    // Use replace so this back navigation doesn't stack a history entry —
+    // the browser back button would otherwise return to this screen.
     // Check if current user is the detailer with matching businessId
     if (firebaseUser && detailer && firebaseUser.uid === detailer.uid && detailer.businessId === businessId) {
       // User is the detailer, go to admin/settings
-      router.push('/admin/settings');
+      router.replace('/admin/settings');
     } else {
       // User is not the detailer or not logged in, go to landing page
-      router.push('/');
+      router.replace('/');
     }
   };
 

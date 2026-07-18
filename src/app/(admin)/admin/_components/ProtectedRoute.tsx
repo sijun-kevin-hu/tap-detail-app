@@ -15,10 +15,13 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
 
     useEffect(() => {
         if (!loading) {
+            // Use replace (not push) so the guarded page doesn't remain in
+            // history — with push, pressing back after the redirect returns to
+            // the protected page, which redirects again, trapping the user.
             if (!detailer) {
-                router.push('/login');
+                router.replace('/login');
             } else if (requiredRole && detailer.role !== requiredRole) {
-                router.push('/login');
+                router.replace('/login');
             }
         }
     }, [detailer, loading, requiredRole, router]);

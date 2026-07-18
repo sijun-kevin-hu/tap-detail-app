@@ -18,10 +18,13 @@ export default function Login() {
     const router = useRouter();
     const { detailer, loading: authLoading } = useAuth();
 
-    // Redirect if already authenticated
+    // Redirect if already authenticated. Use replace (not push) so this page
+    // doesn't stack history entries — with push, pressing the browser back
+    // button from /admin lands here, gets pushed forward again, and the user
+    // is trapped, unable to ever back out of the app.
     useEffect(() => {
         if (!authLoading && detailer) {
-            router.push('/admin');
+            router.replace('/admin');
         }
     }, [detailer, authLoading, router]);
 
