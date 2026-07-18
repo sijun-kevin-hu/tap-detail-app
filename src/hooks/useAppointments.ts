@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/firebase/auth';
 import { getAppointments, updateAppointment, deleteAppointment } from '@/lib/firebase/firestore-appointments';
 import { Appointment, AppointmentFilters } from '@/lib/models';
@@ -9,6 +9,10 @@ export function useAppointments() {
   const { detailer } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
+  // Track whether the first fetch has completed so refetches (e.g. after
+  // creating an appointment) don't toggle the full-screen loading state,
+  // which would unmount the list and cause a visible flicker.
+  const hasFetchedRef = useRef(false);
   const [filters, setFilters] = useState<AppointmentFilters>({
     searchTerm: '',
     statusFilter: 'all',
@@ -28,8 +32,11 @@ export function useAppointments() {
 
   const fetchAppointments = useCallback(async (reset = false) => {
     if (!detailer?.uid) return;
+    // Only show the full-screen spinner on the very first load. Subsequent
+    // refetches update the list in place to avoid flickering the whole page.
+    const isInitialLoad = !hasFetchedRef.current;
     try {
-      setLoading(true);
+      if (isInitialLoad) setLoading(true);
       const { appointments, lastDoc: newLastDoc } = await getAppointments(detailer.uid, { limitNum: PAGE_SIZE, startAfterDoc: reset ? undefined : lastDoc });
       setAppointments(appointments); // Always replace with latest from Firestore
       setLastDoc(newLastDoc);
@@ -37,7 +44,8 @@ export function useAppointments() {
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
-      setLoading(false);
+      hasFetchedRef.current = true;
+      if (isInitialLoad) setLoading(false);
     }
   }, [detailer?.uid, lastDoc]);
 
