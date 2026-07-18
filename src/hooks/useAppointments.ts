@@ -26,32 +26,40 @@ export function useAppointments() {
   const [editLoading, setEditLoading] = useState(false);
   const [dateRangeType, setDateRangeType] = useState<'all' | '7' | '30' | 'next7' | 'next30' | 'custom'>('all');
   const [customRange, setCustomRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
-  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null);
+  // Keep the pagination cursor in a ref (not state) so fetchAppointments has a
+  // stable identity. When it was state, every fetch produced a new lastDoc,
+  // which recreated the callback, which re-ran the mount effect, which fetched
+  // again — an endless refetch loop that made the list flicker.
+  const lastDocRef = useRef<QueryDocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const PAGE_SIZE = 50;
 
-  const fetchAppointments = useCallback(async (reset = false) => {
+  const fetchAppointments = useCallback(async (loadMore = false) => {
     if (!detailer?.uid) return;
     // Only show the full-screen spinner on the very first load. Subsequent
     // refetches update the list in place to avoid flickering the whole page.
     const isInitialLoad = !hasFetchedRef.current;
     try {
       if (isInitialLoad) setLoading(true);
-      const { appointments, lastDoc: newLastDoc } = await getAppointments(detailer.uid, { limitNum: PAGE_SIZE, startAfterDoc: reset ? undefined : lastDoc });
-      setAppointments(appointments); // Always replace with latest from Firestore
-      setLastDoc(newLastDoc);
-      setHasMore(!!newLastDoc && appointments.length === PAGE_SIZE);
+      const { appointments: fetched, lastDoc: newLastDoc } = await getAppointments(detailer.uid, {
+        limitNum: PAGE_SIZE,
+        startAfterDoc: loadMore ? lastDocRef.current ?? undefined : undefined
+      });
+      // A refresh replaces the list from the start; load-more appends the next page.
+      setAppointments(prev => loadMore ? [...prev, ...fetched] : fetched);
+      lastDocRef.current = newLastDoc;
+      setHasMore(!!newLastDoc && fetched.length === PAGE_SIZE);
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
       hasFetchedRef.current = true;
       if (isInitialLoad) setLoading(false);
     }
-  }, [detailer?.uid, lastDoc]);
+  }, [detailer?.uid]);
 
   useEffect(() => {
     if (detailer?.uid) {
-      fetchAppointments(true);
+      fetchAppointments();
     }
   }, [detailer?.uid, fetchAppointments]);
 
@@ -208,7 +216,7 @@ export function useAppointments() {
     handlePermanentDelete,
     openEditModal,
     handleEditSave,
-    loadMoreAppointments: () => hasMore && fetchAppointments(),
+    loadMoreAppointments: () => hasMore && fetchAppointments(true),
     hasMore,
 
     // Utilities
