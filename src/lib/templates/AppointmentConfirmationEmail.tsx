@@ -12,6 +12,24 @@ function formatTime12Hour(time: string) {
   return `${hour}:${minute.padStart(2, '0')} ${ampm}`;
 }
 
+function formatPrice(price?: number) {
+  if (typeof price !== 'number' || isNaN(price)) return '';
+  return `$${price.toFixed(2)}`;
+}
+
+function formatDuration(minutes?: number) {
+  if (!minutes || minutes <= 0) return '';
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hrs === 0) return `${mins} min`;
+  return mins ? `${hrs} hr ${mins} min` : `${hrs} hr`;
+}
+
+function formatVehicle(carType?: string, carMake?: string, carModel?: string, carYear?: string) {
+  const description = [carYear, carMake, carModel].filter(Boolean).join(' ');
+  return description || carType || '';
+}
+
 interface AppointmentConfirmationEmailProps {
   clientName: string;
   detailerName: string;
@@ -19,7 +37,13 @@ interface AppointmentConfirmationEmailProps {
   date: string;
   time: string;
   service?: string;
-  location?: string;
+  address?: string;
+  carType?: string;
+  carMake?: string;
+  carModel?: string;
+  carYear?: string;
+  price?: number;
+  estimatedDuration?: number;
   bookingUrl?: string;
 }
 
@@ -39,9 +63,18 @@ export default function AppointmentConfirmationEmail({
   date,
   time,
   service,
-  location,
+  address,
+  carType,
+  carMake,
+  carModel,
+  carYear,
+  price,
+  estimatedDuration,
   bookingUrl,
 }: AppointmentConfirmationEmailProps) {
+  const vehicle = formatVehicle(carType, carMake, carModel, carYear);
+  const duration = formatDuration(estimatedDuration);
+  const subtotal = formatPrice(price);
   return (
     <Html>
       <Head />
@@ -65,13 +98,16 @@ export default function AppointmentConfirmationEmail({
             <Text style={{ margin: '0 0 8px 0' }}><strong>Date:</strong> {date}</Text>
             <Text style={{ margin: '0 0 8px 0' }}><strong>Time:</strong> {formatTime12Hour(time)}</Text>
             {service && <Text style={{ margin: '0 0 8px 0' }}><strong>Service:</strong> {service}</Text>}
-            {location && <Text style={{ margin: '0 0 8px 0' }}><strong>Location:</strong> {location}</Text>}
+            {vehicle && <Text style={{ margin: '0 0 8px 0' }}><strong>Vehicle:</strong> {vehicle}</Text>}
+            {address && <Text style={{ margin: '0 0 8px 0' }}><strong>Location:</strong> {address}</Text>}
+            {duration && <Text style={{ margin: '0 0 8px 0' }}><strong>Estimated Duration:</strong> {duration}</Text>}
+            {subtotal && <Text style={{ margin: '0 0 8px 0' }}><strong>Subtotal:</strong> {subtotal}</Text>}
             <Text style={{ margin: '0 0 8px 0' }}><strong>Detailer:</strong> {detailerName}</Text>
             <Text style={{ margin: 0 }}><strong>Contact:</strong> <a href={`tel:${detailerPhone}`} style={{ color: primaryColor, textDecoration: 'underline' }}>{detailerPhone}</a></Text>
           </Section>
           {bookingUrl && (
             <Button href={bookingUrl} style={{ display: 'inline-block', background: primaryColor, color: '#fff', fontWeight: 600, padding: '14px 32px', borderRadius: 8, textDecoration: 'none', fontSize: '1rem', marginBottom: 16 }}>
-              View Booking Details
+              Visit Booking Page
             </Button>
           )}
           <Text style={{ fontSize: '1rem', color: '#64748b', marginTop: 24 }}>
@@ -87,4 +123,4 @@ export default function AppointmentConfirmationEmail({
       </Body>
     </Html>
   );
-} 
+}
