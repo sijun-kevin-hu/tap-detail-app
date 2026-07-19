@@ -98,6 +98,8 @@ export default function SettingsPage() {
           {profileOpen && (
             <ProfileSection
               profile={profile}
+              email={detailer?.email}
+              phone={detailer?.phone}
               profileModified={profileModified}
               saving={saving}
               onProfileUpdate={handleProfileUpdate}

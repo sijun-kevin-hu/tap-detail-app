@@ -17,7 +17,8 @@ export default function Signup() {
         confirmPassword: '',
         phone: '',
         businessName: '',
-        businessId: ''
+        businessId: '',
+        notificationConsent: false
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -33,8 +34,10 @@ export default function Signup() {
     }, [detailer, authLoading, router]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        if (name === 'phone') {
+        const { name, value, type, checked } = e.target;
+        if (type === 'checkbox') {
+            setFormData(prev => ({ ...prev, [name]: checked }));
+        } else if (name === 'phone') {
             // Only allow digits, max 10
             const digits = value.replace(/\D/g, '').slice(0, 10);
             // Format as (XXX) XXX-XXXX
@@ -79,6 +82,11 @@ export default function Signup() {
         const digits = formData.phone.replace(/\D/g, '');
         if (digits.length !== 10) {
             setError('Please enter a valid 10-digit US phone number');
+            return false;
+        }
+
+        if (!formData.notificationConsent) {
+            setError('Please agree to receive SMS and email notifications to create your account');
             return false;
         }
 
@@ -306,6 +314,22 @@ export default function Signup() {
                                     placeholder="Confirm your password"
                                 />
                             </div>
+                        </div>
+
+                        {/* Notification Consent */}
+                        <div className="flex items-start gap-3">
+                            <input
+                                id="notificationConsent"
+                                name="notificationConsent"
+                                type="checkbox"
+                                required
+                                checked={formData.notificationConsent}
+                                onChange={handleInputChange}
+                                className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <label htmlFor="notificationConsent" className="text-sm text-gray-700">
+                                I agree to receive SMS and email notifications from Tap Detail, such as appointment updates and account alerts. *
+                            </label>
                         </div>
 
                         {/* Error Message */}

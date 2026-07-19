@@ -30,6 +30,11 @@ export const signUpDetailer = async (formData: DetailerFormData): Promise<void> 
         businessName: formData.businessName,
         role: 'detailer',
         isActive: true,
+        notificationConsent: {
+            email: formData.notificationConsent,
+            sms: formData.notificationConsent,
+            consentedAt: new Date().toISOString(),
+        },
         bio: '',
         profileImage: null,
         galleryImages: [],

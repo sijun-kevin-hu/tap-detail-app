@@ -11,6 +11,12 @@ export interface AvailabilitySettings {
     timezone?: string; // e.g., 'America/New_York'
 }
 
+export interface NotificationConsent {
+    email: boolean;
+    sms: boolean;
+    consentedAt: string; // ISO timestamp of when consent was given
+}
+
 export interface Detailer {
     // Firebase Auth properties
     uid: string;
@@ -32,6 +38,9 @@ export interface Detailer {
     profileImage?: string | null;
     galleryImages?: string[];
     
+    // Notification consent (collected at signup)
+    notificationConsent?: NotificationConsent;
+
     // Optional properties
     location?: string;
     services?: string[];
@@ -55,6 +64,7 @@ export interface DetailerFormData {
     phone: string;
     businessName: string;
     businessId: string;
+    notificationConsent: boolean;
 }
 
 // Legacy interfaces for backward compatibility during transition

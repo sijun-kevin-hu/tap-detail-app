@@ -5,6 +5,8 @@ import Image from 'next/image';
 
 interface ProfileSectionProps {
   profile: ProfileSettings;
+  email?: string;
+  phone?: string;
   profileModified: boolean;
   saving: boolean;
   onProfileUpdate: (field: keyof ProfileSettings, value: string | string[] | null) => void;
@@ -19,6 +21,8 @@ interface ProfileSectionProps {
 
 export default function ProfileSection({
   profile,
+  email,
+  phone,
   profileModified,
   saving,
   onProfileUpdate,
@@ -73,6 +77,28 @@ export default function ProfileSection({
         />
       </div>
       
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+        <input
+          className="input-modern w-full bg-gray-100 text-gray-500 cursor-not-allowed"
+          value={email || ''}
+          readOnly
+          disabled
+        />
+        <p className="text-xs text-gray-400 mt-1">You will receive notifications through this email.</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+        <input
+          className="input-modern w-full bg-gray-100 text-gray-500 cursor-not-allowed"
+          value={phone || ''}
+          readOnly
+          disabled
+        />
+        <p className="text-xs text-gray-400 mt-1">SMS notifications are coming soon.</p>
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Short Description / Bio</label>
         <textarea
