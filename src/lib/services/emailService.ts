@@ -10,7 +10,13 @@ export interface AppointmentData {
   date: string;
   time: string;
   service?: string;
-  location?: string;
+  address?: string;
+  carType?: string;
+  carMake?: string;
+  carModel?: string;
+  carYear?: string;
+  price?: number;
+  estimatedDuration?: number;
   bookingUrl?: string;
 }
 
@@ -25,6 +31,24 @@ function formatTime12Hour(time: string) {
   return `${hour}:${minute.padStart(2, '0')} ${ampm}`;
 }
 
+function formatPrice(price?: number) {
+  if (typeof price !== 'number' || isNaN(price)) return '';
+  return `$${price.toFixed(2)}`;
+}
+
+function formatDuration(minutes?: number) {
+  if (!minutes || minutes <= 0) return '';
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hrs === 0) return `${mins} min`;
+  return mins ? `${hrs} hr ${mins} min` : `${hrs} hr`;
+}
+
+function formatVehicle(carType?: string, carMake?: string, carModel?: string, carYear?: string) {
+  const description = [carYear, carMake, carModel].filter(Boolean).join(' ');
+  return description || carType || '';
+}
+
 /**
  * Sends an appointment confirmation email using Resend and a React template.
  * @param to Recipient email address
@@ -35,18 +59,8 @@ export async function sendAppointmentConfirmationEmail(
   appointmentData: AppointmentData
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { clientName, detailerName, detailerPhone, date, time, service, location, bookingUrl } = appointmentData;
     const subject = 'Your Car Detailing Appointment is Confirmed!';
-    const reactHtml = AppointmentConfirmationEmail({
-      clientName,
-      detailerName,
-      detailerPhone,
-      date,
-      time,
-      service,
-      location,
-      bookingUrl,
-    });
+    const reactHtml = AppointmentConfirmationEmail(appointmentData);
     const { error } = await resend.emails.send({
       from: 'Tap Detail <noreply@tapdetail.com>',
       to,
@@ -74,10 +88,16 @@ export async function sendDetailerNewAppointmentNotification(
   appointmentData: AppointmentData
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { clientName, date, time, service, location } = appointmentData;
+    const { clientName, date, time, service, address, carType, carMake, carModel, carYear, price, estimatedDuration } = appointmentData;
     const subject = 'New Appointment Request - Action Required';
+    const vehicle = formatVehicle(carType, carMake, carModel, carYear);
+    const duration = formatDuration(estimatedDuration);
+    const subtotal = formatPrice(price);
     const serviceLine = service ? `<div style='margin-bottom:6px;'><strong>Service:</strong> ${service}</div>` : '';
-    const locationLine = location ? `<div style='margin-bottom:6px;'><strong>Location:</strong> ${location}</div>` : '';
+    const vehicleLine = vehicle ? `<div style='margin-bottom:6px;'><strong>Vehicle:</strong> ${vehicle}</div>` : '';
+    const locationLine = address ? `<div style='margin-bottom:6px;'><strong>Location:</strong> ${address}</div>` : '';
+    const durationLine = duration ? `<div style='margin-bottom:6px;'><strong>Estimated Duration:</strong> ${duration}</div>` : '';
+    const subtotalLine = subtotal ? `<div style='margin-bottom:6px;'><strong>Subtotal:</strong> ${subtotal}</div>` : '';
     const userLine = clientName ? `<div style='margin-bottom:6px;'><strong>User:</strong> ${clientName}</div>` : '';
     const html = `
       <div style="background:#f8fafc;padding:40px 0;font-family:'Segoe UI',Arial,sans-serif;">
@@ -95,7 +115,10 @@ export async function sendDetailerNewAppointmentNotification(
             <div style='margin-bottom:6px;'><strong>Time:</strong> ${formatTime12Hour(time)}</div>
             ${userLine}
             ${serviceLine}
+            ${vehicleLine}
             ${locationLine}
+            ${durationLine}
+            ${subtotalLine}
           </div>
           <a href="https://tapdetail.com/admin/appointments" style="display:inline-block;background:#4f46e5;color:#fff;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:1rem;margin-bottom:16px;">Go to Appointments</a>
           <div style="font-size:1rem;color:#64748b;margin-top:24px;text-align:center;">Tap Detail</div>
@@ -130,10 +153,16 @@ export async function sendAppointmentConfirmedEmail(
   appointmentData: AppointmentData & { detailerEmail?: string }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { clientName, detailerName, detailerPhone, detailerEmail, date, time, service, location, bookingUrl } = appointmentData;
+    const { clientName, detailerName, detailerPhone, detailerEmail, date, time, service, address, carType, carMake, carModel, carYear, price, estimatedDuration, bookingUrl } = appointmentData;
     const subject = 'Your Car Detailing Appointment is Confirmed!';
+    const vehicle = formatVehicle(carType, carMake, carModel, carYear);
+    const duration = formatDuration(estimatedDuration);
+    const subtotal = formatPrice(price);
     const serviceLine = service ? `<div style='margin-bottom:6px;'><strong>Service:</strong> ${service}</div>` : '';
-    const locationLine = location ? `<div style='margin-bottom:6px;'><strong>Location:</strong> ${location}</div>` : '';
+    const vehicleLine = vehicle ? `<div style='margin-bottom:6px;'><strong>Vehicle:</strong> ${vehicle}</div>` : '';
+    const locationLine = address ? `<div style='margin-bottom:6px;'><strong>Location:</strong> ${address}</div>` : '';
+    const durationLine = duration ? `<div style='margin-bottom:6px;'><strong>Estimated Duration:</strong> ${duration}</div>` : '';
+    const subtotalLine = subtotal ? `<div style='margin-bottom:6px;'><strong>Subtotal:</strong> ${subtotal}</div>` : '';
     const contactLine = `<div style='margin-bottom:6px;'><strong>Contact:</strong> <a href='tel:${detailerPhone}' style='color:#4f46e5;text-decoration:underline;'>${detailerPhone}</a>${detailerEmail ? ` | <a href='mailto:${detailerEmail}' style='color:#4f46e5;text-decoration:underline;'>${detailerEmail}</a>` : ''}</div>`;
     const html = `
       <div style="background:#f8fafc;padding:40px 0;font-family:'Segoe UI',Arial,sans-serif;">
@@ -150,11 +179,14 @@ export async function sendAppointmentConfirmedEmail(
             <div style='margin-bottom:6px;'><strong>Date:</strong> ${date}</div>
             <div style='margin-bottom:6px;'><strong>Time:</strong> ${formatTime12Hour(time)}</div>
             ${serviceLine}
+            ${vehicleLine}
             ${locationLine}
+            ${durationLine}
+            ${subtotalLine}
             <div style='margin-bottom:6px;'><strong>Detailer:</strong> ${detailerName}</div>
             ${contactLine}
           </div>
-          ${bookingUrl ? `<a href='${bookingUrl}' style='display:inline-block;background:#4f46e5;color:#fff;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:1rem;margin-bottom:16px;'>View Booking Details</a>` : ''}
+          ${bookingUrl ? `<a href='${bookingUrl}' style='display:inline-block;background:#4f46e5;color:#fff;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:1rem;margin-bottom:16px;'>Visit Booking Page</a>` : ''}
           <div style="font-size:1rem;color:#64748b;margin-top:24px;text-align:center;">If you have any questions or need to make changes, please contact your detailer directly.<br/><br/>We look forward to serving you!<br/><span style='color:#4f46e5;font-weight:600;'>— The Tap Detail Team</span></div>
         </div>
         <div style="text-align:center;color:#94a3b8;font-size:0.85rem;margin-top:24px;">&copy; ${new Date().getFullYear()} Tap Detail</div>
@@ -187,18 +219,8 @@ export async function sendAppointmentRequestReceivedEmail(
   appointmentData: AppointmentData
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { clientName, detailerName, detailerPhone, date, time, service, location, bookingUrl } = appointmentData;
     const subject = 'Your Appointment Request Has Been Received';
-    const reactHtml = AppointmentConfirmationEmail({
-      clientName,
-      detailerName,
-      detailerPhone,
-      date,
-      time,
-      service,
-      location,
-      bookingUrl,
-    });
+    const reactHtml = AppointmentConfirmationEmail(appointmentData);
     const { error } = await resend.emails.send({
       from: 'Tap Detail <noreply@tapdetail.com>',
       to,

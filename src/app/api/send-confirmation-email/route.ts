@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       detailerName = detailerData.businessName || detailerName;
       detailerPhone = detailerData.phone || '';
     } catch {}
-    const bookingUrl = `https://tapdetail.com/booking/${detailerId}`;
+    const bookingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://tapdetail.com'}/booking/${detailerId}`;
     await sendAppointmentConfirmedEmail(appointment.clientEmail, {
       ...appointment,
       detailerName,

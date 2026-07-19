@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       detailerPhone = detailerData.phone || '';
       detailerEmail = detailerData.email || '';
     } catch {}
-    const bookingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/booking/${detailerId}`;
+    const bookingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://tapdetail.com'}/booking/${detailerId}`;
 
     // Whether we're allowed to email the client (they provided an address and consented).
     const canEmailClient = Boolean(appointmentData.clientEmail && appointmentData.emailConsent);
