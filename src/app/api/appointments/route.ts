@@ -19,14 +19,20 @@ export async function POST(req: NextRequest) {
     let detailerName = 'Your Detailer';
     let detailerPhone = '';
     let detailerEmail = '';
+    let businessId = '';
     try {
       const detailerDoc = await getDoc(firestoreDoc(db, 'detailers', detailerId));
       const detailerData = detailerDoc.exists() ? detailerDoc.data() : {};
       detailerName = detailerData.businessName || detailerName;
       detailerPhone = detailerData.phone || '';
       detailerEmail = detailerData.email || '';
+      businessId = detailerData.businessId || '';
     } catch {}
-    const bookingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://tapdetail.com'}/booking/${detailerId}`;
+    // The public booking page is keyed by businessId, not the detailer's uid;
+    // skip the link (button is hidden) if we couldn't resolve one.
+    const bookingUrl = businessId
+      ? `${process.env.NEXT_PUBLIC_BASE_URL || 'https://tapdetail.com'}/booking/${businessId}`
+      : undefined;
 
     // Whether we're allowed to email the client (they provided an address and consented).
     const canEmailClient = Boolean(appointmentData.clientEmail && appointmentData.emailConsent);
