@@ -37,6 +37,7 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
   // Load slots for selected date
   useEffect(() => {
     if (!selectedDate) return;
+    let cancelled = false;
     setLoading(true);
     setError('');
     
@@ -53,6 +54,8 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
           getAppointmentsForDate(detailerId, dateStr),
         ]);
         
+        if (cancelled) return;
+
         if (!availability) {
           setSlots([]);
           setLoading(false);
@@ -69,13 +72,15 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
         
         setSlots(slots);
       } catch (err) {
+        if (cancelled) return;
         console.error('Error loading time slots:', err);
         setSlots([]);
         setError('Failed to load slots');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [selectedDate, detailerId, serviceDuration, services]);
 
   // Disable dates in the past
@@ -93,7 +98,16 @@ export default function UnifiedDateTimePicker({ detailerId, serviceName, service
         <>
           <div className="rounded-xl border border-gray-200 shadow-sm mb-4 bg-white overflow-x-visible w-full">
             <Calendar
-              onChange={date => setSelectedDate(date as Date)}
+              onChange={date => {
+                const nextDate = date as Date;
+                setSelectedDate(nextDate);
+                setSlots([]);
+                setLoading(true);
+                onChange({
+                  date: `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`,
+                  time: '',
+                });
+              }}
               value={selectedDate}
               tileDisabled={tileDisabled}
               minDate={new Date()}

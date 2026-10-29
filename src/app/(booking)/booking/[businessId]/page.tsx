@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ServiceMenu } from '@/lib/models/settings';
 import QRCodeModal from './_components/QRCodeModal';
@@ -23,6 +23,19 @@ export default function BookingPage() {
   const router = useRouter();
   const { firebaseUser } = useAuth();
   const businessId = params.businessId as string;
+  const [step, setStep] = useState(0);
+  const stageHeading = useRef<HTMLHeadingElement>(null);
+  const hasChangedStep = useRef(false);
+  const steps = ['Service', 'Date & time', 'Your details'];
+
+  useEffect(() => {
+    if (hasChangedStep.current) {
+      stageHeading.current?.focus({ preventScroll: true });
+      stageHeading.current?.scrollIntoView({ block: 'start' });
+    }
+    hasChangedStep.current = true;
+  }, [step]);
+
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -50,6 +63,9 @@ export default function BookingPage() {
   const [showQRModal, setShowQRModal] = useState(false);
 
   const handleServiceSelect = (service: ServiceMenu) => {
+    if (selectedService?.documentId !== service.documentId) {
+      setSelectedDateTime({ date: '', time: '' });
+    }
     setSelectedService(service);
   };
 
@@ -391,34 +407,89 @@ export default function BookingPage() {
         {/* Detailer Profile */}
         {detailer && <DetailerProfile detailer={detailer} />}
 
-        {/* Service Selection */}
-        <ServiceSelector
-          services={services}
-          selectedService={selectedService}
-          onSelect={handleServiceSelect}
-        />
+        <nav aria-label="Booking progress">
+          <ol className="grid grid-cols-3 gap-2">
+            {steps.map((label, index) => (
+              <li key={label}>
+                <button
+                  type="button"
+                  aria-current={step === index ? 'step' : undefined}
+                  disabled={index > step || submitting}
+                  onClick={() => setStep(index)}
+                  className={`w-full border-t-4 pt-3 text-left text-xs font-medium rounded-sm focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-4 ${index <= step ? 'border-indigo-600 text-indigo-700' : 'border-gray-200 text-gray-500'}`}
+                >
+                  <span className="block mb-1">Step {index + 1}</span>
+                  {label}
+                </button>
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-        {/* Date & Time Selection */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Date & Time</h3>
-          <UnifiedDateTimePicker
-            detailerId={detailer?.uid || ''}
-            serviceName={selectedService?.name || ''}
-            services={services}
-            value={selectedDateTime}
-            onChange={setSelectedDateTime}
-          />
-        </div>
+        <h2 ref={stageHeading} tabIndex={-1} className="text-xl font-semibold text-gray-900 scroll-mt-6 focus:outline-none">
+          {['Choose your service', 'Choose a date and time', 'Contact and vehicle details'][step]}
+        </h2>
 
-        {/* Client Information */}
-        <BookingForm
-          formData={formData}
-          onChange={handleFormChange}
-          onConsentChange={handleConsentChange}
-          onEmailConsentChange={handleEmailConsentChange}
-          onSubmit={handleSubmit}
-          submitting={submitting}
-        />
+        {step > 0 && selectedService && (
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-gray-700">
+            <p className="font-semibold text-gray-900">{selectedService.name} · ${selectedService.price}</p>
+            {step === 2 && selectedDateTime.date && selectedDateTime.time && (
+              <p className="mt-1">{new Date(`${selectedDateTime.date}T${selectedDateTime.time}`).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+            )}
+          </div>
+        )}
+
+        {step === 0 && (
+          <ServiceSelector services={services} selectedService={selectedService} onSelect={handleServiceSelect} />
+        )}
+
+        {step === 1 && (
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <UnifiedDateTimePicker
+              detailerId={detailer?.uid || ''}
+              serviceName={selectedService?.name || ''}
+              services={services}
+              value={selectedDateTime}
+              onChange={setSelectedDateTime}
+            />
+          </div>
+        )}
+
+        {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-sm text-red-700">{error}</p>}
+
+        {step === 2 && (
+          <>
+            <button type="button" disabled={submitting} onClick={() => setStep(1)} className="text-sm font-medium text-indigo-700 hover:underline focus-visible:outline-2 focus-visible:outline-indigo-600">
+              ← Back to date & time
+            </button>
+            <BookingForm
+              formData={formData}
+              onChange={handleFormChange}
+              onConsentChange={handleConsentChange}
+              onEmailConsentChange={handleEmailConsentChange}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+            />
+          </>
+        )}
+
+        {step < 2 && (
+          <div className="sticky bottom-0 flex items-center gap-3 border-t border-gray-200 bg-gray-50 py-4">
+            {step > 0 && (
+              <button type="button" onClick={() => setStep(step - 1)} className="rounded-lg border border-gray-300 bg-white px-5 py-3 font-medium text-gray-700 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-indigo-600">
+                Back
+              </button>
+            )}
+            <button
+              type="button"
+              disabled={step === 0 ? !selectedService : !selectedDateTime.date || !selectedDateTime.time}
+              onClick={() => setStep(step + 1)}
+              className="flex-1 rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2"
+            >
+              {step === 0 ? 'Continue to date & time' : 'Continue to your details'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* QR Code Modal */}

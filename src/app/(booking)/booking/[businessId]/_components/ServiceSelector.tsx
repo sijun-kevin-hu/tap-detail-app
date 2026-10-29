@@ -14,10 +14,12 @@ export default function ServiceSelector({ services, selectedService, onSelect }:
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Service</h3>
       <div className="space-y-3">
         {services.map((service) => (
-          <div
+          <button
+            type="button"
+            aria-pressed={selectedService?.documentId === service.documentId}
             key={service.documentId}
             onClick={() => onSelect(service)}
-            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedService?.documentId === service.documentId
+            className={`w-full text-left focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2 p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedService?.documentId === service.documentId
               ? 'border-indigo-500 bg-indigo-50'
               : 'border-gray-200 hover:border-gray-300'
               }`}
@@ -35,7 +37,7 @@ export default function ServiceSelector({ services, selectedService, onSelect }:
               </svg>
               {service.duration} {service.durationUnit}
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
