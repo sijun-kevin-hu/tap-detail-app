@@ -6,20 +6,16 @@ import { auth } from '@/lib/firebase/client';
 import { useRouter } from 'next/navigation';
 import { useAuth, signUpDetailer } from '@/lib/firebase/auth';
 import Link from 'next/link';
-import { DetailerFormData } from '@/lib/models';
+import { SignupFormData } from '@/lib/models';
 
 export default function Signup() {
-    const [formData, setFormData] = useState<DetailerFormData>({
-        firstName: '',
-        lastName: '',
+    const [formData, setFormData] = useState<SignupFormData>({
         email: '',
         password: '',
-        confirmPassword: '',
         phone: '',
-        businessName: '',
-        businessId: '',
         notificationConsent: false
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
@@ -29,7 +25,7 @@ export default function Signup() {
     // back from /admin doesn't get trapped bouncing off this redirect.
     useEffect(() => {
         if (!authLoading && detailer) {
-            router.replace('/admin');
+            router.replace(detailer.onboardingCompleted === false ? '/onboarding' : '/admin');
         }
     }, [detailer, authLoading, router]);
 
@@ -54,13 +50,8 @@ export default function Signup() {
     };
 
     const validateForm = () => {
-        if (!formData.firstName || !formData.lastName || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone || !formData.businessName || !formData.businessId) {
+        if (!formData.email || !formData.password || !formData.phone) {
             setError('Please fill in all fields');
-            return false;
-        }
-
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
             return false;
         }
 
@@ -168,7 +159,7 @@ export default function Signup() {
                         Join Tap Detail
                     </h1>
                     <p className="text-caption text-balance">
-                        Create your detailer account to start managing appointments
+                        Create your account, then set up your booking page in two short steps.
                     </p>
                 </div>
 
@@ -176,77 +167,6 @@ export default function Signup() {
                 <div className="card p-6 sm:p-8">
                     <form onSubmit={handleSignup} className="space-y-6">
                         <div className="space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                                        First Name *
-                                    </label>
-                                    <input
-                                        id="firstName"
-                                        name="firstName"
-                                        type="text"
-                                        autoComplete="given-name"
-                                        required
-                                        value={formData.firstName}
-                                        onChange={handleInputChange}
-                                        className="input-modern"
-                                        placeholder="Enter first name"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Last Name *
-                                    </label>
-                                    <input
-                                        id="lastName"
-                                        name="lastName"
-                                        type="text"
-                                        autoComplete="family-name"
-                                        required
-                                        value={formData.lastName}
-                                        onChange={handleInputChange}
-                                        className="input-modern"
-                                        placeholder="Enter last name"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Business Name *
-                                </label>
-                                <input
-                                    id="businessName"
-                                    name="businessName"
-                                    type="text"
-                                    autoComplete="organization"
-                                    required
-                                    value={formData.businessName}
-                                    onChange={handleInputChange}
-                                    className="input-modern"
-                                    placeholder="Enter business name"
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="businessId" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Business ID *
-                                </label>
-                                <input
-                                    id="businessId"
-                                    name="businessId"
-                                    type="text"
-                                    required
-                                    value={formData.businessId}
-                                    onChange={handleInputChange}
-                                    className="input-modern"
-                                    placeholder="Enter unique business ID (e.g., mybusiness)"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    This will be used in your booking URL: yourapp.com/booking/{formData.businessId}
-                                </p>
-                            </div>
-
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                     Email Address *
@@ -288,31 +208,18 @@ export default function Signup() {
                                 <input
                                     id="password"
                                     name="password"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     autoComplete="new-password"
                                     required
                                     value={formData.password}
                                     onChange={handleInputChange}
                                     className="input-modern"
-                                    placeholder="Create a password"
+                                    minLength={6}
+                                    placeholder="At least 6 characters"
                                 />
-                            </div>
-
-                            <div>
-                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Confirm Password *
-                                </label>
-                                <input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type="password"
-                                    autoComplete="new-password"
-                                    required
-                                    value={formData.confirmPassword}
-                                    onChange={handleInputChange}
-                                    className="input-modern"
-                                    placeholder="Confirm your password"
-                                />
+                                <button type="button" aria-pressed={showPassword} onClick={() => setShowPassword(value => !value)} className="mt-2 min-h-11 text-sm font-medium text-indigo-600">
+                                    {showPassword ? 'Hide password' : 'Show password'}
+                                </button>
                             </div>
                         </div>
 
@@ -334,7 +241,7 @@ export default function Signup() {
 
                         {/* Error Message */}
                         {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center">
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center" role="alert">
                                 <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>

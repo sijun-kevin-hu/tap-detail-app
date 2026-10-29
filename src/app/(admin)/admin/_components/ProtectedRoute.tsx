@@ -20,6 +20,8 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
             // the protected page, which redirects again, trapping the user.
             if (!detailer) {
                 router.replace('/login');
+            } else if (detailer.onboardingCompleted === false) {
+                router.replace('/onboarding');
             } else if (requiredRole && detailer.role !== requiredRole) {
                 router.replace('/login');
             }
@@ -40,7 +42,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
         );
     }
 
-    if (!detailer || (requiredRole && detailer.role !== requiredRole)) {
+    if (!detailer || detailer.onboardingCompleted === false || (requiredRole && detailer.role !== requiredRole)) {
         return null;
     }
 

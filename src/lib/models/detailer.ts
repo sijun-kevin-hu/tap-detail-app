@@ -23,6 +23,7 @@ export interface Detailer {
     email: string;
     
     // Custom Firestore properties
+    onboardingCompleted?: boolean;
     businessId: string; // Unique business identifier for public URLs
     firstName: string;
     lastName: string;
@@ -71,4 +72,5 @@ export interface DetailerFormData {
 // These are kept for any remaining imports that might still reference the old names
 export type User = Detailer;
 export type AuthUser = AuthDetailer;
-export type UserFormData = DetailerFormData; 
+export type UserFormData = DetailerFormData;
+export type SignupFormData = Pick<DetailerFormData, 'email' | 'phone' | 'password' | 'notificationConsent'>;

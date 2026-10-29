@@ -1,15 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/firebase/auth'
 import { Analytics } from '@vercel/analytics/next';
-
-const inter = Inter({ 
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap'
-})
 
 export const metadata: Metadata = {
   title: 'Tap Detail - Mobile Car Detailing',
@@ -19,7 +12,6 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
   },
 }
 
@@ -36,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`}>
+    <html lang="en" className="antialiased">
       <body className="font-sans bg-gray-50 text-gray-900">
         <AuthProvider>
           {children}

@@ -46,6 +46,7 @@ export const getDetailer = async (detailerId: string): Promise<Detailer | null> 
       const data = detailerDoc.data() as FirestoreDetailer;
       return {
         uid: data.uid,
+        onboardingCompleted: data.onboardingCompleted,
         businessId: data.businessId || '',
         email: data.email,
         firstName: data.firstName || '',
@@ -173,9 +174,11 @@ export const getDetailerByBusinessId = async (businessId: string): Promise<Detai
     
     if (!querySnapshot.empty) {
       const doc = querySnapshot.docs[0];
+      if (doc.data().onboardingCompleted === false || doc.data().isActive === false) return null;
       const data = doc.data() as FirestoreDetailer;
       return {
         uid: data.uid,
+        onboardingCompleted: data.onboardingCompleted,
         businessId: data.businessId,
         email: data.email,
         firstName: data.firstName || '',
@@ -217,6 +220,7 @@ export const getAllDetailers = async (): Promise<Detailer[]> => {
       const data = doc.data() as FirestoreDetailer;
       detailers.push({
         uid: data.uid,
+        onboardingCompleted: data.onboardingCompleted,
         businessId: data.businessId || '',
         email: data.email,
         firstName: data.firstName || '',
@@ -258,6 +262,7 @@ export const getActiveDetailers = async (): Promise<Detailer[]> => {
       const data = doc.data() as FirestoreDetailer;
       detailers.push({
         uid: data.uid,
+        onboardingCompleted: data.onboardingCompleted,
         businessId: data.businessId || '',
         email: data.email,
         firstName: data.firstName || '',

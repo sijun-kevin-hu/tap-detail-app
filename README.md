@@ -153,3 +153,11 @@ This project is licensed under the MIT License.
 ## Support
 
 For support, email tapdetail@gmail.com or create an issue in the repository.
+
+### Account setup
+
+New detailers sign up with email, phone, password, and notification consent. After email verification and login, `/onboarding` saves their name, then their business name and suggested public booking link. Completed steps persist in Firestore. New profiles stay inactive until setup finishes; existing profiles without `onboardingCompleted` keep their existing dashboard access.
+
+`POST /api/onboarding` requires a verified Firebase ID token. Completion reserves `/bookingLinks/{businessId}` and updates the profile in one Admin SDK transaction, also checking existing detailers for legacy links. Firebase UID remains the permanent account identifier. The matching `firestore.rules` changes must ship with this flow so clients cannot bypass link reservation or setup completion. No backfill of existing links is required.
+
+Run the focused setup tests with `npx jest --runInBand --config jest.onboarding.config.cjs`.

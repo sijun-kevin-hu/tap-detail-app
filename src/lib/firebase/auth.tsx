@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, createUserWithEmailAndPassword, User as FirebaseUser } from 'firebase/auth';
 import { auth } from './client';
-import { Detailer, AuthDetailer, DetailerFormData } from '../models';
+import { Detailer, AuthDetailer, SignupFormData } from '../models';
 import { getDetailer, createDetailer, createBaseServices } from './firestore-detailers';
 
 /**
@@ -11,7 +11,7 @@ import { getDetailer, createDetailer, createBaseServices } from './firestore-det
  * base services, and the custom verification email.
  * Throws on failure (e.g. auth/email-already-in-use) — callers handle errors.
  */
-export const signUpDetailer = async (formData: DetailerFormData): Promise<void> => {
+export const signUpDetailer = async (formData: SignupFormData): Promise<void> => {
     // Create detailer with Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -22,14 +22,15 @@ export const signUpDetailer = async (formData: DetailerFormData): Promise<void> 
     // Create detailer document in Firestore using new function
     await createDetailer({
         uid: userCredential.user.uid,
-        businessId: formData.businessId,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        businessId: '',
+        firstName: '',
+        lastName: '',
         email: formData.email,
         phone: formData.phone,
-        businessName: formData.businessName,
+        businessName: '',
         role: 'detailer',
-        isActive: true,
+        isActive: false,
+        onboardingCompleted: false,
         notificationConsent: {
             email: formData.notificationConsent,
             sms: formData.notificationConsent,

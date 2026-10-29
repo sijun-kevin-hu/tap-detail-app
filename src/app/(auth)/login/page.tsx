@@ -24,7 +24,7 @@ export default function Login() {
     // is trapped, unable to ever back out of the app.
     useEffect(() => {
         if (!authLoading && detailer) {
-            router.replace('/admin');
+            router.replace(detailer.onboardingCompleted === false ? '/onboarding' : '/admin');
         }
     }, [detailer, authLoading, router]);
 
