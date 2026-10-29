@@ -5,9 +5,9 @@ import { AuthProvider } from '@/lib/firebase/auth'
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
-  title: 'Tap Detail - Mobile Car Detailing',
-  description: 'Professional mobile car detailing services. Book your appointment today.',
-  keywords: 'car detailing, mobile detailing, auto detailing, car wash',
+  title: 'Tap Detail | Business Software for Mobile Detailers',
+  description: 'Manage bookings, client and vehicle details, job schedules, and earnings with Tap Detail. Business software built for independent mobile detailers.',
+  keywords: 'mobile detailing software, detailing business management, detailer booking software, detailing CRM',
   authors: [{ name: 'Tap Detail' }],
   manifest: '/manifest.json',
   icons: {

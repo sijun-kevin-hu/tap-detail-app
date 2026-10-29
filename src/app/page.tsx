@@ -1,283 +1,65 @@
 "use client";
 
+import Image from 'next/image';
 import Link from 'next/link';
 import NavBar from '@/components/features/marketing/NavBar';
 import Logo from '@/components/ui/Logo';
 import AppPreview from './_components/AppPreview';
+import styles from './landing.module.css';
+
+const workflow = [
+    { title: 'Let clients book.', description: 'Share your booking link so clients can pick a service and request an appointment. Spend less time sorting through messages.', detail: 'Your services. Your booking page.' },
+    { title: 'Arrive with the details.', description: 'Keep appointments, vehicle details, and client notes together. Know what’s coming up before you pack the van.', detail: 'A clearer plan for every job.' },
+    { title: 'See what you earned.', description: 'Track completed jobs and revenue. Keep an eye on how your business is doing between appointments.', detail: 'Your work, accounted for.' },
+];
 
 export default function Home() {
     return (
-        <div className="min-h-screen flex flex-col bg-white">
+        <div className={styles.landing}>
             <NavBar />
-
-            {/* Hero Section */}
-            <section className="relative pt-20 pb-32 overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/50 via-white to-white -z-10" />
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                    <div className="text-center max-w-4xl mx-auto">
-                        <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium text-indigo-600 ring-1 ring-inset ring-indigo-600/20 bg-indigo-50 mb-8">
-                            <span className="flex h-2 w-2 rounded-full bg-indigo-600 mr-2"></span>
-                            Perfect for Mobile Detailers
+            <main>
+                <section className={styles.hero} aria-labelledby="hero-title">
+                    <div className={styles.heroCopy}>
+                        <p className={styles.eyebrow}>Business software for mobile detailers</p>
+                        <h1 id="hero-title">More time detailing.<br /><span>Less time managing.</span></h1>
+                        <p className={styles.intro}>You take care of the finish. Tap Detail helps you keep bookings, client details, and earnings in one place—wherever the next job takes you.</p>
+                        <div className={styles.actions}>
+                            <Link href="/signup" className={styles.primary}>Get started <span aria-hidden="true">↗</span></Link>
+                            <Link href="#how-it-works" className={styles.secondary}>See how it works <span aria-hidden="true">↓</span></Link>
                         </div>
-                        <h1 className="text-display text-gray-900 mb-6 tracking-tight text-balance">
-                            Run Your Detailing Business <br className="hidden sm:block" />
-                            <span className="text-indigo-600">From Your Pocket</span>
-                        </h1>
-                        <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed text-balance">
-                            The simplest way to track jobs, manage clients, and get paid.
-                            Built specifically for owner-operators who want to ditch the notebook.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <Link href="/signup" className="btn-primary text-lg px-8 py-4 w-full sm:w-auto shadow-xl shadow-indigo-200">
-                                Start Free Trial
-                            </Link>
-                            <Link href="#features" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
-                                See How It Works
-                            </Link>
-                        </div>
-                        <p className="mt-6 text-sm text-gray-500">
-                            No credit card required · Free forever plan available
-                        </p>
+                        <p className={styles.small}>Built for independent detailers and life on the road.</p>
                     </div>
-
-                    {/* Hero Image / Dashboard Preview */}
-                    <div className="mt-16 relative mx-auto max-w-5xl">
-                        <div className="rounded-2xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-3xl lg:p-4">
-                            <AppPreview />
+                    <div className={styles.heroVisual}>
+                        <div className={styles.photo}>
+                            <Image src="/images/mobile-detailer.webp" alt="Mobile detailer wiping a silver SUV with a microfiber cloth on a driveway, with a detailing van nearby" fill priority sizes="(max-width: 850px) 100vw, 50vw" />
+                        </div>
+                        <div className={styles.photoCaption}>For the business behind the shine.</div>
+                        <div className={styles.phone} aria-label="Illustrative schedule preview with sample appointments">
+                            <div className={styles.phoneTop}><span>Tap Detail</span><span className={styles.demo}>Demo</span></div>
+                            <p className={styles.phoneLabel}>YOUR DAY, AT A GLANCE</p>
+                            <h2>Looking good today.</h2>
+                            <div className={styles.appointment}><time>9:00 AM</time><strong>Full detail</strong><span>SUV · Jordan M.</span><span className={styles.confirmed}>Confirmed</span></div>
+                            <div className={styles.nextJob}><time>1:30 PM</time><strong>Interior refresh</strong><span>Sedan · Alex R.</span></div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Social Proof */}
-            <section className="py-10 border-y border-gray-100 bg-gray-50/50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-6">
-                        Trusted by professional detailers
-                    </p>
-                    <div className="grid grid-cols-2 gap-8 md:grid-cols-4 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                        {/* Placeholders for partner/client logos */}
-                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">MACK&apos;S DETAILING</div>
-                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">PRESTIGE AUTO</div>
-                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">SHINE MASTER</div>
-                        <div className="flex justify-center items-center h-12 font-bold text-xl text-gray-400">ELITE MOBILE</div>
-                    </div>
-                </div>
-            </section>
+                <div className={styles.benefits} aria-label="Core features"><span>Online booking</span><span>Client & vehicle details</span><span>Job scheduling</span><span>Earnings tracking</span></div>
 
-            {/* Features Grid */}
-            <section id="features" className="py-24 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center max-w-3xl mx-auto mb-16">
-                        <h2 className="text-indigo-600 font-semibold tracking-wide uppercase text-sm mb-3">Features</h2>
-                        <p className="text-heading text-gray-900 mb-4">
-                            Everything you need to grow, nothing you don&apos;t.
-                        </p>
-                        <p className="text-lg text-gray-600">
-                            We stripped away the complex features you&apos;ll never use. Tap Detail is designed for speed and simplicity.
-                        </p>
-                    </div>
+                <section id="how-it-works" className={styles.workflow} aria-labelledby="workflow-title">
+                    <div className={styles.sectionHeading}><p className={styles.eyebrow}>From the first booking to the final wipe</p><h2 id="workflow-title">A little less admin.<br />A better working day.</h2><p>Keep the business side moving while you focus on the work in front of you.</p></div>
+                    <ol className={styles.steps}>{workflow.map((step, index) => <li key={step.title}><span className={styles.stepNumber}>0{index + 1}</span><h3>{step.title}</h3><p>{step.description}</p><span className={styles.stepDetail}>{step.detail}</span></li>)}</ol>
+                </section>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {/* Feature 1 - Booking Page */}
-                        <div className="group card p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-2 border-transparent hover:border-indigo-100">
-                            <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span className="inline-block px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-full mb-3">Most Popular</span>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Client Booking Page</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                Your own branded booking page. Let clients schedule appointments 24/7 with a simple link. No back-and-forth texts or calls needed.
-                            </p>
-                        </div>
+                <section id="features" className={styles.product} aria-labelledby="product-title">
+                    <div className={styles.productHeading}><div><p className={styles.eyebrow}>Your business, in view</p><h2 id="product-title">Pack the supplies.<br />Bring your whole business.</h2></div><p>Check your schedule, look up a client, and track your jobs from your phone. One place to pick up where you left off.</p></div>
+                    <div className={styles.preview}><AppPreview /></div>
+                    <p className={styles.previewCaption}>Illustrative product preview · Sample clients, appointments, and earnings</p>
+                </section>
 
-                        {/* Feature 2 - Smart Job Tracking */}
-                        <div className="group card p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Job Tracking</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                Log jobs in seconds. Track services, prices, and notes for every vehicle. Never forget what you did for a client.
-                            </p>
-                        </div>
-
-                        {/* Feature 3 - Schedule & Reminders */}
-                        <div className="group card p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                            <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Schedule & Reminders</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                See your day at a glance. Automated text reminders reduce no-shows and keep your schedule full.
-                            </p>
-                        </div>
-
-                        {/* Feature 4 - Client CRM */}
-                        <div className="group card p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                            <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Client CRM</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                A digital rolodex of all your customers. Search by name, phone, or vehicle. Build long-term relationships.
-                            </p>
-                        </div>
-
-                        {/* Feature 5 - Payment Tracking */}
-                        <div className="group card p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Revenue Insights</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                Track your earnings in real-time. See which services make the most money and grow what works best.
-                            </p>
-                        </div>
-
-                        {/* Feature 6 - Mobile First */}
-                        <div className="group card p-8 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-                            <div className="w-14 h-14 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Mobile-First Design</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                Built for your phone. Update jobs between appointments, check your schedule on the go, manage everything from anywhere.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Comparison Section */}
-            <section className="py-24 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        <div>
-                            <h2 className="text-heading text-gray-900 mb-6">
-                                Stop losing money to disorganization
-                            </h2>
-                            <p className="text-lg text-gray-600 mb-8">
-                                Pen and paper works until it doesn&apos;t. Coffee spills, lost notebooks, and forgotten appointments cost you money.
-                            </p>
-
-                            <div className="space-y-4">
-                                <div className="flex items-start">
-                                    <div className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-red-100 text-red-600 mt-1">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </div>
-                                    <div className="ml-4">
-                                        <h4 className="text-lg font-medium text-gray-900">The Old Way</h4>
-                                        <p className="text-gray-500">Messy notebooks, missed calls, forgotten details.</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start">
-                                    <div className="flex-shrink-0 h-6 w-6 flex items-center justify-center rounded-full bg-green-100 text-green-600 mt-1">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </div>
-                                    <div className="ml-4">
-                                        <h4 className="text-lg font-medium text-gray-900">The Tap Detail Way</h4>
-                                        <p className="text-gray-500">Organized, professional, and always in your pocket.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl transform rotate-3 opacity-10"></div>
-                            <div className="relative bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="h-10 w-10 rounded-full bg-gray-200"></div>
-                                            <div>
-                                                <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                                                <div className="h-3 w-20 bg-gray-100 rounded mt-1"></div>
-                                            </div>
-                                        </div>
-                                        <div className="h-8 w-20 bg-green-100 rounded-full"></div>
-                                    </div>
-                                    <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="h-10 w-10 rounded-full bg-gray-200"></div>
-                                            <div>
-                                                <div className="h-4 w-28 bg-gray-200 rounded"></div>
-                                                <div className="h-3 w-24 bg-gray-100 rounded mt-1"></div>
-                                            </div>
-                                        </div>
-                                        <div className="h-8 w-20 bg-blue-100 rounded-full"></div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="h-10 w-10 rounded-full bg-gray-200"></div>
-                                            <div>
-                                                <div className="h-4 w-36 bg-gray-200 rounded"></div>
-                                                <div className="h-3 w-16 bg-gray-100 rounded mt-1"></div>
-                                            </div>
-                                        </div>
-                                        <div className="h-8 w-20 bg-yellow-100 rounded-full"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="py-24 bg-white">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-display text-gray-900 mb-6">
-                        Ready to level up your business?
-                    </h2>
-                    <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-                        Join hundreds of mobile detailers who trust Tap Detail to run their business.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/signup" className="btn-primary text-lg px-10 py-4 shadow-xl shadow-indigo-200">
-                            Get Started for Free
-                        </Link>
-                    </div>
-                    <p className="mt-6 text-sm text-gray-500">
-                        No credit card required · Cancel anytime
-                    </p>
-                </div>
-            </section>
-
-            {/* Footer */}
-            <footer className="bg-gray-50 border-t border-gray-200 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
-                    <div className="mb-4 md:mb-0">
-                        <Logo />
-                        <p className="mt-2 text-sm text-gray-500">
-                            Simple CRM for Mobile Detailers
-                        </p>
-                    </div>
-                    <div className="flex space-x-6 text-sm text-gray-500">
-                        <Link href="#" className="hover:text-gray-900">Privacy</Link>
-                        <Link href="#" className="hover:text-gray-900">Terms</Link>
-                        <Link href="#" className="hover:text-gray-900">Contact</Link>
-                    </div>
-                    <div className="mt-4 md:mt-0 text-sm text-gray-400">
-                        © 2025 Tap Detail. All rights reserved.
-                    </div>
-                </div>
-            </footer>
+                <section className={styles.cta} aria-labelledby="cta-title"><p className={styles.eyebrow}>Made for the way you work</p><h2 id="cta-title">Your next job deserves<br />your full attention.</h2><p>Give the admin a home. Get back to the details.</p><Link href="/signup" className={styles.primary}>Get started with Tap Detail <span aria-hidden="true">↗</span></Link></section>
+            </main>
+            <footer className={styles.footer}><div><Logo /><p>Business software for mobile detailers.</p></div><Link href="/login">Log in</Link><p>© {new Date().getFullYear()} Tap Detail</p></footer>
         </div>
     );
 }

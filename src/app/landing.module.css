@@ -1,0 +1,54 @@
+.landing { --ink: #132c41; --blue: #245cd5; --muted: #526575; --line: #dae3ea; color: var(--ink); background: #fff; font-family: Arial, Helvetica, sans-serif; }
+.landing a:focus-visible { outline: 3px solid #245cd5; outline-offset: 5px; }
+.hero { max-width: 1280px; margin: auto; padding: 84px 32px 100px; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .15em; font-weight: 700; color: var(--blue); margin-bottom: 24px; }
+.hero h1 { font-size: clamp(44px, 4.4vw, 66px); line-height: 1.04; letter-spacing: -.055em; font-weight: 800; }
+.hero h1 span { color: var(--blue); }
+.intro { max-width: 460px; font-size: 18px; line-height: 1.75; color: var(--muted); margin-top: 28px; }
+.actions { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; margin-top: 32px; }
+.primary { display: inline-flex; align-items: center; justify-content: center; gap: 28px; background: var(--blue); color: white; padding: 16px 23px; border-radius: 7px; font-size: 14px; font-weight: 700; transition: background .2s; }
+.primary:hover { background: #1948af; }
+.secondary { font-size: 14px; font-weight: 700; padding: 12px 0; display: inline-flex; gap: 16px; }
+.secondary:hover { color: var(--blue); }
+.small { font-size: 12px; color: var(--muted); margin-top: 22px; }
+.heroVisual { position: relative; padding: 0 0 40px 26px; }
+.photo { position: relative; height: 510px; border-radius: 90px 12px 12px 12px; overflow: hidden; background: #dce6ed; }
+.photo img { object-fit: cover; object-position: 52% center; }
+.photoCaption { position: absolute; top: 24px; right: 20px; color: white; font-size: 11px; background: #132c41d9; border-radius: 4px; padding: 8px 12px; }
+.phone { position: absolute; bottom: 0; left: -32px; width: 224px; background: #f5f8fb; border: 6px solid var(--ink); border-radius: 27px; padding: 20px 15px 18px; box-shadow: 0 18px 40px #132c4126; transform: rotate(-4deg); }
+.phoneTop { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; margin-bottom: 23px; }
+.demo { color: var(--muted); font-size: 9px; font-weight: 400; }
+.phoneLabel { font-size: 8px; color: var(--muted); letter-spacing: .08em; }
+.phone h2 { font-size: 17px; font-weight: 700; letter-spacing: -.04em; margin: 5px 0 15px; }
+.appointment, .nextJob { display: flex; flex-direction: column; gap: 5px; background: white; border: 1px solid var(--line); padding: 12px; border-radius: 9px; font-size: 10px; }
+.appointment time, .nextJob time { color: var(--blue); font-size: 9px; font-weight: 700; }
+.appointment strong, .nextJob strong { font-size: 12px; }
+.appointment > span, .nextJob > span { color: var(--muted); }
+.appointment .confirmed { color: #22714e; background: #e9f5ee; width: fit-content; font-size: 8px; padding: 3px 6px; border-radius: 4px; }
+.nextJob { margin-top: 9px; }
+.benefits { border-block: 1px solid var(--line); display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 20px 32px; padding: 25px 24px; background: #f5f8fb; font-size: 13px; font-weight: 600; }
+.workflow { max-width: 1216px; margin: auto; padding: 100px 32px; scroll-margin-top: 90px; }
+.sectionHeading { max-width: 560px; }
+.landing h2 { letter-spacing: -.045em; }
+.sectionHeading h2, .productHeading h2 { font-size: clamp(32px, 3.5vw, 44px); line-height: 1.13; font-weight: 750; }
+.sectionHeading > p:last-child { color: var(--muted); line-height: 1.7; margin-top: 20px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 48px; list-style: none; padding: 0; }
+.steps li { border-top: 1px solid var(--line); padding-top: 20px; }
+.stepNumber { font-family: monospace; color: var(--blue); font-size: 12px; }
+.steps h3 { font-size: 23px; letter-spacing: -.03em; font-weight: 700; margin: 24px 0 14px; }
+.steps p { font-size: 15px; color: var(--muted); line-height: 1.8; }
+.stepDetail { display: block; font-size: 12px; font-weight: 700; margin-top: 22px; }
+.product { background: #edf3f8; padding: 80px 32px; scroll-margin-top: 64px; }
+.productHeading { max-width: 1152px; margin: 0 auto 40px; display: flex; justify-content: space-between; align-items: end; gap: 40px; }
+.productHeading > p { max-width: 350px; font-size: 16px; color: var(--muted); line-height: 1.8; }
+.preview { max-width: 1100px; margin: auto; }
+.previewCaption { text-align: center; font-size: 11px; color: var(--muted); margin-top: 22px; }
+.cta { padding: 100px 24px; text-align: center; }
+.cta h2 { font-size: clamp(36px, 4vw, 52px); line-height: 1.1; font-weight: 800; }
+.cta > p:not(.eyebrow) { color: var(--muted); margin: 24px 0 30px; }
+.footer { border-top: 1px solid var(--line); max-width: 1216px; margin: auto; padding: 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; font-size: 12px; color: var(--muted); }
+.footer p { margin-top: 8px; }
+@media (max-width: 1050px) { .hero { gap: 36px; padding-top: 56px; } .phone { left: 0; } .photo { height: 480px; } }
+@media (max-width: 850px) { .hero { grid-template-columns: 1fr; gap: 40px; padding: 48px 24px 56px; } .heroCopy { max-width: 580px; } .heroVisual { max-width: 600px; width: 100%; margin: auto; padding-left: 40px; } .photo { height: 460px; } .phone { left: 0; } .steps { gap: 24px; } .productHeading { align-items: start; flex-direction: column; gap: 20px; } .productHeading > p { max-width: 560px; } }
+@media (max-width: 560px) { .hero h1 { font-size: 44px; } .intro { font-size: 16px; } .heroVisual { padding-left: 25px; padding-bottom: 60px; } .photo { height: 390px; border-top-left-radius: 60px; } .phone { width: 194px; padding: 15px 12px; } .phoneTop { margin-bottom: 15px; } .photoCaption { font-size: 9px; right: 10px; top: 16px; } .benefits { display: grid; grid-template-columns: 1fr 1fr; font-size: 11px; gap: 20px; } .workflow { padding: 64px 24px; } .steps { grid-template-columns: 1fr; gap: 32px; } .steps h3 { margin-top: 14px; } .product { padding: 56px 16px; } .cta { padding: 64px 24px; } .footer { flex-wrap: wrap; padding: 28px 24px; } .footer > div { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { .landing a { transition: none; } }

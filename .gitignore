@@ -156,3 +156,10 @@ ui-debug.log
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Landing page image (keep other public assets under the existing ignore policy)
+!/public/
+/public/*
+!/public/images/
+/public/images/*
+!/public/images/mobile-detailer.webp
